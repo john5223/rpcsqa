@@ -1,0 +1,58 @@
+<% @network_interfaces.each do |iface| -%>
+  
+<% if iface[:auto] -%>
+auto <%= iface[:device] %>
+<% end %>
+iface <%= iface[:device] %> inet <%= iface[:type] %>
+<% if iface[:address] -%>
+    address <%= iface[:address] %>
+<% end %>
+<% if iface[:netmask] -%>
+    netmask <%= iface[:netmask] %>
+<% end %>
+<% if iface[:broadcast] -%>
+    broadcast <%= iface[:broadcast] %>
+<% end %>
+<% if iface[:gateway] -%>
+    gateway <%= iface[:gateway] %>
+<% end %>
+<% if iface[:vlan_dev] -%>
+    vlan_raw_device <%= iface[:vlan_dev] %>
+<% end %>
+<% if iface[:bridge_ports] -%>
+    bridge_ports<% iface[:bridge_ports].each do |port| -%> <%= port %><% end %>
+<% end %>
+<% if iface[:bond_slaves] -%>
+    bond-slaves<% iface[:bond_slaves].each do |bond_slave| -%> <%= bond_slave %><% end %>
+<% end %>
+<% if iface[:bond_mode] -%>
+    bond-mode <%= iface[:bond_mode] %>
+<% end %>
+<% if iface[:metric] -%>
+    metric <%= iface[:metric] %>
+<% end %>
+<% if iface[:mtu] -%>
+    mtu <%= iface[:mtu] %>
+<% end %>
+<% if iface[:pre_up] -%>
+    pre-up <%= iface[:pre_up] %>
+<% end %>
+<% if iface[:up] -%>
+    up <%= iface[:up] %>
+<% end %>
+<% if iface[:post_up] -%>
+    post-up <%= iface[:post_up] %>
+<% end %>
+<% if iface[:pre_down] -%>
+    pre-down <%= iface[:pre_down] %>
+<% end %>
+<% if iface[:down] -%>
+    down <%= iface[:down] %>
+<% end %>
+<% if iface[:post_down] -%>
+    post-down <%= iface[:post_down] %>
+<% end %>
+<% if iface[:custom] -%>
+<% iface[:custom].sort_by{ |instruc, command| instruc }.each do |instruc, command| -%><%= instruc %> <%= command %><% end %>
+<% end %>
+<% end %>
