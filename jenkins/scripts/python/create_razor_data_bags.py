@@ -33,7 +33,7 @@ def create_data_bag(ip):
 		print "Failed to open file %s.json" % ip
 	else:
 		# Write the json string
-		fo.write(json.dumps(data_bag))
+		fo.write(json.dumps(data_bag, indent=4))
 
 		#close the file
 		fo.close()
