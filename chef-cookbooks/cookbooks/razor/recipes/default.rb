@@ -18,7 +18,7 @@ ruby_block "set node info from data bag" do
 		uuid = ethers.sort.join("_")
 		enviroment_variables = data_bag_item("razor_node", uuid) if uuid != ""
 		if enviroment_variables != []
-			enviroment_variables.each {|(k,v)| node.set[:razor][k] = v}
+			enviroment_variables.each {|(k,v)| node.set[k] = v}
 			node.save
 		end
 	end
