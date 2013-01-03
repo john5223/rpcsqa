@@ -6,7 +6,7 @@
     		"type": "static",
     		"device": "eth0",
     		"netmask": "255.255.255.0",
-    		"address": "198.101.133.193"
+    		"address": "198.101.133.197"
 		}
 	]
 }
