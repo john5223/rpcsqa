@@ -12,11 +12,10 @@ ruby_block "set node info from data bag" do
 		ethers = Array.new
 		node.network.interfaces.each do |(k,v)|
 			v[:addresses].each do |(k2,v2)|
-				ethers << k2.gsub(":","").upcase if v2[:family] == "laddr"
+				ethers << k2.gsub(":","").upcase if v2[:family] == "lladdr"
 			end
 		end
 		uuid = ethers.sort.join("_")
-		puts uuid
 		enviroment_variables = data_bag_item("razor_node", uuid) if uuid != ""
 		if enviroment_variables != []
 			enviroment_variables.each {|(k,v)| node.set[:razor][k] = v}
