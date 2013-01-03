@@ -20,6 +20,7 @@ ruby_block "set node info from data bag" do
 		if enviroment_variables != []
 			enviroment_variables.each {|(k,v)| node.set[k] = v}
 			node.save
+			puts "this should have network interfaces : #{node[:network_interfaces]}"
 		end
 	end
 end
