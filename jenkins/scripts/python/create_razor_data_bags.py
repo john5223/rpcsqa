@@ -14,7 +14,7 @@ def check_addr(start_a, end_a):
 
 def create_data_bag(ip):
 	data_bag = {
-		"id": "",
+		"id": "123456789012_123456789012_123456789012_123456789012",
 		"network_interfaces": [
 			{
 				"auto": "true",
