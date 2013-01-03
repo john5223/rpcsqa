@@ -1,0 +1,13 @@
+{
+	"id": "D4AE527F224E_D4AE527F2250_D4AE527F2252_D4AE527F2254",
+	"network_interfaces": [
+		{
+    		"auto": "true",
+    		"type": "static",
+    		"device": "eth0",
+    		"netmask": "255.255.255.0",
+    		"address": "198.101.133.189"
+		}
+	]
+}
+
