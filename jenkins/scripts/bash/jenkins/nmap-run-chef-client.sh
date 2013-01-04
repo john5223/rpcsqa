@@ -2,7 +2,7 @@
 
 # print usage and exit
 if [ "$#" -eq 0 ]; then
-        echo "Usage: namp_reboot.sh -p root_pass" >&2
+        echo "Usage: nmap-run-chef-client.sh -p root_pass" >&2
         exit
 fi
 
@@ -32,8 +32,8 @@ do
                 if [[ $ip == '10.0.0.1' || $ip == '10.0.0.2' || $ip == '10.0.0.3' ]]; then
                         echo "This box is restricted infrastructure, ignore it."
                 else
-                        echo "Rebooting machine with ip $ip"
-                        sshpass -p $ROOT_PASS ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root $ip 'reboot'
+                        echo "Running chef-client on server with ip $ip"
+                        sshpass -p $ROOT_PASS ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root $ip 'chef-client'
                 fi
         fi
 done

@@ -30,7 +30,7 @@ do
 
         if [[ ${#results} > 300 ]]; then
                 echo "!!## -- Rebooting box with ip: $ip -- ##!!"
-                sshpass -p $ROOT_PASS ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -l root $ip 'reboot'
+                sshpass -p $ROOT_PASS ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root $ip 'reboot'
         else
                 echo "!!## -- Nothing @ $ip to reboot -- ##!!"
         fi
