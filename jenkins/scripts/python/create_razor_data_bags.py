@@ -1,20 +1,8 @@
 #!/usr/bin/python
 import os, json, argparse
 
-temp_ident = "123456789012_123456789012_123456789012_123456789012"
-
-def check_addr(start_a, end_a):
-
-	start_addr = start_a.split(".")
-	end_addr = end_a.split(".")
-
-	end_int = int(end_addr[3])
-	start_int = int(start_addr[3])
-
-	size = end_int - start_int
-	return (size, start_addr, end_addr) 
-
-def create_data_bag(ident=None, ip):
+def create_data_bag(ip, ident=None):
+	
 	if ident is None:
 		data_bag = {
 			"id": temp_ident,
@@ -78,29 +66,41 @@ def create_data_bag(ident=None, ip):
 # Gather the arguments from the command line
 parser = argparse.ArgumentParser()
 
-# Get the start of the ip range
-parser.add_argument('--start_ip', action="store", dest="start_ip", 
-					required=True, help="Starting IP address")
-
-# Get the ending of the ip range
-parser.add_argument('--end_ip', action="store", dest="end_ip", 
-					required=True, help="Ending IP address")
-
-# Get the identity of the box
-parser.add_argument('--ident', action="store", dest="ident", 
-					required=False, defaut=None, help="Identy of the box (UUID of MACs)")
+# Path to JSON file of MACs
+parser.add_argument('--file_path', action="store", dest="file_path", 
+					required=True, default=None, help="Path to the JSON file")
 
 # Parse the parameters
 results = parser.parse_args()
 
-(size, start, end) = check_addr(results.start_ip, results.end_ip)
+path = os.path.abspath(results.file_path)
 
-if size < 0:
-	print "Size doesnt work, check ip addresses"
+print path
+#open JSON file
+try:
+	fo = open(path, 'r')
+except IOError:
+		print "Failed to open file @ %s" % path
 else:
-	for i in range(int(start[3]),int(end[3])):
-		ip = "%s.%s.%s.%s" % (start[0], start[1], start[2], i)
-		if results.ident is None:
-			create_data_bag(ip)
-		else:
-			create_data_bag(ident, ip)
+	print fo
+	macs_to_ips = json.loads(fo.read())
+	fo.close()
+
+for k,v in macs_to_ips.items():
+	print "key: %s, value: %s" % (k,v)
+	create_data_bag(v, k)
+"""
+if results.end_ip is None:
+	create_data_bag(results.start_ip, results.ident)
+else:
+	(size, start, end) = check_addr(results.start_ip, results.end_ip)
+	if size < 1:
+		print "Size doesnt work, check ip addresses"
+	else:
+		for i in range(int(start[3]),int(end[3])):
+			ip = "%s.%s.%s.%s" % (start[0], start[1], start[2], i)
+			if results.ident is None:
+				create_data_bag(ip)
+			else:
+				create_data_bag(ident, ip)
+"""
