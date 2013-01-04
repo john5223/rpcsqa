@@ -1,0 +1,12 @@
+{
+    "network_interfaces": [
+        {
+            "device": "eth0", 
+            "auto": "true", 
+            "netmask": "255.255.255.0", 
+            "type": "static", 
+            "address": "198.101.133.197"
+        }
+    ], 
+    "id": "D4AE527F0F30_D4AE527F0F32_D4AE527F0F34_D4AE527F0F36"
+}
