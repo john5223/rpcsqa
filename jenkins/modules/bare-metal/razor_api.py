@@ -110,12 +110,17 @@ class razor_api:
 
 		return model
 
-	def active_models(self):
+	def active_models(self, filter=None):
 		""" This return the whole json returned by the Razor API for a single active model."""
-
+		
+		if filter is None:
+			url = self.url + '/active_model'
+		else:
+			url = self.url + '/active_model?label=%s' % filter
+			
 		# make the request to get active models from Razor
 		headers = {'content-type': 'application/json'}
-		r = requests.get(self.url + '/active_model', headers=headers)
+		r = requests.get(url, headers=headers)
 
 		# Check the status code and return appropriately
 		if r.status_code == 200:
@@ -123,18 +128,14 @@ class razor_api:
 		else:
 			return 'Error in request, exited with status code: ' + str(r.status_code)
 
-	def simple_active_models(self):
+	def simple_active_models(self, filter=None):
 		""" This will return all the active models with an easy to consume JSON"""
-		
 		# make the request to get active models from Razor
-		headers = {'content-type': 'application/json'}
-		r = requests.get(self.url + '/active_model', headers=headers)
-
-		am_content = json.loads(r.content)
-		#print json.dumps(am_content, indent=2)
-
+		
+		am_content = self.active_models(filter)
+		
 		# Check the status code and return appropriately
-		if r.status_code == 200:
+		if 'response' in am_content.keys():
 			active_models = {}
 			for response in am_content['response']:
 
