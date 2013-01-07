@@ -15,7 +15,7 @@ def create_data_bag(ip, ident=None):
 	    			"device": "eth0",
 	    			"netmask": "255.255.255.0",
 	    			"address": ip,
-	    			"gateway": "%s.%s.%s.%s" % ( ip_array[0], ip_array[1], ip_array[2], 0)
+	    			"gateway": "%s.%s.%s.%s" % ( ip_array[0], ip_array[1], ip_array[2], 1)
 				}
 			]
 		}
