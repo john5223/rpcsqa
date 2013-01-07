@@ -71,6 +71,17 @@ execute "service networking restart" do
   end
 end
 
+
+ruby_block "set default gateway" do
+  block do
+    execute "route add default gw node[:network_interfaces][:gateway] dev node[:network_interfaces][:device]"
+      only_if do
+        $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
+      end
+    end
+  end
+end
+
 =begin
 node.network.interfaces.each do | (k,v)|
   v[:addresses].each do | (k2, v2) |

@@ -29,8 +29,8 @@ do
         echo $results
 
         if [[ ${#results} > 300 ]]; then
-                echo "!!## -- Rebooting box with ip: $ip -- ##!!"
-                sshpass -p $ROOT_PASS ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root $ip 'chef-client'
+                echo "!!## -- Running chef-client on box @ $ip -- ##!!"
+                sshpass -p $ROOT_PASS ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root $ip 'nohup chef-client &' 
         else
                 echo "!!## -- Nothing @ $ip, cant run chef-client -- ##!!"
         fi
