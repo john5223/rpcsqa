@@ -4,7 +4,7 @@
 os=("ubuntu" "centos")
 feature=("glance-cf" "keystone-ldap" "keystone-389" "nova-quantum")
 declare -A model_uuid=( ["ubuntu-glance-cf"]="3kinbHYZ0jLby70DtRPgaa" ["ubuntu-keystone-ldap"]="5dY7YurK5QtGwNpfJckjBU" ["ubuntu-keystone-389"]="6R2zOpT41PfD2fZKs6NdBU" ["ubuntu-nova-quantum"]="6zclclFls4hWxJkWkWRmm4" ["centos-glance-cf"]="7Y3PmB1kNrJoOyV7d790wu" ["centos-keystone-ldap"]="QqoAI6FvGcgwryBdyE7lU" ["centos-keystone-389"]="oD5YleUNeKS33kYXIdl7M" ["centos-nova-quantum"]="1FANBOSvaWaimtz7UVoVYq")
-declare -A broker_uuid=( ["chef"]="5QJppl9LOTFLOmZ5f3nwlw" )
+declare -A broker_uuid=( ["chef"]="1mEjanA4Siow2Z8bUe64OS" )
 
 for o in "${os[@]}"; do
 	for f in "${feature[@]}"; do
