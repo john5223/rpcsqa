@@ -71,7 +71,9 @@ execute "service networking restart" do
   end
 end
 
-route "0.0.0.0" do
+route do
+  target "0.0.0.0"
+  netmask "255.255.255.0"
   gateway "198.101.133.1"
   device "eth0"
 end
