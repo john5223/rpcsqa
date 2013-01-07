@@ -71,7 +71,11 @@ execute "service networking restart" do
   end
 end
 
-execute "route add default gw node[:network_interfaces][:gateway] dev node[:network_interfaces][:device]"
+execute "route add" do
+  command "route add default gw $GATEWAY dev $DEVICE"
+  action :run
+  environment ({'GATEWAY' => node.network_interfaces.gateway, 'DEVICE' => node.network_interfaces.device})
+end
 
 =begin
 node.network.interfaces.each do | (k,v)|
