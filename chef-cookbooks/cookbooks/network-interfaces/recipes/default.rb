@@ -74,7 +74,7 @@ end
 
 ruby_block "set default gateway" do
   block do
-    execute "route add default gw node[:network_interfaces][:gateway] dev node[:network_interfaces][:device]"
+    execute "route add default gw node[:network_interfaces][:gateway] dev node[:network_interfaces][:device]" do
       only_if do
         $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
       end
