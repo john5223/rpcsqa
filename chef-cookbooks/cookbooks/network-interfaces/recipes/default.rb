@@ -74,5 +74,5 @@ end
 execute "route add" do
   command "route add default gw $GATEWAY dev $DEVICE"
   action :run
-  environment ({'GATEWAY' => node['network_interfaces']['gatewa'], 'DEVICE' => node['network_interface']['device']})
+  environment ({'GATEWAY' => node['network_interfaces']['gateway'], 'DEVICE' => node['network_interface']['device']})
 end
