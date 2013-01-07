@@ -25,7 +25,7 @@ for i in {4..254}
 do
         ip=10.0.0.$i
         results=`ping -c 2 10.0.0.$i`
-        echo -e "\n!!## -- PING RESULTS FOR IP: $ip, with len(results): ${#results}-- ##!!"
+        echo -e "\n!!## -- PING RESULTS FOR IP: $ip, with len(results): ${#results} -- ##!!"
         echo $results
 
         if [[ ${#results} > 300 ]]; then
