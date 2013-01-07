@@ -74,13 +74,5 @@ end
 execute "route add" do
   command "route add default gw $GATEWAY dev $DEVICE"
   action :run
-  environment ({'GATEWAY' => node[:network_interfaces][:gateway], 'DEVICE' => node[:network_interfaces][:device]})
+  environment ({'GATEWAY' => node['network_interfaces']['gatewa'], 'DEVICE' => node['network_interface']['device']})
 end
-
-=begin
-node.network.interfaces.each do | (k,v)|
-  v[:addresses].each do | (k2, v2) |
-    print "#{k} : #{v2}\n" if v2[:family] == "lladdr"
-  end
-end
-=end
