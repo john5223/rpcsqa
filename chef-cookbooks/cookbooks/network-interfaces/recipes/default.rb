@@ -72,6 +72,6 @@ execute "service networking restart" do
 end
 
 route "default" do
-  gateway node['network_interfaces']['gateway']
-  device node['network_interfaces']['device']
+  gateway "198.101.133.1"
+  device "eth0"
 end
