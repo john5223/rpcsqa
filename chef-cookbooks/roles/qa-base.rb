@@ -3,5 +3,5 @@ description "This will create an all-in-one Openstack cluster for RPCS QA Team"
 run_list(
   "recipe[razor]",
   "recipe[network-interfaces]",
-  "recipe[base]"
+  "role[base]"
 )
