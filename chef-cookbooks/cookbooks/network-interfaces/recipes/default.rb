@@ -66,19 +66,12 @@ ruby_block "finalize interfaces file" do
 end
 
 execute "service networking restart" do
-  node.save
   only_if do
     $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
   end
 end
 
-execute "route add default gw node[:network_interfaces][:gateway] dev node[:network_interfaces][:device]" do
-  node.save
-  only_if do
-    $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
-  end
-end
-
+execute "route add default gw node[:network_interfaces][:gateway] dev node[:network_interfaces][:device]"
 
 =begin
 node.network.interfaces.each do | (k,v)|
