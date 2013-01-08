@@ -51,7 +51,7 @@ while get_active == False:
         active_models = razor.simple_active_models(policy)
         get_active = True
     except:
-        pass
+        time.sleep(60)
 
 
 
