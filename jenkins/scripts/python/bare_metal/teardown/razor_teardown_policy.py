@@ -21,7 +21,7 @@ parser.add_argument('--data-bag-location', action="store", dest="data_bag_loc",
 
 
 parser.add_argument('--display-only', action="store", dest="display_only", 
-                    default="1", 
+                    default="true", 
                     required=False, help="Display the node information only (will not reboot or teardown am)")
 
 
@@ -121,7 +121,7 @@ else:
         print ""
         
         
-        if results.display_only == 0:
+        if results.display_only == 'false':
             
             print "Removing active model..."
             try:
