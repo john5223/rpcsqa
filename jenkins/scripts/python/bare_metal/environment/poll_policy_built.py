@@ -44,7 +44,15 @@ print "#################################"
 print "Polling for  '%s'  active models" % policy
 print "Display only: %s " % results.display
 
-active_models = razor.simple_active_models(policy)
+
+get_active = False
+while get_active == False:
+    try:
+        active_models = razor.simple_active_models(policy)
+        get_active = True
+    except:
+        pass
+
 
 
 if active_models == {}:
@@ -67,6 +75,7 @@ else:
         #ssh into ip and reboot   
     
     
+    
     active = False
     while active == False:
         print "Polling..."
@@ -83,9 +92,5 @@ else:
         active_models = razor.simple_active_models(policy)
           
     print "Broker finished for %s " % policy
-        
-        
-        
-     
      
         
