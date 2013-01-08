@@ -71,10 +71,8 @@ execute "service networking restart" do
   end
 end
 
-=begin
-node.network.interfaces.each do | (k,v)|
-  v[:addresses].each do | (k2, v2) |
-    print "#{k} : #{v2}\n" if v2[:family] == "lladdr"
-  end
+route "0.0.0.0" do
+  netmask "0.0.0.0"
+  gateway "198.101.133.1"
+  device "eth0"
 end
-=end
