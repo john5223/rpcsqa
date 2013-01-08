@@ -14,7 +14,7 @@ parser.add_argument('--policy', action="store", dest="policy",
                     required=True, help="Policy to teardown from razor and reboot nodes")
 
 
-parser.add_argument('--display-only', action="store", dest="display_only", 
+parser.add_argument('--display', action="store", dest="display", 
                     default="true", 
                     required=False, help="Display the node information only (will not reboot or teardown am)")
 
@@ -38,7 +38,7 @@ policy = results.policy
 
 print "#################################"
 print "Polling for  '%s'  active models" % policy
-print "Display only: %s " % results.display_only
+print "Display only: %s " % results.display
 
 active_models = razor.simple_active_models(policy)
 
@@ -71,7 +71,7 @@ else:
             if 'broker_' not in active_models[a]['current_state']:
                 active = False
                 pass 
-            if results.display_only == "true":
+            if results.display == "true":
                  temp = { 'am_uuid': active_models[a]['am_uuid'], 'current_state':  active_models[a]['current_state'] }
                  print json.dumps(temp, indent=4)
         
