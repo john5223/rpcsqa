@@ -6,6 +6,10 @@ from razor_api import razor_api
 from ssh_session import ssh_session
 import time
 
+import sys
+sys.stdout.flush()
+
+
 parser = argparse.ArgumentParser()
 # Get the ip of the server you want to remove
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", 

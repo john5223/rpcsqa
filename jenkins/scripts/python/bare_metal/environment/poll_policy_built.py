@@ -5,6 +5,10 @@ import argparse
 from razor_api import razor_api
 import time
 
+import sys
+sys.stdout.flush()
+
+
 parser = argparse.ArgumentParser()
 # Get the ip of the server you want to remove
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", 
@@ -75,7 +79,7 @@ else:
                  temp = { 'am_uuid': active_models[a]['am_uuid'], 'current_state':  active_models[a]['current_state'] }
                  print json.dumps(temp, indent=4)
         
-        time.sleep(10)
+        time.sleep(30)
         active_models = razor.simple_active_models(policy)
           
     print "Broker finished for %s " % policy
