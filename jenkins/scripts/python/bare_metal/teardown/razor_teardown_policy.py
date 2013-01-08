@@ -16,7 +16,7 @@ parser.add_argument('--policy', action="store", dest="policy",
 
 parser.add_argument('--data-bag-location', action="store", dest="data_bag_loc", 
                     #default="/home/john/git/rpcsqa/chef-cookbooks/data_bags/razor_node",
-                    default="/var/lib/jenkins/chef-cookbooks/data_bags/razor_node", 
+                    default="/var/lib/jenkins/rpcsqa/chef-cookbooks/data_bags/razor_node", 
                     required=False, help="Policy to teardown from razor and reboot nodes")
 
 
@@ -58,6 +58,7 @@ def getip_from_data_bag(uuid):
         ip = ans['network_interfaces'][0]['address']
         return str(ip)
     except IOError as e:
+        print e
         return ''
 
 
