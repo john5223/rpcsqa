@@ -76,7 +76,7 @@ policy = results.policy
 
 print "#################################"
 print "Tearing down and rebooting  '%s'  active models" % policy
-
+print "Display only: %s " % results.display_only
 
 active_models = razor.simple_active_models(policy)
 
@@ -115,7 +115,7 @@ else:
         
         print "Active Model ID: %s " % active
         print "Data Bag UUID: %s " % dbag_uuid
-        print "ROOT_PASS: %s " % root_pass
+        #print "ROOT_PASS: %s " % root_pass
         print "Public address: %s " % ip
         print "Private address: %s " % private_ip
         print ""
