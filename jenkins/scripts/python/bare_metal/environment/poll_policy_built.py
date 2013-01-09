@@ -34,6 +34,48 @@ results = parser.parse_args()
 
 #####
 
+def get_data_bag_UUID(data):
+    try:
+        eth = ['eth0_mac', 'eth1_mac', 'eth2_mac', 'eth3_mac' ]
+        uuid = ''
+        for e in eth:
+            if e in data:
+                uuid += data[e].replace(':','') + '_'
+        return uuid[:-1]
+    except:
+        return ''
+    
+
+def getrootpass(data):
+    if 'root_password' in data:
+        return data['root_password']
+    else:
+        return ''
+  
+    
+def getip_from_data_bag(uuid):
+    data_bag_loc  = results.data_bag_loc
+    try:
+        with open('%s/%s.json' % (data_bag_loc, uuid) ) as f: 
+            ans = f.read()
+        ans =  json.loads(ans)
+        ip = ans['network_interfaces'][0]['address']
+        return str(ip)
+    except IOError as e:
+        print e
+        return ''
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 razor = razor_api(results.razor_ip)
@@ -90,7 +132,12 @@ else:
         
         time.sleep(30)
         active_models = razor.simple_active_models(policy)
-          
+    
+    for a in active_models:
+        dbag_uuid = get_data_bag_UUID(active_models[a])
+        ip = getip_from_data_bag(dbag_uuid)
+        print "%s : %s " % (active_models[a]['am_uuid'], ip)
+        
     print "Broker finished for %s " % policy
      
         
