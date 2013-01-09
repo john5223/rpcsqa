@@ -5,6 +5,7 @@ import argparse
 from razor_api import razor_api
 from ssh_session import ssh_session
 import time
+from chef import *
 
 import sys
 sys.stdout.flush()
@@ -22,6 +23,24 @@ parser.add_argument('--data-bag-location', action="store", dest="data_bag_loc",
                     #default="/home/john/git/rpcsqa/chef-cookbooks/data_bags/razor_node",
                     default="/var/lib/jenkins/rpcsqa/chef-cookbooks/data_bags/razor_node", 
                     required=False, help="Policy to teardown from razor and reboot nodes")
+
+
+
+parser.add_argument('--chef-url', action="store", dest="chef_url", 
+                    default="http://198.101.133.4:4000", 
+                    required=False, help="client for chef")
+
+
+parser.add_argument('--chef-client', action="store", dest="chef_client", 
+                    default="jenkins", 
+                    required=False, help="client for chef")
+
+
+parser.add_argument('--chef-client-pem', action="store", dest="chef_client_pem", 
+                    default="/var/lib/jenkins/rpcsqa/.chef/jenkins.pem", 
+                    required=False, help="client pem for chef")
+
+
 
 
 parser.add_argument('--display-only', action="store", dest="display_only", 
@@ -101,6 +120,7 @@ else:
         #get data bag for that key to get ip
         #remove specific active model by uuid
         #ssh into ip and reboot   
+    hosts = []
     for active in active_models:
         data = active_models[active]
         
@@ -120,29 +140,44 @@ else:
         print "Public address: %s " % ip
         print "Private address: %s " % private_ip
         print ""
-        
+    
         
         if results.display_only == 'false':
             
             print "Trying to switch roles and run chef-client for %s...." % ip
             try:
                 session = ssh_session('root', ip, root_pass, False)
-                #session.ssh('reboot 0')
-                
-                print "Success."
+                host = session.ssh('hostname --fqdn')
+                host = host.replace("\r\n","")
+                print host
+                hosts.append(host)
             except Exception, e:
                 print "FAILURE: %s " % e
             finally:
                 session.close()
+                
+            
+    print hosts
+ 
+    with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
+            for host in hosts:
+                node = Node(host)
+                print node.run_list
+                print node.chef_environment
+                
+                #Change environment
+                #node.chef_environment = 'rpcs'
+                #Change run list
+                node.run_list = ['role[controller]']
+                
+                node.save
+                
+                node = Node(host)
+                print node.run_list
+                print node.chef_environment
+                
+                break
             
             
-            print "Sleeping for 5 seconds..."
-            time.sleep(5)
-            print "#################################"
             
-        
-        
-        
-     
-     
         
