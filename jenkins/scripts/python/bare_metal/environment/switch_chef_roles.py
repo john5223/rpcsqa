@@ -143,7 +143,7 @@ else:
             else:
                 # set the environment and run lists
                 print "!!## -- %s has run list: %s, and environement: %s -- ##!!" % (node, run_list, environment)
-                environement = policy
+                environment = policy
                 if i == 0:
                     print "!!## -- First host, set to controller -- ##!!"
                     run_list = ['qa-single-controller']
@@ -151,7 +151,7 @@ else:
                     print "!!## -- Second host, set to api -- ##!!"
                     run_list = ['qa-single-api']
                 else:
-                    print "!!## -- Set the rest of the hosts to conpute  -- ##!!"
+                    print "!!## -- Set the rest of the hosts to compute  -- ##!!"
                     run_list = ['qa-single-compute']
                 i += 1
 
