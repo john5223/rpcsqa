@@ -56,7 +56,7 @@ def getrootpass(data):
 def getip_from_data_bag(uuid):
     data_bag_loc  = results.data_bag_loc
     try:
-        with open('%s/%s.json' % (data_bag_loc, uuid) ) as f: 
+        with open('%s/%s.json' % ("/var/lib/jenkins/rpcsqa/chef-cookbooks/data_bags/razor_node", uuid) ) as f: 
             ans = f.read()
         ans =  json.loads(ans)
         ip = ans['network_interfaces'][0]['address']
