@@ -136,7 +136,7 @@ else:
             # Get the node from chef
             node = Node(host)
             run_list = node.run_list
-            environment = node.chef_environement
+            environment = node.chef_environment
 
             if results.display_only == 'true':
                 print "!!## -- %s has run list: %s, and environement: %s -- ##!!" % (node, run_list, environment)
@@ -156,5 +156,5 @@ else:
                 i += 1
 
                 node.run_list = run_list
-                node.chef_environement = environment
+                node.chef_environment = environment
                 node.save()
