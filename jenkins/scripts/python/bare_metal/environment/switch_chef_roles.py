@@ -94,12 +94,7 @@ else:
     print "'%s' active models: %s " % (policy, len(active_models))
     print "#################################"
 
-    #For each active model
-        #get root password 
-        #find uuid from MAC addresses
-        #get data bag for that key to get ip
-        #remove specific active model by uuid
-        #ssh into ip and reboot   
+
     hosts = []
     for active in active_models:
         data = active_models[active]
@@ -157,4 +152,9 @@ else:
 
                 node.run_list = run_list
                 node.chef_environment = environment
-                node.save()
+
+                try:
+                    node.save()
+                    print "!!## -- NODE: %s SAVED -- ##!!" % node
+                except Exception, e:
+                    print "!!## -- Failed to save node -- Exception: %s -- ##!!" % e
