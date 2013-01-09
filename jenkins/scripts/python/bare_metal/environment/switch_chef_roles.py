@@ -122,7 +122,6 @@ else:
             session = ssh_session('root', ip, root_pass, False)
             host = session.ssh('hostname --fqdn')
             host = host.replace("\r\n","")
-            print host
             hosts.append(host)
         except Exception, e:
             print "FAILURE: %s " % e
@@ -137,3 +136,6 @@ else:
 
                 if results.display_only == 'true':
                     print "%s has run list: %s, and environement: %s" % (node, node.run_list, node.chef_environment)
+
+                else:
+                    print "!!Change things here!!"
