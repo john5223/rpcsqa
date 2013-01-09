@@ -129,13 +129,28 @@ else:
             session.close()
 
 
-        with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
-            for host in hosts:
-                # Get the node from chef
-                node = Node(host)
+    with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
+        i = 0
+        for host in hosts:
 
-                if results.display_only == 'true':
-                    print "%s has run list: %s, and environement: %s" % (node, node.run_list, node.chef_environment)
+            # Get the node from chef
+            node = Node(host)
+            run_list = node.run_list
+            environement = node.chef_environement
 
+            if results.display_only == 'true':
+                print "!!## -- %s has run list: %s, and environement: %s -- ##!!" % (node, run_list, environment)
+            # set the environment and run lists
+            else:
+                environement = policy
+                if i == 0:
+                    print "!!## -- First host, set to controller -- ##!!"
+                    run_list = ['qa-single-controller']
+                elif i == 1:
+                    print "!!## -- Second host, set to api -- ##!!"
+                    run_list = ['qa-single-api']
                 else:
-                    print "!!Change things here!!"
+                    print "!!## -- Set the rest of the hosts to conpute  -- ##!!"
+                    run_list = ['qa-single-compute']
+                i += 1
+                
