@@ -1,3 +1,5 @@
+*.pem
+*.out
 *.py[cod]
 
 # C extensions
