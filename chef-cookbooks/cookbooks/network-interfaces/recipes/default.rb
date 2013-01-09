@@ -75,4 +75,7 @@ route "0.0.0.0" do
   netmask "0.0.0.0"
   gateway "198.101.133.1"
   device "eth0"
+  only_if do
+    $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
+  end
 end

@@ -33,7 +33,7 @@ do
                         echo "This box is restricted infrastructure, ignore it."
                 else
                         echo "Running chef-client on server with ip $ip"
-                        nohup sshpass -p $ROOT_PASS ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root $ip 'chef-client' > /dev/null &
+                        sshpass -p $ROOT_PASS ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root $ip 'chef-client'
                 fi
         fi
 done
