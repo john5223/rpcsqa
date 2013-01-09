@@ -3,6 +3,7 @@ import os
 import json
 import argparse
 from razor_api import razor_api
+from ssh_session import ssh_session
 import time
 
 import sys
@@ -23,7 +24,7 @@ parser.add_argument('--data-bag-location', action="store", dest="data_bag_loc",
                     required=False, help="Policy to teardown from razor and reboot nodes")
 
 
-parser.add_argument('--display', action="store", dest="display", 
+parser.add_argument('--display-only', action="store", dest="display_only", 
                     default="true", 
                     required=False, help="Display the node information only (will not reboot or teardown am)")
 
@@ -32,12 +33,6 @@ parser.add_argument('--display', action="store", dest="display",
 results = parser.parse_args()
 
 
-#############################################################
-#Poll active models that match policy from given input
-#   -- once policies are broker_* status then run nmap_chef_client
-#############################################################
-
-#####
 
 def get_data_bag_UUID(data):
     try:
@@ -59,8 +54,8 @@ def getrootpass(data):
   
     
 def getip_from_data_bag(uuid):
+    data_bag_loc  = results.data_bag_loc
     try:
-        data_bag_loc  = results.data_bag_loc
         with open('%s/%s.json' % (data_bag_loc, uuid) ) as f: 
             ans = f.read()
         ans =  json.loads(ans)
@@ -71,15 +66,11 @@ def getip_from_data_bag(uuid):
         return ''
 
 
+#############################################################
+#Collect active models that match policy from given input
+#############################################################
 
-
-
-
-
-
-
-
-
+#####
 
 
 
@@ -88,26 +79,16 @@ policy = results.policy
 
 
 print "#################################"
-print "Polling for  '%s'  active models" % policy
-print "Display only: %s " % results.display
+print " Switching roles and running chef-client for  '%s'  active models" % policy
+print "Display only: %s " % results.display_only
 
-
-get_active = False
-while get_active == False:
-    try:
-        active_models = razor.simple_active_models(policy)
-        get_active = True
-    except:
-        time.sleep(60)
-
+active_models = razor.simple_active_models(policy)
 
 
 if active_models == {}:
     print "'%s' active models: 0 " % (policy)
     print "#################################"
 else:
-    
-    
     if 'response' in active_models.keys():
         active_models = active_models['response']
     
@@ -120,29 +101,48 @@ else:
         #get data bag for that key to get ip
         #remove specific active model by uuid
         #ssh into ip and reboot   
-    
-    
-    
-    active = False
-    while active == False:
-        print "Polling..."
-        active = True
-        for a in active_models:
-            if 'broker_' not in active_models[a]['current_state']:
-                active = False
-                pass 
-            if results.display == "true":
-                 temp = { 'am_uuid': active_models[a]['am_uuid'], 'current_state':  active_models[a]['current_state'] }
-                 print json.dumps(temp, indent=4)
+    for active in active_models:
+        data = active_models[active]
         
-        time.sleep(30)
-        active_models = razor.simple_active_models(policy)
-    
-    for a in active_models:
-        dbag_uuid = get_data_bag_UUID(active_models[a])
+        #print data
+        private_ip = data['eth1_ip']
+        am_uuid = data['am_uuid']
+        root_pass = getrootpass(data)
+        dbag_uuid = get_data_bag_UUID(data)
         ip = getip_from_data_bag(dbag_uuid)
-        print "%s : %s " % (active_models[a]['am_uuid'], ip)
         
-    print "Broker finished for %s " % policy
+        #Remove active model
+        
+        #SSH into ip and reboot 
+        print "Active Model ID: %s " % active
+        print "Data Bag UUID: %s " % dbag_uuid
+        #print "ROOT_PASS: %s " % root_pass
+        print "Public address: %s " % ip
+        print "Private address: %s " % private_ip
+        print ""
+        
+        
+        if results.display_only == 'false':
+            
+            print "Trying to switch roles and run chef-client for %s...." % ip
+            try:
+                session = ssh_session('root', ip, root_pass, False)
+                #session.ssh('reboot 0')
+                
+                print "Success."
+            except Exception, e:
+                print "FAILURE: %s " % e
+            finally:
+                session.close()
+            
+            
+            print "Sleeping for 5 seconds..."
+            time.sleep(5)
+            print "#################################"
+            
+        
+        
+        
+     
      
         

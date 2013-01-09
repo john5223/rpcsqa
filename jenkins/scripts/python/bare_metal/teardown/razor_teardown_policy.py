@@ -139,7 +139,7 @@ else:
             print "Trying restart...."
             try:
                 session = ssh_session('root', ip, root_pass, False)
-                #session.ssh('reboot 0')
+                session.ssh('reboot 0')
                 print "Restart success."
             except Exception, e:
                 print "Restart FAILURE: %s " % e
