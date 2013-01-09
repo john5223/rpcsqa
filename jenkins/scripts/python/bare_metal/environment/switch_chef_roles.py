@@ -136,12 +136,13 @@ else:
             # Get the node from chef
             node = Node(host)
             run_list = node.run_list
-            environement = node.chef_environement
+            environment = node.chef_environement
 
             if results.display_only == 'true':
                 print "!!## -- %s has run list: %s, and environement: %s -- ##!!" % (node, run_list, environment)
-            # set the environment and run lists
             else:
+                # set the environment and run lists
+                print "!!## -- %s has run list: %s, and environement: %s -- ##!!" % (node, run_list, environment)
                 environement = policy
                 if i == 0:
                     print "!!## -- First host, set to controller -- ##!!"
@@ -153,4 +154,7 @@ else:
                     print "!!## -- Set the rest of the hosts to conpute  -- ##!!"
                     run_list = ['qa-single-compute']
                 i += 1
-                
+
+                node.run_list = run_list
+                node.chef_environement = environment
+                node.save()
