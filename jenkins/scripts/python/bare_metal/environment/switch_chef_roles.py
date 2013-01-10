@@ -86,12 +86,11 @@ else:
         root_pass = get_root_pass(data)
         chef_name = get_chef_name(data)
 
-        if results.display_only == 'true':
-            print "Chef Node Name: %s " % chef_name
-        else:
-            with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
-                node = Node(chef_name)
+        with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
+            node = Node(chef_name)
+            if results.display_only == 'true':
                 print "Node with name %s has private ip of %s" % (chef_name, node['ipaddress'])
+            else:
                 private_ips.append({'private_ip': node['ipaddress'], 'root_pass': root_pass})
                 run_list = node.run_list
                 environment = node.chef_environment
@@ -104,13 +103,13 @@ else:
                     print "!!## -- %s has run list: %s, and environement: %s -- ##!!" % (node, run_list, environment)
                     environment = policy
                     if i == 0:
-                        print "!!## -- First host, set to controller -- ##!!"
+                        print "!!## -- First host, set to role %s -- ##!!" % roles[0]
                         run_list = roles[0]
                     elif i == 1:
-                        print "!!## -- Second host, set to api -- ##!!"
+                        print "!!## -- Second host, set to role %s -- ##!!" % roles[1]
                         run_list = roles[1]
                     else:
-                        print "!!## -- Set host to compute  -- ##!!"
+                        print "!!## -- Non API host, set to role %s -- ##!!" % roles[2]
                         run_list = roles[2]
 
                     node.run_list = run_list
