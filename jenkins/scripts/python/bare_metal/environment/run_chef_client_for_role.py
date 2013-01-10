@@ -95,9 +95,9 @@ else:
                     print "!!## -- ROLE %s FOUND, would run chef-client on %s with ip %s..." % (results.role, node, ip)
                else:
                     try:
-                         fo.open("/var/lib/jenkins/rpcsqa/jenkins/chef_runs/%s-chef-run.txt" % node, "w")
+                         fo.open("/var/lib/jenkins/rpcsqa/jenkins/chef_runs/%s-chef-run.out" % node, "w")
                     except IOError, e:
-                         print "Failed to open /var/lib/jenkins/rpcsqa/jenkins/chef_runs/%s-chef-run.txt" % node
+                         print "Failed to open /var/lib/jenkins/rpcsqa/jenkins/chef_runs/%s-chef-run.out" % node
                     else:
                          try:
                               session = ssh_session('root', ip, root_password, False)
@@ -105,5 +105,5 @@ else:
                          except Exception, e:
                               print "chef-client FAILURE: %s " % e
                          finally:
-                              print "%s-chef-run.txt saved in /var/lib/jenkins/chef_runs" % node
+                              print "%s-chef-run.out saved in /var/lib/jenkins/chef_runs" % node
                               session.close()
