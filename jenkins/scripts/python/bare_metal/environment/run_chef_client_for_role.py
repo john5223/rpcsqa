@@ -90,12 +90,12 @@ else:
             node = Node(chef_name)
 
             if node.run_list == results.role:
-               ip = node['ipaddress']
                print "!!## -- ROLE %s FOUND, RUNNING chef-client..."
-                 try:
-                     session = ssh_session('root', ip, root_pass, True)
-                     session.ssh('chef-client')
-                 except Exception, e:
-                     print "chef-client FAILURE: %s " % e
-                 finally:
-                     session.close()
+               ip = node['ipaddress']
+               try:
+                    session = ssh_session('root', ip, root_password, True)
+                    session.ssh('chef-client')
+               except Exception, e:
+                    print "chef-client FAILURE: %s " % e
+               finally:
+                    session.close()
