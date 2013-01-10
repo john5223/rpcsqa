@@ -68,7 +68,7 @@ print " Switching roles and running chef-client for  '%s'  active models" % poli
 print "Display only: %s " % results.display_only
 
 active_models = razor.simple_active_models(policy)
-
+to_run_list = []
 if active_models == {}:
     print "'%s' active models: 0 " % (policy)
     print "#################################"
@@ -95,11 +95,15 @@ else:
                     print "!!## -- ROLE %s FOUND, would run chef-client on %s with ip %s..." % (results.role, node, ip)
                else:
                     print "!!## -- ROLE %s FOUND, runnning chef-client on %s with ip %s..." % (results.role, node, ip)
-                    try:
-                         session = ssh_session('root', ip, root_password, True)
-                         print session
-                         session.ssh('chef-client')
-                    except Exception, e:
-                         print "chef-client FAILURE: %s " % e
-                    finally:
-                         session.close()
+                    to_run_list.append({'node': node, 'role': results.role, 'ip': ip, 'root_password': root_password})
+
+     for server in to_run_list:
+          print "Trying restart...."
+          try:
+               session = ssh_session('root', to_run_list[server]['ip'], to_run_list[server]['root_pass'], False)
+               session.ssh('chef-client')
+               print "chef-client success."
+          except Exception, e:
+               print "chef-client FAILURE: %s " % e
+          finally:
+               session.close()
