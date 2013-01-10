@@ -88,42 +88,39 @@ else:
 
         with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             node = Node(chef_name)
+            run_list = node.run_list
+            environment = node.chef_environment
+            
             if results.display_only == 'true':
-                print "Node with name %s has private ip of %s" % (chef_name, node['ipaddress'])
+                print "!!## -- %s has run list: %s, and environment: %s -- ##!!" % (node, run_list, environment)
+                print "!!## -- %s run list will be switched to %s with environment %s -- ##!!" % (node, roles[i], policy)
+                i += 1
             else:
-                run_list = node.run_list
-                environment = node.chef_environment
-
-                if results.display_only == 'true':
-                    print "!!## -- %s has run list: %s, and environement: %s -- ##!!" % (node, run_list, environment)
-                    print "!!## -- %s run list will be switched to %s with environment %s -- ##!!" % (node, roles[i], policy)
-                    i += 1
+                # set the environment and run lists
+                # this is for our QA environment of 4 servers (2 api, 2 compute), might make script take roles -> numbers at a later date
+                print "!!## -- %s has run list: %s, and environment: %s -- ##!!" % (node, run_list, environment)
+                environment = policy
+                if i == 0:
+                    print "!!## -- First host, set to role %s -- ##!!" % roles[i]
+                    run_list = roles[i]
+                    private_ips.append({'private_ip': node['ipaddress'], 'root_pass': root_pass, 'role': roles[i]})
+                elif i == 1:
+                    print "!!## -- Second host, set to role %s -- ##!!" % roles[i]
+                    run_list = roles[i]
+                    private_ips.append({'private_ip': node['ipaddress'], 'root_pass': root_pass, 'role': roles[i]})
                 else:
-                    # set the environment and run lists
-                    # this is for our QA environment of 4 servers (2 api, 2 compute), might make script take roles -> numbers at a later date
-                    print "!!## -- %s has run list: %s, and environement: %s -- ##!!" % (node, run_list, environment)
-                    environment = policy
-                    if i == 0:
-                        print "!!## -- First host, set to role %s -- ##!!" % roles[i]
-                        run_list = roles[i]
-                        private_ips.append({'private_ip': node['ipaddress'], 'root_pass': root_pass, 'role': roles[i]})
-                    elif i == 1:
-                        print "!!## -- Second host, set to role %s -- ##!!" % roles[i]
-                        run_list = roles[i]
-                        private_ips.append({'private_ip': node['ipaddress'], 'root_pass': root_pass, 'role': roles[i]})
-                    else:
-                        print "!!## -- Non API host, set to role %s -- ##!!" % roles[i]
-                        run_list = roles[i]
-                        private_ips.append({'private_ip': node['ipaddress'], 'root_pass': root_pass, 'role': roles[i]})
+                    print "!!## -- Non API host, set to role %s -- ##!!" % roles[i]
+                    run_list = roles[i]
+                    private_ips.append({'private_ip': node['ipaddress'], 'root_pass': root_pass, 'role': roles[i]})
 
-                    node.run_list = run_list
-                    node.chef_environment = environment
+                node.run_list = run_list
+                node.chef_environment = environment
 
-                    try:
-                        node.save()
-                        print "!!## -- NODE: %s SAVED -- ##!!" % node
-                        print "!!## -- NEW RUN LIST: %s" % node.run_list
-                        print "!!## -- NEW ENVIRONMENT: %s" % node.chef_environment
-                    except Exception, e:
-                        print "!!## -- Failed to save node -- Exception: %s -- ##!!" % e
-                    i += 1
+                try:
+                    node.save()
+                    print "!!## -- NODE: %s SAVED -- ##!!" % node
+                    print "!!## -- NEW RUN LIST: %s" % node.run_list
+                    print "!!## -- NEW ENVIRONMENT: %s" % node.chef_environment
+                except Exception, e:
+                    print "!!## -- Failed to save node -- Exception: %s -- ##!!" % e
+                i += 1
