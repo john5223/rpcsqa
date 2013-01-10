@@ -1,9 +1,9 @@
 #!/usr/bin/python
 import os
+import subprocess
 import json
 import argparse
 from razor_api import razor_api
-from ssh_session import ssh_session
 import time
 from chef import *
 
