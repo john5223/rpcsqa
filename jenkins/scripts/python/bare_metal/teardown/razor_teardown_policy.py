@@ -34,7 +34,7 @@ parser.add_argument('--chef_client', action="store", dest="chef_client",
                     required=False, help="client for chef")
 
 parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem", 
-                    default="/var/lib/jenkins/rpcsqa/.chef/jenkins.pem", 
+                    default="/var/lib/jenkins/.chef/jenkins.pem", 
                     required=False, help="client pem for chef")
 
 parser.add_argument('--display-only', action="store", dest="display_only", 
@@ -142,9 +142,9 @@ else:
             try:
                 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                     clients = Search('client')
-                    print "Clients: \n %s " % json.dumps(clients, indent=4)
+                    print "Clients: \n %s " % clients
             except Exception, e:
-                print "Error removing chef node: %s " % e
+                print "Error printing chef clients: %s " % e
                 continue
         else: 
             print "Removing active model..."
