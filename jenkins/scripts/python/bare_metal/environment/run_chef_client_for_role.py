@@ -101,7 +101,7 @@ else:
                try:
                     session = ssh_session('root', server['ip'], server['root_password'], True)
                     print session
-                    session.ssh("echo 'hello'")
+                    session.ssh('ifconfig')
                     print "chef-client success..."
                except Exception, e:
                     print "chef-client FAILURE: %s " % e
