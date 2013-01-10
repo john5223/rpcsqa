@@ -142,7 +142,7 @@ else:
             try:
                 chef_api = ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client)
                 client = chef_api.api_request('GET', '/clients/%s' % chef_name) 
-                for k, v in clients:
+                for k, v in client:
                     print "Key: %s, Value %s" % (k, v)
             except Exception, e:
                 print "Error printing chef clients: %s " % e
@@ -170,7 +170,7 @@ else:
             try:
                 chef_api = ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client)
                 client = chef_api.api_request('GET', '/clients/%s' % chef_name) 
-                for k, v in clients:
+                for k, v in client:
                     print "Key: %s, Value %s" % (k, v)
             except Exception, e:
                 print "Error removing chef node: %s " % e
