@@ -96,8 +96,11 @@ else:
                     try:
                          print "!!## -- ROLE %s FOUND, RUNNING chef-client on %s with ip %s..." % (results.role, node, ip)
                          session = ssh_session('root', ip, root_password, True)
-                         session.ssh('chef-client')
+                         ssh_output = session.ssh('chef-client')
+                         print "chef-client run output for node %s" % node
+                         print ssh_output
                     except Exception, e:
                          print "chef-client FAILURE: %s " % e
                     finally:
                          session.close()
+                         
