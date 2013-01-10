@@ -16,12 +16,12 @@ parser.add_argument('--razor_ip', action="store", dest="razor_ip",
 parser.add_argument('--policy', action="store", dest="policy", 
                     required=True, help="Razor policy to set chef roles for.")
 
-parser.add_argument('--role', action="store", dest="role", 
-                    required=True, help="Chef role to run chef-client on")
-
 parser.add_argument('--data_bag_location', action="store", dest="data_bag_loc",
                     default="/var/lib/jenkins/rpcsqa/chef-cookbooks/data_bags/razor_node", 
                     required=False, help="Location of chef data bags")
+
+parser.add_argument('--role', action="store", dest="role", 
+                    required=True, help="Chef role to run chef-client on")
 
 parser.add_argument('--chef_url', action="store", dest="chef_url", 
                     default="http://198.101.133.4:4000", 
@@ -88,14 +88,17 @@ else:
 
         with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             node = Node(chef_name)
-
+            
             if node.run_list == results.role:
-               ip = node['ipaddress']
-               print "!!## -- ROLE %s FOUND, RUNNING chef-client on %s with ip %s..." % (results.role, node, ip)
-               try:
-                    session = ssh_session('root', ip, root_password, True)
-                    session.ssh('chef-client')
-               except Exception, e:
-                    print "chef-client FAILURE: %s " % e
-               finally:
-                    session.close()
+                    ip = node['ipaddress']
+               if results.display_only == 'True':
+                    print "!!## -- ROLE %s FOUND, would run chef-client on %s with ip %s..." % (results.role, node, ip)
+               else:
+                    try:
+                         print "!!## -- ROLE %s FOUND, RUNNING chef-client on %s with ip %s..." % (results.role, node, ip)
+                         session = ssh_session('root', ip, root_password, True)
+                         session.ssh('chef-client')
+                    except Exception, e:
+                         print "chef-client FAILURE: %s " % e
+                    finally:
+                         session.close()
