@@ -7,7 +7,7 @@ if [ "$#" -eq 0 ]; then
 fi
 
 # Get the root password from the box off the command line
-while getopts "p:h" OPTION;
+while getopts "r:p:h" OPTION;
 do
   case $OPTION in
     r) ROOT_PASS=$OPTARG
