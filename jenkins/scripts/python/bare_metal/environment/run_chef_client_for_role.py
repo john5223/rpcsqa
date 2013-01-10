@@ -16,6 +16,9 @@ parser.add_argument('--razor_ip', action="store", dest="razor_ip",
 parser.add_argument('--policy', action="store", dest="policy", 
                     required=True, help="Razor policy to set chef roles for.")
 
+parser.add_argument('--role', action="store", dest="role", 
+                    required=True, help="Chef role to run chef-client on")
+
 parser.add_argument('--data_bag_location', action="store", dest="data_bag_loc",
                     default="/var/lib/jenkins/rpcsqa/chef-cookbooks/data_bags/razor_node", 
                     required=False, help="Location of chef data bags")
@@ -46,13 +49,18 @@ def get_chef_name(data):
     except Exception, e:
         return ''
 
+def get_root_pass(data):
+    if 'root_password' in data:
+        return data['root_password']
+    else:
+        return ''
+
 #############################################################
 #Collect active models that match policy from given input
 #############################################################
 
 razor = razor_api(results.razor_ip)
 policy = results.policy
-roles = ['role[qa-single-controller]', 'role[qa-single-api]', 'role[qa-single-compute]']
 
 print "#################################"
 print " Switching roles and running chef-client for  '%s'  active models" % policy
@@ -76,44 +84,18 @@ else:
     for active in active_models:
         data = active_models[active]
         chef_name = get_chef_name(data)
+        root_password = get_root_pass(data)
 
         with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             node = Node(chef_name)
-            run_list = node.run_list
-            environment = node.chef_environment
-            
-            if results.display_only == 'true':
-                if (i > len(roles) - 1):
-                    i = len(roles) - 1
-                print "!!## -- "
-                print "!!## -- %s has run list: %s, and environment: %s -- ##!!" % (node, run_list, environment)
-                print "!!## -- %s run list will be switched to %s with environment %s -- ##!!" % (node, roles[i], policy)
-                i += 1
-            else:
-                # set the environment and run lists
-                # this is for our QA environment of 4 servers (2 api, 2 compute), might make script take roles -> numbers at a later date
-                print "!!## --   "
-                print "!!## -- %s has run list: %s, and environment: %s -- ##!!" % (node, run_list, environment)
-                environment = policy
-                if i == 0:
-                    print "!!## -- First host %s, set to role %s -- ##!!" % (node, roles[i])
-                    run_list = [roles[i]]
-                    i += 1
-                elif i == 1:
-                    print "!!## -- Second host %s, set to role %s -- ##!!" % (node, roles[i])
-                    run_list = [roles[i]]
-                    i += 1
-                else:
-                    print "!!## -- Non API host %s, set to role %s -- ##!!" % (node, roles[i])
-                    run_list = [roles[i]]
 
-                node.run_list = run_list
-                node.chef_environment = environment
-
-                try:
-                    node.save()
-                    print "!!## -- NODE: %s SAVED -- ##!!" % node
-                    print "!!## -- NEW RUN LIST: %s" % node.run_list
-                    print "!!## -- NEW ENVIRONMENT: %s" % node.chef_environment
-                except Exception, e:
-                    print "!!## -- Failed to save node -- Exception: %s -- ##!!" % e
+            if node.run_list == results.role:
+               ip = node['ipaddress']
+               print "!!## -- ROLE %s FOUND, RUNNING chef-client..."
+                 try:
+                     session = ssh_session('root', ip, root_pass, True)
+                     session.ssh('chef-client')
+                 except Exception, e:
+                     print "chef-client FAILURE: %s " % e
+                 finally:
+                     session.close()
