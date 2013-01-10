@@ -90,8 +90,8 @@ else:
             node = Node(chef_name)
 
             if node.run_list == results.role:
-               print "!!## -- ROLE %s FOUND, RUNNING chef-client..."
                ip = node['ipaddress']
+               print "!!## -- ROLE %s FOUND, RUNNING chef-client on %s with ip %s..." % (results.role, node, ip)
                try:
                     session = ssh_session('root', ip, root_password, True)
                     session.ssh('chef-client')
