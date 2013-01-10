@@ -31,15 +31,16 @@ tmp_file='/var/lib/jenkins/tmp/ubuntu-glance-cf.json'
 
 echo Start
 for line in $filelines ; do
-    if [[ $line=~'TENANT_PASSWORD' ]]; then
-        echo $TENANT_PASSWORD >> tmp_file
-    elif [[ $line=~'TENANT_ID' ]]; then
-        echo $TENANT_ID >> tmp_file
-    elif [[ $line=~'TENANT_NAME']]; then
-        echo $TENANT_NAME >> tmp_file
-    else
-        echo $line >> tmp_file
-    fi
+    case $line in
+        'TENANT_PASSWORD')
+            echo $TENANT_PASSWORD >> $tmp_file ;;
+        'TENANT_NAME')
+            echo $TENANT_NAME >> $tmp_file ;;
+        'TENANT_ID')
+            echo $TENANT_ID >> $tmp_file ;;
+        *)
+            echo $line >> $tmp_file ;;
+    esac
 done
 
 tmplines=`cat $tmp_file`
