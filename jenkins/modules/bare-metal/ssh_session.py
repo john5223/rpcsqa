@@ -14,7 +14,7 @@ import time
 class ssh_session:
     "Session with extra state including the password to be used."
 
-    def __init__(self, user, host, output_file='ssh.out', password=None, verbose=0):
+    def __init__(self, user, host, password=None, verbose=0):
         self.user = user
         self.host = host
         self.verbose = verbose
@@ -27,7 +27,7 @@ class ssh_session:
             EOF,
             ]
         
-        self.f = open('%s' % output_file,'w')
+        self.f = open('ssh.out','w')
             
     def __repr__(self):
         outl = 'class :'+self.__class__.__name__
@@ -41,9 +41,7 @@ class ssh_session:
     def __exec(self, command):
 
         "Execute a command on the remote host.    Return the output."
-        child = spawn(command,
-                                    #timeout=10,
-                                    )
+        child = spawn(command)
         if self.verbose:
             sys.stderr.write("-> " + command + "\n")
         seen = child.expect(self.keys)

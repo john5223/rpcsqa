@@ -1,6 +1,5 @@
 #!/usr/bin/python
 import os
-import csv
 import json
 import argparse
 from razor_api import razor_api
@@ -100,9 +99,9 @@ else:
           for server in to_run_list:
                print "Trying chef-client on %s with ip %s...." % (server['node'], server['ip'])
                try:
-                    session = ssh_session('root', server['ip'], server['root_password'], '/var/lib/jenkins/chef_runs/%s.out' % server['node'], True)
+                    session = ssh_session('root', server['ip'], server['root_password'], True)
                     print session
-                    session.ssh('chef-client')
+                    session.ssh('chef-client >> /dev/null')
                     print "chef-client success..."
                except Exception, e:
                     print "chef-client FAILURE: %s " % e
