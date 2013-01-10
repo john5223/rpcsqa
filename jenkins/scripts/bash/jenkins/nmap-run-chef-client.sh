@@ -17,7 +17,7 @@ do
     h) echo "Usage: nmap_reboot.sh [-h]" >&2
        echo " -h Return this help information" >&2
        echo " -r The root password for the boxes to be rebooted" >&2
-       echo " -p The razor policy to run chef-client against"
+       echo " -p The razor policy to run chef-client against" >&2
        exit
        ;; 
   esac

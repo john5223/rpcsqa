@@ -9,7 +9,7 @@ from chef import *
 
 
 parser = argparse.ArgumentParser()
-# Get the ip of the server you want to remove
+
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", 
                     required=True, help="IP for the Razor server")
 
