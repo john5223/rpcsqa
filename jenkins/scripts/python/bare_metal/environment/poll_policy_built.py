@@ -70,19 +70,7 @@ def getip_from_data_bag(uuid):
         print e
         return ''
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+#### MAIN ####
 razor = razor_api(results.razor_ip)
 policy = results.policy
 

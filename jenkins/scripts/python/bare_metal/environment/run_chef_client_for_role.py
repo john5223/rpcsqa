@@ -80,7 +80,6 @@ else:
 
 
     # Gather all of the active models for the policy and get information about them
-    i = 0
     for active in active_models:
         data = active_models[active]
         chef_name = get_chef_name(data)
@@ -89,7 +88,7 @@ else:
         with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             node = Node(chef_name)
 
-            if node.run_list == results.role:
+            if node.run_list =~ 'role[%s]' % results.role:
                ip = node['ipaddress']
                if results.display_only == 'True':
                     print "!!## -- ROLE %s FOUND, would run chef-client on %s with ip %s..." % (results.role, node, ip)
