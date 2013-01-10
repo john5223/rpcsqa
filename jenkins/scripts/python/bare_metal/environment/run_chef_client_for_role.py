@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import os
+import csv
 import json
 import argparse
 from razor_api import razor_api
@@ -94,13 +95,14 @@ else:
                     print "!!## -- ROLE %s FOUND, would run chef-client on %s with ip %s..." % (results.role, node, ip)
                else:
                     try:
-                         print "!!## -- ROLE %s FOUND, RUNNING chef-client on %s with ip %s..." % (results.role, node, ip)
-                         session = ssh_session('root', ip, root_password, True)
-                         ssh_output = session.ssh('chef-client')
-                         print "chef-client run output for node %s" % node
-                         print ssh_output
-                    except Exception, e:
-                         print "chef-client FAILURE: %s " % e
-                    finally:
-                         session.close()
-                         
+                         fo.open("/var/lib/jenkins/rpcsqa/jenkins/chef_runs/%s-chef-run.txt" % node, "w")
+                    except IOError, e:
+                         print "Failed to open /var/lib/jenkins/rpcsqa/jenkins/chef_runs/%s-chef-run.txt" % node
+                    else:
+                         try:
+                              session = ssh_session('root', ip, root_password, False)
+                              fo.write(session.ssh('chef-client'))
+                         except Exception, e:
+                              print "chef-client FAILURE: %s " % e
+                         finally:
+                              session.close()
