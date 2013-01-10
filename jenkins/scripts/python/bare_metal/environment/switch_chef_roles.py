@@ -92,6 +92,8 @@ else:
             environment = node.chef_environment
             
             if results.display_only == 'true':
+                if (i > len(roles) - 1):
+                    i = len(roles) - 1
                 print "!!## -- %s has run list: %s, and environment: %s -- ##!!" % (node, run_list, environment)
                 print "!!## -- %s run list will be switched to %s with environment %s -- ##!!" % (node, roles[i], policy)
                 i += 1
