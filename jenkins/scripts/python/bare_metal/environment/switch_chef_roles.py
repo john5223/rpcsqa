@@ -117,4 +117,4 @@ else:
                     print "!!## -- NEW ENVIRONMENT: %s" % node.chef_environment
                 except Exception, e:
                     print "!!## -- Failed to save node -- Exception: %s -- ##!!" % e
-                
+                    
