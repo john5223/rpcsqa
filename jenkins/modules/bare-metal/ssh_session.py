@@ -27,7 +27,7 @@ class ssh_session:
             EOF,
             ]
         
-        self.f = open('%s' % output_file,'wU')
+        self.f = open('%s' % output_file,'w')
             
     def __repr__(self):
         outl = 'class :'+self.__class__.__name__
