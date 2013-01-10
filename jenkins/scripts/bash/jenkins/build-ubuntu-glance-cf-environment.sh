@@ -26,8 +26,9 @@ do
 done
 
 filename='/var/lib/jenkins/rpcsqa/chef-cookbooks/environments/templates/ubuntu-glance-cf.json'
-echo Start
+filelines=`cat $filename`
 
-while read p; do
-    echo $p
-done < $filename
+echo Start
+for line in $filelines ; do
+    echo $line
+done
