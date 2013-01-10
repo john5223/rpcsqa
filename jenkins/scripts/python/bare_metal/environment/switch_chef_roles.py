@@ -91,8 +91,8 @@ else:
         else:
             with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 node = Node(chef_name)
-                print "Node with name %s has private ip of %s" % (chef_name, node['ip'])
-                private_ips.append({'private_ip': node['ip'], 'root_pass': root_pass})
+                print "Node with name %s has private ip of %s" % (chef_name, node['ipaddress'])
+                private_ips.append({'private_ip': node['ipaddress'], 'root_pass': root_pass})
                 run_list = node.run_list
                 environment = node.chef_environment
 
@@ -126,7 +126,6 @@ else:
                     i += 1
 
     for ip in private_ips:
-        print "Run chef-client via ssh"
         # ssh into the host and get the fqdn
         try:
             session = ssh_session('root', private_ips[ip]['private_ip'], private_ips[ip]['root_pass'], True)
