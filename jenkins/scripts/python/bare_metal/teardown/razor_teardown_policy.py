@@ -20,7 +20,7 @@ parser.add_argument('--razor_ip', action="store", dest="razor_ip",
 parser.add_argument('--policy', action="store", dest="policy", 
                     required=True, help="Policy to teardown from razor and reboot nodes")
 
-parser.add_argument('--data-bag-location', action="store", dest="data_bag_loc", 
+parser.add_argument('--data_bag_location', action="store", dest="data_bag_loc", 
                     #default="/home/john/git/rpcsqa/chef-cookbooks/data_bags/razor_node",
                     default="/var/lib/jenkins/rpcsqa/chef-cookbooks/data_bags/razor_node", 
                     required=False, help="Policy to teardown from razor and reboot nodes")
@@ -139,13 +139,13 @@ else:
             print "Private address: %s " % private_ip
             print "Chef Name: %s" % chef_name
             print "Searching chef clients..."
-                try:
-                    with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
-                        clients = Search('client')
-                        print "Clients: \n %s " % json.dumps(clients, indent=4)
-                except Exception, e:
-                    print "Error removing chef node: %s " % e
-                    continue
+            try:
+                with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
+                    clients = Search('client')
+                    print "Clients: \n %s " % json.dumps(clients, indent=4)
+            except Exception, e:
+                print "Error removing chef node: %s " % e
+                continue
         else: 
             print "Removing active model..."
             try:
@@ -188,4 +188,3 @@ else:
             print "Sleeping for 5 seconds..."
             time.sleep(5)
             print "#################################"
-            
