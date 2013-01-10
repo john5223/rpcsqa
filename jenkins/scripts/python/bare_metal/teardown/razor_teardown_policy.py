@@ -120,7 +120,7 @@ else:
         #print data
         private_ip = data['eth1_ip']
         am_uuid = data['am_uuid']
-        chef_name = "%s%s" % (data['label'], data['bind_number'])
+        chef_name = "%s%s.%s" % (data['hostname_prefix'], data['bind_number'], data['domain'])
         root_pass = getrootpass(data)
         dbag_uuid = get_data_bag_UUID(data)
         ip = getip_from_data_bag(dbag_uuid)

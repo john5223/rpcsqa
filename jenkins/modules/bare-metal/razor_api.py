@@ -165,7 +165,8 @@ class razor_api:
 							'nic_count': int(item['@model']['@node']['@attributes_hash']['mk_hw_nic_count']),
 							'broker': item['@broker']['@name'],
 							'bind_number': item['@model']['@counter'],
-							'label': item['@label']
+							'hostname_prefix': item['@model']['@hostname_prefix'],
+							'domain': item['@model']['@domainname']
 							}
 
 			# Get the active network interface ips
@@ -195,8 +196,9 @@ class razor_api:
 								'am_uuid': razor_json[item]['am_uuid'],
 								'root_passwd': razor_json[item]['root_password'],
 								'broker': razor_json[item]['broker'],
-								'bind_number': razor_json[item]['bind_number'],
-								'label': razor_json[item]['label']
+								'bind_number': item['@model']['@counter'],
+								'hostname_prefix': item['@model']['@hostname_prefix'],
+								'domain': item['@model']['@domainname']
 								}
 				for x in range(0, razor_json[item]['nic_count']):
 					try:
@@ -225,8 +227,9 @@ class razor_api:
 								'am_uuid': razor_json[item]['am_uuid'],
 								'root_passwd': razor_json[item]['root_password'],
 								'broker': razor_json[item]['broker'],
-								'bind_number': razor_json[item]['bind_number'],
-								'label': razor_json[item]['label']
+								'bind_number': item['@model']['@counter'],
+								'hostname_prefix': item['@model']['@hostname_prefix'],
+								'domain': item['@model']['@domainname']
 								}
 				for x in range(0, razor_json[item]['nic_count']):
 					try:
