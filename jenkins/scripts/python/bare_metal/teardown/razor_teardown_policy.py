@@ -141,8 +141,7 @@ else:
             print "Searching chef clients..."
             try:
                 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
-                    clients = dict(Search('client'))
-                    print "Clients: \n %s" % json.dumps(clients, indent=4)
+                    clients = Search('client')
                     for k, v in clients:
                         print "Key: %s, Value %s" % (k, v)
             except Exception, e:
