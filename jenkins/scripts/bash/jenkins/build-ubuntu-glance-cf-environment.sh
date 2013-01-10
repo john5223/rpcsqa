@@ -27,8 +27,21 @@ done
 
 filename='/var/lib/jenkins/rpcsqa/chef-cookbooks/environments/templates/ubuntu-glance-cf.json'
 filelines=`cat $filename`
+tmp_file='/var/lib/jenkins/tmp/ubuntu-glance-cf.json'
 
 echo Start
 for line in $filelines ; do
+    if [[ $line=~'TENANT_PASSWORD' ]]; then
+        echo $TENANT_PASSWORD >> tmp_file
+    elif [[ $line=~'TENANT_ID' ]]; then
+        echo $TENANT_ID >> tmp_file
+    elif [[ $line=~TENANT_NAME]]; then
+        echo $TENANT_NAME >> tmp_file
+    else
+        echo $line >> tmp_file
+done
+
+tmplines=`cat $tmp_file`
+for line in $tmplines; do
     echo $line
 done
