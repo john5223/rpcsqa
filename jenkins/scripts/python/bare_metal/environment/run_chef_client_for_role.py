@@ -105,4 +105,5 @@ else:
                          except Exception, e:
                               print "chef-client FAILURE: %s " % e
                          finally:
+                              print "%s-chef-run.txt saved in /var/lib/jenkins/chef_runs" % node
                               session.close()
