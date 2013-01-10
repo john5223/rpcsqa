@@ -25,7 +25,7 @@ do
   esac
 done
 
-filename='/var/lib/jenkins/rpcsqa/chef-cookbooks/environments/ubuntu-glance-cf.json'
+filename='/var/lib/jenkins/rpcsqa/chef-cookbooks/environments/templates/ubuntu-glance-cf.json'
 echo Start
 
 while read p; do
