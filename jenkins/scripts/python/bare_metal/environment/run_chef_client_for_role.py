@@ -95,7 +95,7 @@ else:
                     print "!!## -- ROLE %s FOUND, would run chef-client on %s with ip %s..." % (results.role, node, ip)
                else:
                     try:
-                         fo.open("/var/lib/jenkins/rpcsqa/jenkins/chef_runs/%s-chef-run.out" % node, "w")
+                         fo = open("/var/lib/jenkins/rpcsqa/jenkins/chef_runs/%s-chef-run.out" % node, "w")
                     except IOError, e:
                          print "Failed to open /var/lib/jenkins/rpcsqa/jenkins/chef_runs/%s-chef-run.out" % node
                     else:
