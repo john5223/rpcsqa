@@ -142,7 +142,7 @@ else:
             try:
                 chef_api = ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client)
                 client = chef_api.api_request('GET', '/clients/%s' % chef_name)
-                print "Response: %s Client: \n %s" % (client.code, json.dumps(client, indent=4)
+                print "Response: %s Client: \n %s" % (client.code, json.dumps(client, indent=4))
             except Exception, e:
                 print "Error printing chef clients: %s " % e
                 continue
