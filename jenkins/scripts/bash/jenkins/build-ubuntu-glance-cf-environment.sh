@@ -39,6 +39,7 @@ for line in $filelines ; do
         echo $TENANT_NAME >> tmp_file
     else
         echo $line >> tmp_file
+    fi
 done
 
 tmplines=`cat $tmp_file`
