@@ -2,7 +2,7 @@
 
 # print usage and exit
 if [ "$#" -eq 0 ]; then
-  echo "Usage: build-ubuntu-glance-cf-environment.sh [-h help] -i tenant_id -n tenant_name -p tenant_pass" >&2
+  echo "Usage: build-ubuntu-glance-cf-environment.sh [-h help] -i tenant_id -n tenant_name -p tenant_password" >&2
   exit
 fi
 
