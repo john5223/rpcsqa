@@ -96,6 +96,7 @@ else:
                else:
                     try:
                          session = ssh_session('root', ip, root_password, False)
+                         print "Trying to run 'chef-client on node: %s, with ip: %s" % (node, ip)
                          session.ssh('chef-client')
                          print "chef-client ran, check node @ %s for logs" % ip
                     except Exception, e:
