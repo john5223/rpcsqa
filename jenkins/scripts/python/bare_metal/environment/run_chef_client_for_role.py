@@ -100,9 +100,9 @@ else:
           for server in to_run_list:
                print "Trying chef-client on %s with ip %s...." % (server['node'], server['ip'])
                try:
-                    session = ssh_session('root', server['ip'], server['root_password'], False)
+                    session = ssh_session('root', server['ip'], server['root_password'], True)
                     session.ssh('chef-client')
-                    print "chef-client success."
+                    print "chef-client success..."
                except Exception, e:
                     print "chef-client FAILURE: %s " % e
                finally:
