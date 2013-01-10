@@ -37,9 +37,13 @@ do
     else
       echo "Running hostname --fqdn on server with ip $ip"
       hostname_result=`sshpass -p $ROOT_PASS ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root $ip 'hostname --fqdn'`
-      if [[ $hostname_result=~$POLICY ]]; then
+      if [[ $hostname_result =~ $POLICY([0-9]+) ]]; then
         echo "Found host that matched policy, $hostname_result with IP: $ip"
-        chef_ips[$i]=$ip
+        name=${BASH_REMATCH[0]}
+        if [[ $POLICY == $name ]]
+          echo "Found a box with the exact policy match, $name with IP: $ip"
+          chef_ips[$i]=$ip
+        fi
       fi
     fi
   fi
