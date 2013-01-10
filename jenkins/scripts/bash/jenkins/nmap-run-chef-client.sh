@@ -40,7 +40,7 @@ do
       if [[ $hostname_result =~ $POLICY([0-9]+) ]]; then
         echo "Found host that matched policy, $hostname_result with IP: $ip"
         name=${BASH_REMATCH[0]}
-        if [[ $POLICY == $name ]]
+        if [[ $POLICY == $name ]]; then
           echo "Found a box with the exact policy match, $name with IP: $ip"
           chef_ips[$i]=$ip
         fi
