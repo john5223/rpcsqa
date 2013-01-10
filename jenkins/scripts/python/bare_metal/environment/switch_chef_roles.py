@@ -145,13 +145,13 @@ else:
                 environment = policy
                 if i == 0:
                     print "!!## -- First host, set to controller -- ##!!"
-                    run_list = ['qa-single-controller']
+                    run_list = ["role['qa-single-controller']"]
                 elif i == 1:
                     print "!!## -- Second host, set to api -- ##!!"
-                    run_list = ['qa-single-api']
+                    run_list = ["role['qa-single-api']"]
                 else:
                     print "!!## -- Set host to compute  -- ##!!"
-                    run_list = ['qa-single-compute']
+                    run_list = ["role['qa-single-compute']"]
 
                 node.run_list = run_list
                 node.chef_environment = environment

@@ -6,6 +6,8 @@ from razor_api import razor_api
 from ssh_session import ssh_session
 import time
 
+from chef import *
+
 import sys
 sys.stdout.flush()
 
@@ -23,6 +25,17 @@ parser.add_argument('--data-bag-location', action="store", dest="data_bag_loc",
                     default="/var/lib/jenkins/rpcsqa/chef-cookbooks/data_bags/razor_node", 
                     required=False, help="Policy to teardown from razor and reboot nodes")
 
+parser.add_argument('--chef_url', action="store", dest="chef_url", 
+                    default="http://198.101.133.4:4000", 
+                    required=False, help="client for chef")
+
+parser.add_argument('--chef_client', action="store", dest="chef_client", 
+                    default="jenkins", 
+                    required=False, help="client for chef")
+
+parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem", 
+                    default="/var/lib/jenkins/rpcsqa/.chef/jenkins.pem", 
+                    required=False, help="client pem for chef")
 
 parser.add_argument('--display-only', action="store", dest="display_only", 
                     default="true", 
@@ -107,6 +120,7 @@ else:
         #print data
         private_ip = data['eth1_ip']
         am_uuid = data['am_uuid']
+        chef_name = "%s%s" % (data['label'], data['bind_number'])
         root_pass = getrootpass(data)
         dbag_uuid = get_data_bag_UUID(data)
         ip = getip_from_data_bag(dbag_uuid)
@@ -122,7 +136,7 @@ else:
         #print "ROOT_PASS: %s " % root_pass
         print "Public address: %s " % ip
         print "Private address: %s " % private_ip
-        print ""
+        print "Chef Name: %s" % chef_name
         
         
         if results.display_only == 'false':
@@ -134,6 +148,15 @@ else:
                 #pass
             except Exception, e:
                 print "Error removing active model: %s " % e
+                continue
+
+            print "Removing chef-node..."
+            try:
+                 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
+                    node = Node(chef_name)
+                    node.delete()
+            except Exception, e:
+                print "Error removing chef client: %s " % e
                 continue
             
             print "Trying restart...."

@@ -163,7 +163,9 @@ class razor_api:
 							'current_state': item['@model']['@current_state'],
 							'final_state': item['@model']['@final_state'],
 							'nic_count': int(item['@model']['@node']['@attributes_hash']['mk_hw_nic_count']),
-							'broker': item['@broker']['@name']
+							'broker': item['@broker']['@name'],
+							'bind_number': item['@model']['@counter'],
+							'label': item['@label']
 							}
 
 			# Get the active network interface ips
@@ -192,7 +194,9 @@ class razor_api:
 								'node_uuid': razor_json[item]['node_uuid'],
 								'am_uuid': razor_json[item]['am_uuid'],
 								'root_passwd': razor_json[item]['root_password'],
-								'broker': razor_json[item]['broker']
+								'broker': razor_json[item]['broker'],
+								'bind_number': razor_json[item]['bind_number'],
+								'label': razor_json[item]['label']
 								}
 				for x in range(0, razor_json[item]['nic_count']):
 					try:
@@ -220,7 +224,9 @@ class razor_api:
 								'node_uuid': razor_json[item]['node_uuid'],
 								'am_uuid': razor_json[item]['am_uuid'],
 								'root_passwd': razor_json[item]['root_password'],
-								'broker': razor_json[item]['broker']
+								'broker': razor_json[item]['broker'],
+								'bind_number': razor_json[item]['bind_number'],
+								'label': razor_json[item]['label']
 								}
 				for x in range(0, razor_json[item]['nic_count']):
 					try:
