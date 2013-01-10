@@ -73,32 +73,31 @@ if active_models == {}:
     print "'%s' active models: 0 " % (policy)
     print "#################################"
 else:
-    if 'response' in active_models.keys():
-        active_models = active_models['response']
-    
-    print "'%s' active models: %s " % (policy, len(active_models))
-    print "#################################"
+     if 'response' in active_models.keys():
+          active_models = active_models['response']
+     print "'%s' active models: %s " % (policy, len(active_models))
+     print "#################################"
 
+     # Gather all of the active models for the policy and get information about them
+     for active in active_models:
+          data = active_models[active]
+          chef_name = get_chef_name(data)
+          root_password = get_root_pass(data)
 
-    # Gather all of the active models for the policy and get information about them
-    for active in active_models:
-        data = active_models[active]
-        chef_name = get_chef_name(data)
-        root_password = get_root_pass(data)
+          with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
+               node = Node(chef_name)
 
-        with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
-            node = Node(chef_name)
-
-            if 'role[%s]' % results.role in node.run_list:
-               ip = node['ipaddress']
-               if results.display_only == 'true':
-                    print "!!## -- ROLE %s FOUND, would run chef-client on %s with ip %s..." % (results.role, node, ip)
-               else:
-                    print "!!## -- ROLE %s FOUND, runnning chef-client on %s with ip %s..." % (results.role, node, ip)
-                    to_run_list.append({'node': node, 'role': results.role, 'ip': ip, 'root_password': root_password})
+               if 'role[%s]' % results.role in node.run_list:
+                    ip = node['ipaddress']
+               
+                    if results.display_only == 'true':
+                         print "!!## -- ROLE %s FOUND, would run chef-client on %s with ip %s..." % (results.role, node, ip)
+                    else:
+                         print "!!## -- ROLE %s FOUND, runnning chef-client on %s with ip %s..." % (results.role, node, ip)
+                         to_run_list.append({'node': node, 'role': results.role, 'ip': ip, 'root_password': root_password})
 
      for server in to_run_list:
-          print "Trying restart...."
+          print "Trying chef-client on %s with ip %s...." % (to_run_list[server]['node'], to_run_list[server]['ip'])
           try:
                session = ssh_session('root', to_run_list[server]['ip'], to_run_list[server]['root_pass'], False)
                session.ssh('chef-client')
