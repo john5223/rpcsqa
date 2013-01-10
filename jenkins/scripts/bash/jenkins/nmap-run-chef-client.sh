@@ -36,7 +36,7 @@ do
       echo "This box is restricted infrastructure, ignore it."
     else
       echo "Running hostname --fqdn on server with ip $ip"
-      hostname_result=`sshpass -p ${ROOT_PASS} ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root ${ip} 'hostname -fqdn'`
+      hostname_result=`sshpass -p $ROOT_PASS ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root $ip 'hostname -fqdn'`
       if [[ $hostname_result=~$POLICY ]]; then
         echo "Found host that matched policy, $hostname_result with IP: $ip"
         chef_ips[$i]=$ip
