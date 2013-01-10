@@ -102,8 +102,8 @@ else:
                          try:
                               session = ssh_session('root', ip, root_password, False)
                               fo.write(session.ssh('chef-client'))
+                              print "%s-chef-run.out saved in /var/lib/jenkins/chef_runs" % node
                          except Exception, e:
                               print "chef-client FAILURE: %s " % e
                          finally:
-                              print "%s-chef-run.out saved in /var/lib/jenkins/chef_runs" % node
                               session.close()
