@@ -104,10 +104,12 @@ else:
                     print "!!## -- First host, set to role %s -- ##!!" % roles[i]
                     run_list = roles[i]
                     private_ips.append({'private_ip': node['ipaddress'], 'root_pass': root_pass, 'role': roles[i]})
+                    i += 1
                 elif i == 1:
                     print "!!## -- Second host, set to role %s -- ##!!" % roles[i]
                     run_list = roles[i]
                     private_ips.append({'private_ip': node['ipaddress'], 'root_pass': root_pass, 'role': roles[i]})
+                    i += 1
                 else:
                     print "!!## -- Non API host, set to role %s -- ##!!" % roles[i]
                     run_list = roles[i]
@@ -123,4 +125,4 @@ else:
                     print "!!## -- NEW ENVIRONMENT: %s" % node.chef_environment
                 except Exception, e:
                     print "!!## -- Failed to save node -- Exception: %s -- ##!!" % e
-                i += 1
+                
