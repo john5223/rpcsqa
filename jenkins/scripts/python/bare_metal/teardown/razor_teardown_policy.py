@@ -141,8 +141,9 @@ else:
             print "Searching chef clients..."
             try:
                 chef_api = ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client)
-                client = chef_api.api_request('GET', '/clients/%s' % chef_name) 
+                client = json.loads(chef_api.api_request('GET', '/clients/%s' % chef_name) )
                 print "The API return a object of type %s" % type(client)
+                print "Client: \n %s" % json.dumps(client, indent=4)
             except Exception, e:
                 print "Error printing chef clients: %s " % e
                 continue
