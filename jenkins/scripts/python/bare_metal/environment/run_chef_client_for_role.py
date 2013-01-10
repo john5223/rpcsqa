@@ -99,7 +99,7 @@ else:
           for server in to_run_list:
                print "Trying chef-client on %s with ip %s...." % (server['node'], server['ip'])
                try:
-                    session = ssh_session('root', server['ip'], server['root_password'], True)
+                    session = ssh_session('root', server['ip'], server['root_password'], False)
                     print session
                     session.ssh('ifconfig')
                     print "chef-client success..."
