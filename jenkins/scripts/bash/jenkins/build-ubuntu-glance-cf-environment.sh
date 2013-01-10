@@ -35,7 +35,7 @@ for line in $filelines ; do
         echo $TENANT_PASSWORD >> tmp_file
     elif [[ $line=~'TENANT_ID' ]]; then
         echo $TENANT_ID >> tmp_file
-    elif [[ $line=~TENANT_NAME]]; then
+    elif [[ $line=~'TENANT_NAME']]; then
         echo $TENANT_NAME >> tmp_file
     else
         echo $line >> tmp_file
