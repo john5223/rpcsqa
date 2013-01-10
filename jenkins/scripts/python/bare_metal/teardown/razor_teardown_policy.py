@@ -156,7 +156,16 @@ else:
                     node = Node(chef_name)
                     node.delete()
             except Exception, e:
-                print "Error removing chef client: %s " % e
+                print "Error removing chef node: %s " % e
+                continue
+
+            print "Searching chef clients..."
+            try:
+                with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
+                    clients = Search('client')
+                    print "Clients: \n %s " % json.dumps(clients, indent=4)
+            except Exception, e:
+                print "Error removing chef node: %s " % e
                 continue
             
             print "Trying restart...."
