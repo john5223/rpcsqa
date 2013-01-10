@@ -1,0 +1,9 @@
+[submodule "chef-cookbooks/nscd"]
+	path = chef-cookbooks/nscd
+	url = git@github.com:opscode-cookbooks/nscd.git
+[submodule "chef-cookbooks/cookbooks/nscd"]
+	path = chef-cookbooks/cookbooks/nscd
+	url = git@github.com:opscode-cookbooks/nscd.git
+[submodule "chef-cookbooks/cookbooks/openldap"]
+	path = chef-cookbooks/cookbooks/openldap
+	url = git@github.com:opscode-cookbooks/openldap.git
