@@ -142,7 +142,8 @@ else:
             try:
                 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                     clients = Search('client')
-                    print "Clients: \n %s " % clients
+                    for k, v in clients:
+                        print "Key: %s, Value %s" % (k, v)
             except Exception, e:
                 print "Error printing chef clients: %s " % e
                 continue
