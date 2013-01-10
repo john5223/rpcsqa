@@ -101,6 +101,5 @@ else:
                          print "chef-client FAILURE: %s " % e
                     finally:
                          session.close()
-
-               print "chef-client run output for node %s" % node
-               print output
+                         print "chef-client run output for node %s" % node
+                         print output
