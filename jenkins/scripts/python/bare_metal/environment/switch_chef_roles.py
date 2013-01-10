@@ -159,6 +159,8 @@ else:
                 try:
                     node.save()
                     print "!!## -- NODE: %s SAVED -- ##!!" % node
+                    print "!!## -- NEW RUN LIST: %s" % node.run_list
+                    print "!!## -- NEW ENVIRONMENT: %s" % node.chef_environment
                 except Exception, e:
                     print "!!## -- Failed to save node -- Exception: %s -- ##!!" % e
 
