@@ -51,7 +51,7 @@ def get_data_bag_UUID(data):
         return ''
     
 
-def getrootpass(data):
+def get_root_pass(data):
     if 'root_password' in data:
         return data['root_password']
     else:
@@ -95,6 +95,7 @@ else:
     print "#################################"
 
 
+    # Gather all of the active models for the policy and get information about them
     hosts = []
     for active in active_models:
         data = active_models[active]
@@ -102,7 +103,7 @@ else:
         #print data
         private_ip = data['eth1_ip']
         am_uuid = data['am_uuid']
-        root_pass = getrootpass(data)
+        root_pass = get_root_pass(data)
         dbag_uuid = get_data_bag_UUID(data)
         ip = getip_from_data_bag(dbag_uuid)
 
@@ -113,6 +114,7 @@ else:
             print "Private address: %s " % private_ip
             print ""
 
+        # ssh into the host and get the fqdn
         try:
             session = ssh_session('root', ip, root_pass, False)
             host = session.ssh('hostname --fqdn')
@@ -124,6 +126,7 @@ else:
             session.close()
 
 
+    # for each fqdn, set roles and environment for it in chef
     with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         i = 0
         for host in hosts:
@@ -137,6 +140,7 @@ else:
                 print "!!## -- %s has run list: %s, and environement: %s -- ##!!" % (node, run_list, environment)
             else:
                 # set the environment and run lists
+                # this is for our QA environment of 4 servers (2 api, 2 compute), might make script take roles -> numbers at a later date
                 print "!!## -- %s has run list: %s, and environement: %s -- ##!!" % (node, run_list, environment)
                 environment = policy
                 if i == 0:
@@ -146,9 +150,8 @@ else:
                     print "!!## -- Second host, set to api -- ##!!"
                     run_list = ['qa-single-api']
                 else:
-                    print "!!## -- Set the rest of the hosts to compute  -- ##!!"
+                    print "!!## -- Set host to compute  -- ##!!"
                     run_list = ['qa-single-compute']
-                i += 1
 
                 node.run_list = run_list
                 node.chef_environment = environment
@@ -158,3 +161,5 @@ else:
                     print "!!## -- NODE: %s SAVED -- ##!!" % node
                 except Exception, e:
                     print "!!## -- Failed to save node -- Exception: %s -- ##!!" % e
+
+                i += 1
