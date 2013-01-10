@@ -73,7 +73,6 @@ else:
 
     # Gather all of the active models for the policy and get information about them
     i = 0
-    private_ips = []
     for active in active_models:
         data = active_models[active]
         chef_name = get_chef_name(data)
@@ -98,17 +97,14 @@ else:
                 if i == 0:
                     print "!!## -- First host %s, set to role %s -- ##!!" % (node, roles[i])
                     run_list = [roles[i]]
-                    private_ips.append({'private_ip': node['ipaddress'], 'root_pass': root_pass, 'role': roles[i]})
                     i += 1
                 elif i == 1:
                     print "!!## -- Second host %s, set to role %s -- ##!!" % (node, roles[i])
                     run_list = [roles[i]]
-                    private_ips.append({'private_ip': node['ipaddress'], 'root_pass': root_pass, 'role': roles[i]})
                     i += 1
                 else:
                     print "!!## -- Non API host %s, set to role %s -- ##!!" % (node, roles[i])
                     run_list = [roles[i]]
-                    private_ips.append({'private_ip': node['ipaddress'], 'root_pass': root_pass, 'role': roles[i]})
 
                 node.run_list = run_list
                 node.chef_environment = environment
