@@ -92,6 +92,7 @@ else:
             else:
                 # set the environment and run lists
                 # this is for our QA environment of 4 servers (2 api, 2 compute), might make script take roles -> numbers at a later date
+                print "!!## --                      -- ##!!"
                 print "!!## -- %s has run list: %s, and environment: %s -- ##!!" % (node, run_list, environment)
                 environment = policy
                 if i == 0:
