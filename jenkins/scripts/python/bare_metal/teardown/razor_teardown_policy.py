@@ -140,7 +140,7 @@ else:
             print "Chef Name: %s" % chef_name
             print "Searching chef clients..."
             try:
-                chef_api = ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
+                chef_api = ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client)
                 client = chef_api.api_request('GET', '/clients/%s' % chef_name) 
                 for k, v in clients:
                     print "Key: %s, Value %s" % (k, v)
@@ -168,9 +168,10 @@ else:
 
             print "Searching chef clients..."
             try:
-                with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
-                    clients = Search('client')
-                    print "Clients: \n %s " % json.dumps(clients, indent=4)
+                chef_api = ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client)
+                client = chef_api.api_request('GET', '/clients/%s' % chef_name) 
+                for k, v in clients:
+                    print "Key: %s, Value %s" % (k, v)
             except Exception, e:
                 print "Error removing chef node: %s " % e
                 continue
