@@ -131,16 +131,22 @@ else:
         
         #SSH into ip and reboot 
         
-        print "Active Model ID: %s " % active
-        print "Data Bag UUID: %s " % dbag_uuid
-        #print "ROOT_PASS: %s " % root_pass
-        print "Public address: %s " % ip
-        print "Private address: %s " % private_ip
-        print "Chef Name: %s" % chef_name
-        
-        
-        if results.display_only == 'false':
-            
+        if results.display_only == 'true':
+            print "Active Model ID: %s " % active
+            print "Data Bag UUID: %s " % dbag_uuid
+            #print "ROOT_PASS: %s " % root_pass
+            print "Public address: %s " % ip
+            print "Private address: %s " % private_ip
+            print "Chef Name: %s" % chef_name
+            print "Searching chef clients..."
+                try:
+                    with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
+                        clients = Search('client')
+                        print "Clients: \n %s " % json.dumps(clients, indent=4)
+                except Exception, e:
+                    print "Error removing chef node: %s " % e
+                    continue
+        else: 
             print "Removing active model..."
             try:
                 delete = razor.remove_active_model(am_uuid)
@@ -183,9 +189,3 @@ else:
             time.sleep(5)
             print "#################################"
             
-        
-        
-        
-     
-     
-        
