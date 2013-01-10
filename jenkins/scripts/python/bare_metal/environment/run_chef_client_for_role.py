@@ -94,13 +94,13 @@ else:
                          print "!!## -- ROLE %s FOUND, would run chef-client on %s with ip %s..." % (results.role, node, ip)
                     else:
                          print "!!## -- ROLE %s FOUND, runnning chef-client on %s with ip %s..." % (results.role, node, ip)
-                         to_run_list.append({'node': node, 'role': results.role, 'ip': ip, 'root_password': root_password})
+                         to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
 
      if results.display_only == 'false':
           for server in to_run_list:
-               print "Trying chef-client on %s with ip %s...." % (to_run_list[server]['node'], to_run_list[server]['ip'])
+               print "Trying chef-client on %s with ip %s...." % (server['node'], server['ip'])
                try:
-                    session = ssh_session('root', to_run_list[server]['ip'], to_run_list[server]['root_pass'], False)
+                    session = ssh_session('root', server['ip'], server['root_pass'], False)
                     session.ssh('chef-client')
                     print "chef-client success."
                except Exception, e:
