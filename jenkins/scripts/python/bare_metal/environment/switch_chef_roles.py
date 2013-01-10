@@ -105,17 +105,17 @@ else:
                 environment = policy
                 if i == 0:
                     print "!!## -- First host, set to role %s -- ##!!" % roles[i]
-                    run_list = roles[i]
+                    run_list = [roles[i]]
                     private_ips.append({'private_ip': node['ipaddress'], 'root_pass': root_pass, 'role': roles[i]})
                     i += 1
                 elif i == 1:
                     print "!!## -- Second host, set to role %s -- ##!!" % roles[i]
-                    run_list = roles[i]
+                    run_list = [roles[i]]
                     private_ips.append({'private_ip': node['ipaddress'], 'root_pass': root_pass, 'role': roles[i]})
                     i += 1
                 else:
                     print "!!## -- Non API host, set to role %s -- ##!!" % roles[i]
-                    run_list = roles[i]
+                    run_list = [roles[i]]
                     private_ips.append({'private_ip': node['ipaddress'], 'root_pass': root_pass, 'role': roles[i]})
 
                 node.run_list = run_list
