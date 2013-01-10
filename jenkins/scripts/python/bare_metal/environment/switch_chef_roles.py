@@ -39,12 +39,6 @@ parser.add_argument('--display_only', action="store", dest="display_only",
 # Parse the parameters
 results = parser.parse_args()
 
-def get_root_pass(data):
-    if 'root_password' in data:
-        return data['root_password']
-    else:
-        return ''
-
 def get_chef_name(data):
     try:
         name = "%s%s.%s" % (data['hostname_prefix'], data['bind_number'], data['domain'])
@@ -82,8 +76,6 @@ else:
     private_ips = []
     for active in active_models:
         data = active_models[active]
-        
-        root_pass = get_root_pass(data)
         chef_name = get_chef_name(data)
 
         with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
