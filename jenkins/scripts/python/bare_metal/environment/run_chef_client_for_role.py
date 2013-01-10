@@ -88,9 +88,9 @@ else:
 
         with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             node = Node(chef_name)
-            
+
             if node.run_list == results.role:
-                    ip = node['ipaddress']
+               ip = node['ipaddress']
                if results.display_only == 'True':
                     print "!!## -- ROLE %s FOUND, would run chef-client on %s with ip %s..." % (results.role, node, ip)
                else:
