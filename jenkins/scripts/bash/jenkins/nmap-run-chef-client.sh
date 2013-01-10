@@ -38,19 +38,9 @@ do
       echo "Running hostname --fqdn on server with ip $ip"
       hostname_result=`sshpass -p $ROOT_PASS ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root $ip 'hostname --fqdn'`
       if [[ $hostname_result =~ $POLICY([0-9]+) ]]; then
-        echo "Found host that matched policy, $hostname_result with IP: $ip"
-        name=${BASH_REMATCH[0]}
-        if [[ $POLICY == $name ]]; then
-          echo "Found a box with the exact policy match, $name with IP: $ip"
-          chef_ips[$i]=$ip
-        fi
+        echo "Found host that matched policy, $hostname_result with IP: $ip: RUNNING chef-client"
+        sshpass -p $ROOT_PASS ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root $ip 'chef-client'
       fi
     fi
   fi
-done
-
-for ip in $chef_ips
-do
-  echo "Running chef client on IP: $ip"
-  sshpass -p $ROOT_PASS ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root $ip 'chef-client'
 done
