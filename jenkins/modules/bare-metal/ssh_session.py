@@ -14,7 +14,7 @@ import time
 class ssh_session:
     "Session with extra state including the password to be used."
 
-    def __init__(self, user, host, password=None, verbose=0):
+    def __init__(self, user, host, output_file='ssh.out', password=None, verbose=0):
         self.user = user
         self.host = host
         self.verbose = verbose
@@ -27,7 +27,7 @@ class ssh_session:
             EOF,
             ]
         
-        self.f = open('ssh.out','w')
+        self.f = open('%s' % output_file,'w')
             
     def __repr__(self):
         outl = 'class :'+self.__class__.__name__
