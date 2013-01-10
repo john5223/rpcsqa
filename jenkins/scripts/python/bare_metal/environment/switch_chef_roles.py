@@ -58,7 +58,7 @@ def get_chef_name(data):
 
 razor = razor_api(results.razor_ip)
 policy = results.policy
-roles = ["['role[qa-single-controller]']", "['role[qa-single-api]']", "['role[qa-single-compute]']"]
+roles = ['role[qa-single-controller]', 'role[qa-single-api]', 'role[qa-single-compute]']
 
 print "#################################"
 print " Switching roles and running chef-client for  '%s'  active models" % policy
