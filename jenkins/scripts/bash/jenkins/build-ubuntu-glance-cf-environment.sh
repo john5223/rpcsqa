@@ -36,7 +36,7 @@ cp $template_filename $environment_filename
 ## replace the lines we are looking for
 echo "Replacing template values with real values..."
 sed -i 's/<TENANT_ID>/$TENANT_ID/g' $environment_filename
-sed -i 's/<TENANT_NAME>/$TENANT_NAME/g' environment_filename
-sed -i 's/<TENANT_PASSWORD>/$TENANT_PASSWORD/g' environment_filename
+sed -i 's/<TENANT_NAME>/$TENANT_NAME/g' $environment_filename
+sed -i 's/<TENANT_PASSWORD>/$TENANT_PASSWORD/g' $environment_filename
 
 echo "Done..."
