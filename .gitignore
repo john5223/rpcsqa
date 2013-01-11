@@ -1,3 +1,4 @@
+ignore_files/
 *.pem
 *.out
 *.py[cod]
