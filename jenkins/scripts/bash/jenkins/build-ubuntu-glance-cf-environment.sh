@@ -25,25 +25,15 @@ do
   esac
 done
 
-filename='/var/lib/jenkins/rpcsqa/chef-cookbooks/environments/templates/ubuntu-glance-cf.json'
+template_filename='/var/lib/jenkins/rpcsqa/chef-cookbooks/environments/templates/ubuntu-glance-cf.json'
+environment_filename='/var/lib/jenkins/rpcsqa/chef-cookbooks/environments/ubuntu-glance-cf.json'
 filelines=`cat $filename`
-tmp_file='/var/lib/jenkins/tmp/ubuntu-glance-cf.json'
 
-echo Start
-for line in $filelines ; do
-    case $line in
-        'TENANT_PASSWORD')
-            echo $TENANT_PASSWORD >> $tmp_file ;;
-        'TENANT_NAME')
-            echo $TENANT_NAME >> $tmp_file ;;
-        'TENANT_ID')
-            echo $TENANT_ID >> $tmp_file ;;
-        *)
-            echo $line >> $tmp_file ;;
-    esac
-done
+## copy the environment file to the proper directory
 
-tmplines=`cat $tmp_file`
-for line in $tmplines; do
-    echo $line
-done
+cp $template_filename $environment_filename
+
+## replace the lines we are looking for
+cat $environment_filename | sed -i 's/<TENANT_ID>/$TENANT_ID/g'
+cat $environment_filename | sed -i 's/<TENANT_NAME>/$TENANT_NAME/g'
+cat $environment_filename | sed -i 's/<TENANT_PASSWORD>/$TENANT_PASSWORD/g'

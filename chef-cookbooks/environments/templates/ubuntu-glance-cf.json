@@ -75,8 +75,8 @@
     "glance": {
       "api": {
     		"default_store": "swift",
-    		"swift_store_user": "REPLACE_ME_TENANT_ID:REPLACE_ME_TENANT_NAME",
-    		"swift_store_key": "REPLACE_ME_TENANT_PASSWORD",
+    		"swift_store_user": "<TENANT_ID>:<TENANT_NAME>",
+    		"swift_store_key": "<TENANT_PASSWORD>",
     		"swift_store_auth_version": "2",
 			  "swift_store_auth_address": "https://identity.api.rackspacecloud.com/v2.0"
 	    },
