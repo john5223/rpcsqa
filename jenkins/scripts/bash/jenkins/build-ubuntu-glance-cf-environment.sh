@@ -40,5 +40,5 @@ result=`sed -i 's/<TENANT_NAME>/'${TENANT_NAME}'/g' $environment_filename`
 result=`sed -i 's/<TENANT_PASSWORD>/'${TENANT_PASSWORD}'/g' $environment_filename`
 
 echo "Set Knife Environment..."
-
+knife environment from file $environment_filename
 echo "Done..."
