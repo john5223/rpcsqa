@@ -80,14 +80,13 @@ else:
         with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             node = Node(chef_name)
             run_list = node.run_list
-            role = node.role
             environment = node.chef_environment
             
             if results.display_only == 'true':
                 if (i > len(roles) - 1):
                     i = len(roles) - 1
                 print "!!## -- "
-                print "!!## -- %s has role: %s ,run list: %s, and environment: %s -- ##!!" % (node, role, run_list, environment)
+                print "!!## -- %s has run list: %s, and environment: %s -- ##!!" % (node, run_list, environment)
                 print "!!## -- %s run list will be switched to %s with environment %s -- ##!!" % (node, roles[i], policy)
                 i += 1
             else:
@@ -114,7 +113,6 @@ else:
                 try:
                     node.save()
                     print "!!## -- NODE: %s SAVED -- ##!!" % node
-                    print "!!## -- NEW ROLE: %S" % node.role
                     print "!!## -- NEW RUN LIST: %s" % node.run_list
                     print "!!## -- NEW ENVIRONMENT: %s" % node.chef_environment
                 except Exception, e:
