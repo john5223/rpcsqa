@@ -30,10 +30,13 @@ environment_filename='/var/lib/jenkins/rpcsqa/chef-cookbooks/environments/ubuntu
 filelines=`cat $filename`
 
 ## copy the environment file to the proper directory
-
+echo "Copying template to environment..."
 cp $template_filename $environment_filename
 
 ## replace the lines we are looking for
-cat $environment_filename | sed -i 's/<TENANT_ID>/$TENANT_ID/g'
-cat $environment_filename | sed -i 's/<TENANT_NAME>/$TENANT_NAME/g'
-cat $environment_filename | sed -i 's/<TENANT_PASSWORD>/$TENANT_PASSWORD/g'
+echo "Replacing template values with real values..."
+sed -i 's/<TENANT_ID>/$TENANT_ID/g' $environment_filename
+sed -i 's/<TENANT_NAME>/$TENANT_NAME/g' environment_filename
+sed -i 's/<TENANT_PASSWORD>/$TENANT_PASSWORD/g' environment_filename
+
+echo "Done..."
