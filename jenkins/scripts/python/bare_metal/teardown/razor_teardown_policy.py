@@ -1,9 +1,9 @@
 #!/usr/bin/python
 import os
+import subprocess
 import json
 import argparse
 from razor_api import razor_api
-from ssh_session import ssh_session
 import time
 
 from chef import *
@@ -176,8 +176,7 @@ else:
             
             print "Trying restart...."
             try:
-                session = ssh_session('root', ip, root_pass, False)
-                session.ssh('reboot 0')
+                subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
                 print "Restart success."
             except Exception, e:
                 print "Restart FAILURE: %s " % e
