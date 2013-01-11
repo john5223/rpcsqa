@@ -8,18 +8,16 @@ def create_data_bag(ip, ident=None):
 	if ident is None:
 		data_bag = {
 			"id": temp_ident,
-			"network": {
-				"interfaces" : [
-					{
-						"auto": "true",
-		    			"type": "static",
-		    			"device": "eth0",
-		    			"netmask": "255.255.255.0",
-		    			"address": ip,
-		    			"gateway": "%s.%s.%s.%s" % ( ip_array[0], ip_array[1], ip_array[2], 1)
-					}
-				]
-			}
+			"network_interfaces": [
+				{
+					"auto": "true",
+	    			"type": "static",
+	    			"device": "eth0",
+	    			"netmask": "255.255.255.0",
+	    			"address": ip,
+	    			"gateway": "%s.%s.%s.%s" % ( ip_array[0], ip_array[1], ip_array[2], 1)
+				}
+			]
 		}
 
 		try:
@@ -39,18 +37,16 @@ def create_data_bag(ip, ident=None):
 	else:
 		data_bag = {
 			"id": ident,
-			"network": {
-				"interfaces" : [
-					{
-						"auto": "true",
-		    			"type": "static",
-		    			"device": "eth0",
-		    			"netmask": "255.255.255.0",
-		    			"address": ip,
-		    			"gateway": "%s.%s.%s.%s" % ( ip_array[0], ip_array[1], ip_array[2], 1)
-					}
-				]
-			}
+			"network_interfaces": [
+				{
+					"auto": "true",
+	    			"type": "static",
+	    			"device": "eth0",
+	    			"netmask": "255.255.255.0",
+	    			"address": ip,
+	    			"gateway": "%s.%s.%s.%s" % ( ip_array[0], ip_array[1], ip_array[2], 1)
+				}
+			]
 		}
 
 		try:

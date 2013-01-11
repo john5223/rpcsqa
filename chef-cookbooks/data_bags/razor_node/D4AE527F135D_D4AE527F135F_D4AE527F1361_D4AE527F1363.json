@@ -1,15 +1,13 @@
 {
-    "id": "D4AE527F135D_D4AE527F135F_D4AE527F1361_D4AE527F1363", 
-    "network": {
-        "interfaces": [
-            {
-                "auto": "true", 
-                "netmask": "255.255.255.0", 
-                "address": "198.101.133.172", 
-                "device": "eth0", 
-                "type": "static", 
-                "gateway": "198.101.133.1"
-            }
-        ]
-    }
+    "network_interfaces": [
+        {
+            "auto": "true", 
+            "netmask": "255.255.255.0", 
+            "address": "198.101.133.172", 
+            "device": "eth0", 
+            "type": "static", 
+            "gateway": "198.101.133.1"
+        }
+    ], 
+    "id": "D4AE527F135D_D4AE527F135F_D4AE527F1361_D4AE527F1363"
 }

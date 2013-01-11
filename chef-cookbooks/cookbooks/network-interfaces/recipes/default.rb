@@ -39,7 +39,7 @@ template "/tmp/chef-net-iface" do
   mode 0644
   owner "root"
   group "root"
-  variables({:network_interfaces => node['network']['interfaces']})
+  variables({:network_interfaces => node['network_interfaces']})
 end
 
 # merge new ifaces with the old ones
