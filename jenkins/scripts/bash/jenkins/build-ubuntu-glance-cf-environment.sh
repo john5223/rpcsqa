@@ -16,7 +16,7 @@ do
        ;;
     p) TENANT_PASSWORD=$OPTARG
        ;;
-    h) echo "Usage: nmap_reboot.sh [-h]" >&2
+    h) echo "Usage: build-ubuntu-glance-cf-environment.sh [-h]" >&2
        echo " -h Return this help information" >&2
        echo " -r The root password for the boxes to be rebooted" >&2
        echo " -p The razor policy to run chef-client against" >&2
@@ -35,9 +35,9 @@ cp $template_filename $environment_filename
 
 ## replace the lines we are looking for
 echo "Replacing template values with real values..."
-sed -i 's/<TENANT_ID>/${TENANT_ID}/g' $environment_filename
-sed -i 's/<TENANT_NAME>/${TENANT_NAME}/g' $environment_filename
-sed -i 's/<TENANT_PASSWORD>/${TENANT_PASSWORD}/g' $environment_filename
+result=`sed -i 's/<TENANT_ID>/'${TENANT_ID}'/g' $environment_filename`
+sed -i 's/<TENANT_NAME>/'${TENANT_NAME}'/g' $environment_filename
+sed -i "'s/<TENANT_PASSWORD>/'${TENANT_PASSWORD}'/g'" $environment_filename
 
 echo "Set Knife Environment..."
 
