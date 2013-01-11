@@ -180,8 +180,6 @@ else:
                 print "Restart success."
             except Exception, e:
                 print "Restart FAILURE: %s " % e
-            finally:
-                session.close()
             
             
             print "Sleeping for 10 seconds..."
