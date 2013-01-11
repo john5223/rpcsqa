@@ -185,6 +185,6 @@ else:
                 session.close()
             
             
-            print "Sleeping for 5 seconds..."
-            time.sleep(5)
+            print "Sleeping for 10 seconds..."
+            time.sleep(10)
             print "#################################"
