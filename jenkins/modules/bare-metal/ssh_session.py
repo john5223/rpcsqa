@@ -41,9 +41,7 @@ class ssh_session:
     def __exec(self, command):
 
         "Execute a command on the remote host.    Return the output."
-        child = spawn(command,
-                                    #timeout=10,
-                                    )
+        child = spawn(command)
         if self.verbose:
             sys.stderr.write("-> " + command + "\n")
         seen = child.expect(self.keys)

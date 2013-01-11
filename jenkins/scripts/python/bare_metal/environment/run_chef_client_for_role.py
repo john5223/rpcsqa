@@ -1,15 +1,15 @@
 #!/usr/bin/python
 import os
+import subprocess
 import json
 import argparse
 from razor_api import razor_api
-from ssh_session import ssh_session
 import time
 from chef import *
 
 
 parser = argparse.ArgumentParser()
-# Get the ip of the server you want to remove
+
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", 
                     required=True, help="IP for the Razor server")
 
@@ -63,44 +63,43 @@ razor = razor_api(results.razor_ip)
 policy = results.policy
 
 print "#################################"
-print " Switching roles and running chef-client for  '%s'  active models" % policy
+print " Attempting to run chef-cleint for role %s " % results.role
 print "Display only: %s " % results.display_only
 
 active_models = razor.simple_active_models(policy)
-
+to_run_list = []
 if active_models == {}:
     print "'%s' active models: 0 " % (policy)
     print "#################################"
 else:
-    if 'response' in active_models.keys():
-        active_models = active_models['response']
-    
-    print "'%s' active models: %s " % (policy, len(active_models))
-    print "#################################"
+     if 'response' in active_models.keys():
+          active_models = active_models['response']
+     print "'%s' active models: %s " % (policy, len(active_models))
+     print "#################################"
 
+     # Gather all of the active models for the policy and get information about them
+     for active in active_models:
+          data = active_models[active]
+          chef_name = get_chef_name(data)
+          root_password = get_root_pass(data)
 
-    # Gather all of the active models for the policy and get information about them
-    for active in active_models:
-        data = active_models[active]
-        chef_name = get_chef_name(data)
-        root_password = get_root_pass(data)
+          with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
+               node = Node(chef_name)
 
-        with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
-            node = Node(chef_name)
+               if 'role[%s]' % results.role in node.run_list:
+                    ip = node['ipaddress']
+               
+                    if results.display_only == 'true':
+                         print "!!## -- ROLE %s FOUND, would run chef-client on %s with ip %s..." % (results.role, node, ip)
+                    else:
+                         print "!!## -- ROLE %s FOUND, runnning chef-client on %s with ip %s..." % (results.role, node, ip)
+                         to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
 
-            if 'role[%s]' % results.role in node.run_list:
-               ip = node['ipaddress']
-               if results.display_only == 'true':
-                    print "!!## -- ROLE %s FOUND, would run chef-client on %s with ip %s..." % (results.role, node, ip)
-               else:
-                    try:
-                         print "!!## -- ROLE %s FOUND, RUNNING chef-client on %s with ip %s..." % (results.role, node, ip)
-                         session = ssh_session('root', ip, root_password, True)
-                         ssh_output = session.ssh('chef-client')
-                         print "chef-client run output for node %s" % node
-                         print ssh_output
-                    except Exception, e:
-                         print "chef-client FAILURE: %s " % e
-                    finally:
-                         session.close()
-                         
+     if results.display_only == 'false':
+          for server in to_run_list:
+               print "Trying chef-client on %s with ip %s...." % (server['node'], server['ip'])
+               try:
+                    subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'chef-client'" % (server['root_password'], server['ip']), shell=True)
+                    print "chef-client success..."
+               except Exception, e:
+                    print "chef-client FAILURE: %s " % e
