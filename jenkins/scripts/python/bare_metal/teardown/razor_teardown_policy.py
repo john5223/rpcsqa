@@ -26,7 +26,7 @@ parser.add_argument('--data_bag_location', action="store", dest="data_bag_loc",
                     required=False, help="Policy to teardown from razor and reboot nodes")
 
 parser.add_argument('--chef_url', action="store", dest="chef_url", 
-                    default="http://198.101.133.4:4000", 
+                    default="http://198.101.133.3:4000", 
                     required=False, help="client for chef")
 
 parser.add_argument('--chef_client', action="store", dest="chef_client", 
@@ -37,7 +37,7 @@ parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem",
                     default="/var/lib/jenkins/.chef/jenkins.pem", 
                     required=False, help="client pem for chef")
 
-parser.add_argument('--display-only', action="store", dest="display_only", 
+parser.add_argument('--display_only', action="store", dest="display_only", 
                     default="true", 
                     required=False, help="Display the node information only (will not reboot or teardown am)")
 

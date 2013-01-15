@@ -21,7 +21,7 @@ do
 done
 
 # ping all ips in range and reboot the good ones
-for i in {4..254}
+for i in {2..254}
 do
         ip=10.0.0.$i
         results=`ping -c 2 10.0.0.$i`
