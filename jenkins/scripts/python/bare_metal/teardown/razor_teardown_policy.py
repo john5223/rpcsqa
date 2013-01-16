@@ -133,7 +133,9 @@ else:
             chef_client = chef_api.api_request('GET', '/clients/%s' % chef_name)
             # if chef has a node for this box, change the ip to the ip that chef has for it
             #print json.dumps(chef_node, indent=4)
-            ip = chef_node['ipaddress']
+            print chef_node.ipaddress
+            print chef_node['ipaddress']
+            ip = chef_node.ipaddress
         except Exception, e:
             print "Razor node %s doesnt have a chef node / chef client, exception %s" % (chef_name, e)
             continue
