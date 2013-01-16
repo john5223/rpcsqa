@@ -24,6 +24,7 @@ done
 results=`nmap -sP -oG alive 10.0.0.0/24 | grep 10.0.0.* | awk '{print $5 $6}'`
 
 # Loop through the alive boxes, grab the ip and then reboot them
+IP_END=254
 for item in ${results}
 do
         if [[ $item =~ '10.0.0.' ]]; then
@@ -37,8 +38,8 @@ do
                                 mac_array[i++]=$o
                         done
                         new_array=`echo ${mac_array[@]} | sed -e 's/ /_/g' | tr '[:lower:]' '[:upper:]'`
-                        num=`expr 254 - ${i}`
-                        echo "\"${new_array[@]}\": 198.101.133.$num"
+                        echo "\"${new_array[@]}\": 198.101.133.${IP_END}"
                 fi
         fi
+    IP_END=`expr $IPEND - 1`
 done
