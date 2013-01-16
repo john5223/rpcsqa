@@ -129,7 +129,7 @@ else:
         # check to see if box has a chef node and client
         try:
             chef_api = ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client)
-            chef_node = chef_api.api_request('GET', '/node/%s' % chef_name)
+            chef_node = chef_api.api_request('GET', '/nodes/%s' % chef_name)
             chef_client = chef_api.api_request('GET', '/client/%s' % chef_name)
             # if chef has a node for this box, change the ip to the ip that chef has for it
             ip = chef_node['ip_address']
@@ -145,8 +145,8 @@ else:
             print "Chef Name: %s" % chef_name
             print "Searching chef clients..."
             if chef_client is not None and chef_node is not None:
-                print "Chef Node: \n %s" % json.dumps(node, indent=4)
-                print "Client: \n %s" % json.dumps(client, indent=4)
+                print "Chef Node: \n %s" % json.dumps(chef_node, indent=4)
+                print "Client: \n %s" % json.dumps(chef_client, indent=4)
             else:
                 print "Razor node %s doesnt have a chef client or node" % chef_name
         else: 
@@ -163,7 +163,7 @@ else:
             if chef_node is not None:
                 try:
                     print "Removing chef-node %s..." % chef_name
-                    node.delete()
+                    chef_node.delete()
                 except Exception, e:
                     print "Error removing chef node: %s " % e
                     continue 
