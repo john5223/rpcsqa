@@ -156,7 +156,7 @@ class razor_api:
 		# step through the json and gather simplified information
 		for item in razor_json['response']:
 
-			if item['@broker']['@name'] is not None:
+			if item['@broker'] is not None:
 				broker = item['@broker']['@name']
 			else:
 				broker = None
