@@ -38,7 +38,7 @@ do
                         done
                         new_array=`echo ${mac_array[@]} | sed -e 's/ /_/g' | tr '[:lower:]' '[:upper:]'`
                         num=`expr 254 - ${i}`
-                        echo "\"${new_array[@]}\": 198.101.133.${num}"
+                        echo "\"${new_array[@]}\": 198.101.133.$num"
                 fi
         fi
 done
