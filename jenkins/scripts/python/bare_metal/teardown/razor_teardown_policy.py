@@ -181,7 +181,7 @@ else:
                 print "Error removing chef node: %s " % e
                 continue
             
-            print "Trying to restart server with ip %s...." %
+            print "Trying to restart server with ip %s...." % ip
             try:
                 subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
                 print "Restart success."
