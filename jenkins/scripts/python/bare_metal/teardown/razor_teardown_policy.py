@@ -130,7 +130,7 @@ else:
         try:
             chef_api = ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client)
             chef_node = chef_api.api_request('GET', '/nodes/%s' % chef_name)
-            chef_client = chef_api.api_request('GET', '/client/%s' % chef_name)
+            chef_client = chef_api.api_request('GET', '/clients/%s' % chef_name)
             # if chef has a node for this box, change the ip to the ip that chef has for it
             ip = chef_node['ip_address']
         except Exception, e:
