@@ -134,7 +134,7 @@ else:
             # if chef has a node for this box, change the ip to the ip that chef has for it
             ip = chef_node['ip_address']
         except Exception, e:
-            print "Razor node %s doesnt have a chef node / chef client" % chef_name
+            print "Razor node %s doesnt have a chef node / chef client, exception %s" % (chef_name, e)
             continue
         
         if results.display_only == 'true':
@@ -148,7 +148,7 @@ else:
                 print "Chef Node: \n %s" % json.dumps(node, indent=4)
                 print "Client: \n %s" % json.dumps(client, indent=4)
             else:
-                print "Razor node doesnt have a chef client or node"
+                print "Razor node %s doesnt have a chef client or node" % chef_name
         else: 
             print "Removing active model..."
             try:
