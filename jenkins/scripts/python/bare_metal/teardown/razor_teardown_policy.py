@@ -166,8 +166,9 @@ else:
             try:
                  with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                     node = Node(chef_name)
-                    ip = node['ipaddress']
-                    node.delete()
+                    if node is not None:
+                        ip = node['ipaddress']
+                        node.delete()
             except Exception, e:
                 print "Error removing chef node: %s " % e
                 continue
@@ -175,8 +176,9 @@ else:
             print "Searching chef clients..."
             try:
                 chef_api = ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client)
-                response = chef_api.api_request('DELETE', '/clients/%s' % chef_name)
-                print "Client %s removed with response: %s" % (chef_name, response)
+                if chef_api is not None:
+                    response = chef_api.api_request('DELETE', '/clients/%s' % chef_name)
+                    print "Client %s removed with response: %s" % (chef_name, response)
             except Exception, e:
                 print "Error removing chef node: %s " % e
                 continue
