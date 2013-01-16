@@ -134,7 +134,7 @@ else:
             # if chef has a node for this box, change the ip to the ip that chef has for it
             ip = chef_node['ip_address']
         except Exception, e:
-            print "Razor node doesnt have a chef node / chef client"
+            print "Razor node %s doesnt have a chef node / chef client" % chef_name
             continue
         
         if results.display_only == 'true':
