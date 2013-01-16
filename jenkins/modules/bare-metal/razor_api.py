@@ -156,6 +156,11 @@ class razor_api:
 		# step through the json and gather simplified information
 		for item in razor_json['response']:
 
+			if item['@broker']['@name'] is not None:
+				broker = item['@broker']['@name']
+			else:
+				broker = None
+
 			active_model = {'node_uuid': item['@node_uuid'],
 							'am_uuid': item['@uuid'],
 							'description': item['@model']['@description'],
@@ -163,7 +168,7 @@ class razor_api:
 							'current_state': item['@model']['@current_state'],
 							'final_state': item['@model']['@final_state'],
 							'nic_count': int(item['@model']['@node']['@attributes_hash']['mk_hw_nic_count']),
-							'broker': item['@broker']['@name'],
+							'broker': broker,
 							'bind_number': item['@model']['@counter'],
 							'hostname_prefix': item['@model']['@hostname_prefix'],
 							'domain': item['@model']['@domainname']
