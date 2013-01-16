@@ -38,7 +38,7 @@ do
                                 mac_array[i++]=$o
                         done
                         new_array=`echo ${mac_array[@]} | sed -e 's/ /_/g' | tr '[:lower:]' '[:upper:]'`
-                        echo "\"${new_array[@]}\": \"198.101.133.${IP_END}\""
+                        echo "\"${new_array[@]}\": \"198.101.133.${IP_END}\","
                 fi
         fi
     IP_END=`expr $IP_END - 1`
