@@ -123,35 +123,31 @@ else:
         chef_name = "%s%s.%s" % (data['hostname_prefix'], data['bind_number'], data['domain'])
         root_pass = getrootpass(data)
         dbag_uuid = get_data_bag_UUID(data)
-        # get the ip from the data bag
         ip = getip_from_data_bag(dbag_uuid)
-
-        # check to see if box has a chef node and client
-        try:
-            chef_api = ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client)
-            chef_node = chef_api.api_request('GET', '/nodes/%s' % chef_name)
-            chef_client = chef_api.api_request('GET', '/clients/%s' % chef_name)
-            # if chef has a node for this box, change the ip to the ip that chef has for it
-            #print json.dumps(chef_node, indent=4)
-            print chef_node.ipaddress
-            print chef_node['ipaddress']
-            ip = chef_node.ipaddress
-        except Exception, e:
-            print "Razor node %s doesnt have a chef node / chef client, exception %s" % (chef_name, e)
-            continue
         
         if results.display_only == 'true':
             print "Active Model ID: %s " % active
             print "Data Bag UUID: %s " % dbag_uuid
+            #print "ROOT_PASS: %s " % root_pass
             print "Public address: %s " % ip
             print "Private address: %s " % private_ip
             print "Chef Name: %s" % chef_name
+
+            print "Searching chef nodes..."
+            try:
+                with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
+                    node = Node(chef_name)
+                    ip = node['ipaddress']
+                    print "Node found %s, has ip %s" % (chef_name, ip)
             print "Searching chef clients..."
-            if chef_client is not None and chef_node is not None:
-                print "Chef Node: \n %s" % json.dumps(chef_node, indent=4)
-                print "Client: \n %s" % json.dumps(chef_client, indent=4)
-            else:
-                print "Razor node %s doesnt have a chef client or node" % chef_name
+            
+            try:
+                chef_api = ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client)
+                client = chef_api.api_request('GET', '/clients/%s' % chef_name)
+                print "Client: \n %s" % json.dumps(client, indent=4)
+            except Exception, e:
+                print "Error printing chef clients: %s " % e
+                continue 
         else: 
             print "Removing active model..."
             try:
@@ -162,25 +158,26 @@ else:
                 print "Error removing active model: %s " % e
                 continue
 
-            print "Attempting to remove Chef node %s..." % chef_name
-            if chef_node is not None:
-                try:
-                    print "Removing chef-node %s..." % chef_name
-                    chef_node.delete()
-                except Exception, e:
-                    print "Error removing chef node: %s " % e
-                    continue 
+            print "Removing chef-node..."
+            try:
+                 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
+                    node = Node(chef_name)
+                    ip = node['ipaddress']
+                    node.delete()
+            except Exception, e:
+                print "Error removing chef node: %s " % e
+                continue
 
-            print "Attempting to remove chef client %s..." % chef_name
-            if chef_client is not None:
-                try:
-                    response = chef_api.api_request('DELETE', '/clients/%s' % chef_name)
-                    print "Client %s removed with response: %s" % (chef_name, response)
-                except Exception, e:
-                    print "Error removing chef client: %s " % e
-                    continue
+            print "Searching chef clients..."
+            try:
+                chef_api = ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client)
+                response = chef_api.api_request('DELETE', '/clients/%s' % chef_name)
+                print "Client %s removed with response: %s" % (chef_name, response)
+            except Exception, e:
+                print "Error removing chef node: %s " % e
+                continue
             
-            print "Trying to restart server %s with ip %s...." % (chef_name, ip)
+            print "Trying to restart server with ip %s...." %
             try:
                 subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
                 print "Restart success."
