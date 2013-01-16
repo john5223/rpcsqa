@@ -24,7 +24,7 @@ done
 results=`nmap -sP -oG alive 10.0.0.0/24 | grep 10.0.0.* | awk '{print $5 $6}'`
 
 # Loop through the alive boxes, grab the ip and then reboot them
-IP_END=254
+IP_END=255
 for item in ${results}
 do
         if [[ $item =~ '10.0.0.' ]]; then
