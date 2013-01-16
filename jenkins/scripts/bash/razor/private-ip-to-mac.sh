@@ -41,5 +41,5 @@ do
                         echo "\"${new_array[@]}\": \"198.101.133.${IP_END}\""
                 fi
         fi
-    IP_END=`expr $IPEND - 1`
+    IP_END=`expr $IP_END - 1`
 done
