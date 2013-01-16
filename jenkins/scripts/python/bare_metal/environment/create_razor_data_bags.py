@@ -93,18 +93,3 @@ else:
 for k,v in macs_to_ips.items():
 	print "key: %s, value: %s" % (k,v)
 	create_data_bag(v, k)
-"""
-if results.end_ip is None:
-	create_data_bag(results.start_ip, results.ident)
-else:
-	(size, start, end) = check_addr(results.start_ip, results.end_ip)
-	if size < 1:
-		print "Size doesnt work, check ip addresses"
-	else:
-		for i in range(int(start[3]),int(end[3])):
-			ip = "%s.%s.%s.%s" % (start[0], start[1], start[2], i)
-			if results.ident is None:
-				create_data_bag(ip)
-			else:
-				create_data_bag(ident, ip)
-"""
