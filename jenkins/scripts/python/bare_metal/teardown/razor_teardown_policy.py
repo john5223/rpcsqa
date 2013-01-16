@@ -139,8 +139,12 @@ else:
                     node = Node(chef_name)
                     ip = node['ipaddress']
                     print "Node found %s, has ip %s" % (chef_name, ip)
-            print "Searching chef clients..."
+            except Exception, e:
+                print "Error findng chef node %s..." % chef_name
+                print "Exit with exception %s..." % e
+                continue
             
+            print "Searching chef clients..."
             try:
                 chef_api = ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client)
                 client = chef_api.api_request('GET', '/clients/%s' % chef_name)
