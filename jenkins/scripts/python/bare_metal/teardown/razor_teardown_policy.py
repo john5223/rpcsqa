@@ -41,11 +41,8 @@ parser.add_argument('--display_only', action="store", dest="display_only",
                     default="true", 
                     required=False, help="Display the node information only (will not reboot or teardown am)")
 
-
 # Parse the parameters
 results = parser.parse_args()
-
-
 
 def get_data_bag_UUID(data):
     try:
@@ -83,13 +80,8 @@ def getip_from_data_bag(uuid):
 #Collect active models that match policy from given input
 #############################################################
 
-#####
-
-
-
 razor = razor_api(results.razor_ip)
 policy = results.policy
-
 
 print "#################################"
 print "Tearing down and rebooting  '%s'  active models" % policy
@@ -128,7 +120,6 @@ else:
         if results.display_only == 'true':
             print "Active Model ID: %s " % active
             print "Data Bag UUID: %s " % dbag_uuid
-            #print "ROOT_PASS: %s " % root_pass
             print "Public address: %s " % ip
             print "Private address: %s " % private_ip
             print "Chef Name: %s" % chef_name
@@ -169,6 +160,8 @@ else:
                     if node is not None:
                         ip = node['ipaddress']
                         node.delete()
+                    else:
+                        continue
             except Exception, e:
                 print "Error removing chef node: %s " % e
                 continue
@@ -179,6 +172,8 @@ else:
                 if chef_api is not None:
                     response = chef_api.api_request('DELETE', '/clients/%s' % chef_name)
                     print "Client %s removed with response: %s" % (chef_name, response)
+                else:
+                    continue
             except Exception, e:
                 print "Error removing chef node: %s " % e
                 continue
