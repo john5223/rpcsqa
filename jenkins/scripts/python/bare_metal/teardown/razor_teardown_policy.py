@@ -133,7 +133,7 @@ else:
             except Exception, e:
                 print "Error findng chef node %s..." % chef_name
                 print "Exit with exception %s..." % e
-                continue
+                pass
             
             print "Searching chef clients..."
             try:
@@ -142,7 +142,7 @@ else:
                 print "Client: \n %s" % json.dumps(client, indent=4)
             except Exception, e:
                 print "Error printing chef clients: %s " % e
-                continue 
+                pass 
         else: 
             print "Removing active model..."
             try:
@@ -151,7 +151,7 @@ else:
                 #pass
             except Exception, e:
                 print "Error removing active model: %s " % e
-                continue
+                pass
 
             print "Removing chef-node..."
             try:
@@ -161,10 +161,10 @@ else:
                         ip = node['ipaddress']
                         node.delete()
                     else:
-                        continue
+                        pass
             except Exception, e:
                 print "Error removing chef node: %s " % e
-                continue
+                pass
 
             print "Searching chef clients..."
             try:
@@ -173,10 +173,10 @@ else:
                     response = chef_api.api_request('DELETE', '/clients/%s' % chef_name)
                     print "Client %s removed with response: %s" % (chef_name, response)
                 else:
-                    continue
+                    pass
             except Exception, e:
                 print "Error removing chef node: %s " % e
-                continue
+                pass
             
             print "Trying to restart server with ip %s...." % ip
             try:
@@ -184,7 +184,7 @@ else:
                 print "Restart success."
             except Exception, e:
                 print "Restart FAILURE: %s " % e
-            
+                pass
             
             print "Sleeping for 10 seconds..."
             time.sleep(10)
