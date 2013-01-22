@@ -41,11 +41,8 @@ parser.add_argument('--display_only', action="store", dest="display_only",
                     default="true", 
                     required=False, help="Display the node information only (will not reboot or teardown am)")
 
-
 # Parse the parameters
 results = parser.parse_args()
-
-
 
 def get_data_bag_UUID(data):
     try:
@@ -83,13 +80,8 @@ def getip_from_data_bag(uuid):
 #Collect active models that match policy from given input
 #############################################################
 
-#####
-
-
-
 razor = razor_api(results.razor_ip)
 policy = results.policy
-
 
 print "#################################"
 print "Tearing down and rebooting  '%s'  active models" % policy
@@ -125,19 +117,24 @@ else:
         dbag_uuid = get_data_bag_UUID(data)
         ip = getip_from_data_bag(dbag_uuid)
         
-        
-
-        #Remove active model
-        
-        #SSH into ip and reboot 
-        
         if results.display_only == 'true':
             print "Active Model ID: %s " % active
             print "Data Bag UUID: %s " % dbag_uuid
-            #print "ROOT_PASS: %s " % root_pass
             print "Public address: %s " % ip
             print "Private address: %s " % private_ip
             print "Chef Name: %s" % chef_name
+
+            print "Searching chef nodes..."
+            try:
+                with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
+                    node = Node(chef_name)
+                    ip = node['ipaddress']
+                    print "Node found %s, has ip %s" % (chef_name, ip)
+            except Exception, e:
+                print "Error findng chef node %s..." % chef_name
+                print "Exit with exception %s..." % e
+                pass
+            
             print "Searching chef clients..."
             try:
                 chef_api = ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client)
@@ -145,7 +142,7 @@ else:
                 print "Client: \n %s" % json.dumps(client, indent=4)
             except Exception, e:
                 print "Error printing chef clients: %s " % e
-                continue
+                pass 
         else: 
             print "Removing active model..."
             try:
@@ -154,33 +151,40 @@ else:
                 #pass
             except Exception, e:
                 print "Error removing active model: %s " % e
-                continue
+                pass
 
             print "Removing chef-node..."
             try:
                  with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                     node = Node(chef_name)
-                    node.delete()
+                    if node is not None:
+                        ip = node['ipaddress']
+                        node.delete()
+                    else:
+                        pass
             except Exception, e:
                 print "Error removing chef node: %s " % e
-                continue
+                pass
 
             print "Searching chef clients..."
             try:
                 chef_api = ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client)
-                response = chef_api.api_request('DELETE', '/clients/%s' % chef_name)
-                print "Client %s removed with response: %s" % (chef_name, response)
+                if chef_api is not None:
+                    response = chef_api.api_request('DELETE', '/clients/%s' % chef_name)
+                    print "Client %s removed with response: %s" % (chef_name, response)
+                else:
+                    pass
             except Exception, e:
                 print "Error removing chef node: %s " % e
-                continue
+                pass
             
-            print "Trying restart...."
+            print "Trying to restart server with ip %s...." % ip
             try:
                 subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
                 print "Restart success."
             except Exception, e:
                 print "Restart FAILURE: %s " % e
-            
+                pass
             
             print "Sleeping for 10 seconds..."
             time.sleep(10)

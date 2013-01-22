@@ -3,7 +3,7 @@
         {
             "auto": "true", 
             "netmask": "255.255.255.0", 
-            "address": "198.101.133.191", 
+            "address": "198.101.133.248", 
             "device": "eth0", 
             "type": "static", 
             "gateway": "198.101.133.1"
