@@ -111,14 +111,14 @@ else:
                 i += 1
             else:
                 # set the environment
-                print "!!## -- %s has environment: %s -- ##!!" % (node, run_list, environment)
+                print "!!## -- %s has environment: %s -- ##!!" % (node, environment)
                 
                 if environment != policy:
                     environment = policy
                     try:
+                        node.chef_environment = environment
                         node.save()
-                        print "!!## -- NODE: %s SAVED -- ##!!" % node
-                        print "!!## -- NEW ENVIRONMENT: %s" % node.chef_environment
+                        print "!!## -- NODE: %s SAVED WITH NEW ENVIRONMENT: %s -- ##!1" % (node, node.chef_environment)
                     except Exception, e:
                         print "!!## -- Failed to save node environment -- Exception: %s -- ##!!" % e
                 else:
@@ -133,14 +133,12 @@ else:
                     
                     print "!!## -- %s run list will be switched to %s -- ##!!" % (node, roles[i])
                     run_list = [roles[i]]
-                    
-                    # save the new run list
-                    node.run_list = run_list
 
                     try:
+                        # save the new run list
+                        node.run_list = run_list
                         node.save()
-                        print "!!## -- NODE: %s SAVED -- ##!!" % node
-                        print "!!## -- NEW RUN LIST: %s" % node.run_list
+                        print "!!## -- NODE: %s SAVED WITH NEW RUN LIST %s -- ##!!" % (node, node.run_list)
                     except Exception, e:
                         print "!!## -- Failed to save node -- Exception: %s -- ##!!" % e
                 else:
