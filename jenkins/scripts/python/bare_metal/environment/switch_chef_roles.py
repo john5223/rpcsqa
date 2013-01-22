@@ -77,7 +77,7 @@ roles = []
 for i in range(len(temp_roles)):
     roles.append(temp_roles['%s' % i])
 
-
+# Gather the active models with the policy from the cmd line
 active_models = razor.simple_active_models(policy)
 
 if active_models == {}:
@@ -115,16 +115,19 @@ else:
                 print "!!## --   "
                 print "!!## -- %s has run list: %s, and environment: %s -- ##!!" % (node, run_list, environment)
                 environment = policy
+                
+                # This sets the last X amount of boxes to the last role in the role list
                 if (i >= len(roles) - 1):
                     i = len(roles) - 1
 
-                print "!!## -- "
-                print "!!## -- %s has run list: %s, and environment: %s -- ##!!" % (node, run_list, environment)
-                print "!!## -- %s run list will be switched to %s with environment %s -- ##!!" % (node, roles[i], policy)
-
                 # If the role isnt already set, set it
                 if roles[i] not in run_list:
+                    print "!!## -- %s run list will be switched to %s with environment %s -- ##!!" % (node, roles[i], policy)
                     run_list = [roles[i]]
+                else:
+                    print "!!## -- %s already has the proper run list, not changing -- ##!!" % node
+                    continue
+
                 i += 1
 
                 # save the new run list and environment
