@@ -2,6 +2,5 @@
     "0": "qa-ldap-open",
     "1": "qa-single-controller",
     "2": "qa-single-api",
-    "3": "qa-single-compute",
-    "4": "qa-single-compute"
+    "X": "qa-single-compute"
 }
