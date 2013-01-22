@@ -9,7 +9,6 @@ from chef import *
 
 
 parser = argparse.ArgumentParser()
-# Get the ip of the server you want to remove
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", 
                     required=True, help="IP for the Razor server")
 
@@ -62,7 +61,6 @@ except IOError:
 else:
     # read the json in
     roles = json.loads(fo.read())
-    print json.dumps(roles, indent=4)
 
     #close the file
     fo.close()
@@ -73,6 +71,10 @@ else:
 print "#################################"
 print " Switching roles and running chef-client for  '%s'  active models" % policy
 print "Display only: %s " % results.display_only
+
+print "Roles List"
+for i in roles.iteritems():
+    print "!!## -- Roles index %s has role %s -- ##!!" % (i, roles[i])
 
 active_models = razor.simple_active_models(policy)
 
