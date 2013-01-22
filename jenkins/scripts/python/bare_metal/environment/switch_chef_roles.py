@@ -96,15 +96,18 @@ else:
                 environment = policy
                 if i == 0:
                     print "!!## -- First host %s, set to role %s -- ##!!" % (node, roles[i])
-                    run_list = [roles[i]]
+                    if roles[i] not in run_list:
+                        run_list = [roles[i]]
                     i += 1
                 elif i == 1:
                     print "!!## -- Second host %s, set to role %s -- ##!!" % (node, roles[i])
-                    run_list = [roles[i]]
+                    if roles[i] not in run_list:
+                        run_list = [roles[i]]
                     i += 1
                 else:
                     print "!!## -- Non API host %s, set to role %s -- ##!!" % (node, roles[i])
-                    run_list = [roles[i]]
+                    if roles[i] not in run_list:
+                        run_list = [roles[i]]
 
                 node.run_list = run_list
                 node.chef_environment = environment
