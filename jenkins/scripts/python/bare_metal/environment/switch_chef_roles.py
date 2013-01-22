@@ -110,11 +110,19 @@ else:
                 print "!!## -- %s run list will be switched to %s with environment %s -- ##!!" % (node, roles[i], policy)
                 i += 1
             else:
-                # set the environment and run lists
-                # this is for our QA environment of 4 servers (2 api, 2 compute), might make script take roles -> numbers at a later date
-                print "!!## --   "
-                print "!!## -- %s has run list: %s, and environment: %s -- ##!!" % (node, run_list, environment)
-                environment = policy
+                # set the environment
+                print "!!## -- %s has environment: %s -- ##!!" % (node, run_list, environment)
+                
+                if environment != policy:
+                    environment = policy
+                    try:
+                        node.save()
+                        print "!!## -- NODE: %s SAVED -- ##!!" % node
+                        print "!!## -- NEW ENVIRONMENT: %s" % node.chef_environment
+                    except Exception, e:
+                        print "!!## -- Failed to save node environment -- Exception: %s -- ##!!" % e
+                else:
+                    print "Node %s already had the correct environment, no change" % node
                 
                 # This sets the last X amount of boxes to the last role in the role list
                 if (i >= len(roles) - 1):
@@ -122,22 +130,20 @@ else:
 
                 # If the role isnt already set, set it
                 if roles[i] not in run_list:
-                    print "!!## -- %s run list will be switched to %s with environment %s -- ##!!" % (node, roles[i], policy)
+                    
+                    print "!!## -- %s run list will be switched to %s -- ##!!" % (node, roles[i])
                     run_list = [roles[i]]
+                    
+                    # save the new run list
+                    node.run_list = run_list
+
+                    try:
+                        node.save()
+                        print "!!## -- NODE: %s SAVED -- ##!!" % node
+                        print "!!## -- NEW RUN LIST: %s" % node.run_list
+                    except Exception, e:
+                        print "!!## -- Failed to save node -- Exception: %s -- ##!!" % e
                 else:
                     print "!!## -- %s already has the proper run list, not changing -- ##!!" % node
-                    continue
 
                 i += 1
-
-                # save the new run list and environment
-                node.run_list = run_list
-                node.chef_environment = environment
-
-                try:
-                    node.save()
-                    print "!!## -- NODE: %s SAVED -- ##!!" % node
-                    print "!!## -- NEW RUN LIST: %s" % node.run_list
-                    print "!!## -- NEW ENVIRONMENT: %s" % node.chef_environment
-                except Exception, e:
-                    print "!!## -- Failed to save node -- Exception: %s -- ##!!" % e
