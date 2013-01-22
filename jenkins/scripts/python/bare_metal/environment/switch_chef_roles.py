@@ -5,7 +5,7 @@ import json
 import argparse
 from razor_api import razor_api
 import time
-#from chef import *
+from chef import *
 
 
 parser = argparse.ArgumentParser()
