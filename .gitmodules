@@ -7,3 +7,6 @@
 [submodule "chef-cookbooks/cookbooks/389"]
 	path = chef-cookbooks/cookbooks/389
 	url = git@github.com:john5223/389.git
+[submodule "chef-cookbooks/cookbooks/openldap"]
+	path = chef-cookbooks/cookbooks/openldap
+	url = git@github.com:john5223/openldap.git
