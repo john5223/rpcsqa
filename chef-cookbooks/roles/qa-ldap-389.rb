@@ -1,8 +1,9 @@
 name "qa-389"
 description "This will create an 389 ldap server for RPCS QA Team"
 run_list(
-  #"role[qa-base]",
-  #"recipe[network-interfaces]",
+  "recipe[razor]",
+  "recipe[network-interfaces]",
+  "recipe[yum::epel]",
   "recipe[389::server]"
 )
 default_attributes(  { "389" => {
