@@ -132,7 +132,7 @@ else:
                 if roles[i] not in run_list:
                     
                     print "!!## -- %s run list will be switched to %s -- ##!!" % (node, roles[i])
-                    run_list = [roles[i]]
+                    run_list = roles[i]
 
                     try:
                         # save the new run list
