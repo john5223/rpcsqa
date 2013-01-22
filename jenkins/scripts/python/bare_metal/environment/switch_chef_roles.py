@@ -74,7 +74,7 @@ print "Display only: %s " % results.display_only
 
 print "Roles List"
 for i in roles.iteritems():
-    print "!!## -- Roles index %s has role %s -- ##!!" % (i, roles[i])
+    print "!!## -- Roles index %s has role %s -- ##!!" % (i, roles['%s' % i])
 
 active_models = razor.simple_active_models(policy)
 
@@ -105,7 +105,7 @@ else:
                     i = len(roles) - 1
                 print "!!## -- "
                 print "!!## -- %s has run list: %s, and environment: %s -- ##!!" % (node, run_list, environment)
-                print "!!## -- %s run list will be switched to %s with environment %s -- ##!!" % (node, roles[i], policy)
+                print "!!## -- %s run list will be switched to %s with environment %s -- ##!!" % (node, roles['%s' % i], policy)
                 i += 1
             else:
                 # set the environment and run lists
@@ -118,11 +118,11 @@ else:
 
                 print "!!## -- "
                 print "!!## -- %s has run list: %s, and environment: %s -- ##!!" % (node, run_list, environment)
-                print "!!## -- %s run list will be switched to %s with environment %s -- ##!!" % (node, roles[i], policy)
+                print "!!## -- %s run list will be switched to %s with environment %s -- ##!!" % (node, roles['%s' % i], policy)
 
                 # If the role isnt already set, set it
-                if roles[i] not in run_list:
-                    run_list = [roles[i]]
+                if roles['%s' % i] not in run_list:
+                    run_list = [roles['%s' % i]]
                 i += 1
 
                 # save the new run list and environment
