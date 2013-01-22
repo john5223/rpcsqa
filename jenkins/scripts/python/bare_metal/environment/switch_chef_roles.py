@@ -60,7 +60,7 @@ except IOError:
     sys.exit()
 else:
     # read the json in
-    roles = json.loads(fo.read())
+    temp_roles = json.loads(fo.read())
 
     #close the file
     fo.close()
@@ -72,9 +72,11 @@ print "#################################"
 print " Switching roles and running chef-client for  '%s'  active models" % policy
 print "Display only: %s " % results.display_only
 
-print "Roles List"
-for i in roles.iteritems():
-    print "!!## -- Roles index %s has role %s -- ##!!" % (i, roles['%s' % i])
+# create the roles list from the ordered json
+roles = []
+for i in range(len(temp_roles)):
+    roles.append(temp_roles['%s' % i])
+
 
 active_models = razor.simple_active_models(policy)
 
@@ -105,7 +107,7 @@ else:
                     i = len(roles) - 1
                 print "!!## -- "
                 print "!!## -- %s has run list: %s, and environment: %s -- ##!!" % (node, run_list, environment)
-                print "!!## -- %s run list will be switched to %s with environment %s -- ##!!" % (node, roles['%s' % i], policy)
+                print "!!## -- %s run list will be switched to %s with environment %s -- ##!!" % (node, roles[i], policy)
                 i += 1
             else:
                 # set the environment and run lists
@@ -118,11 +120,11 @@ else:
 
                 print "!!## -- "
                 print "!!## -- %s has run list: %s, and environment: %s -- ##!!" % (node, run_list, environment)
-                print "!!## -- %s run list will be switched to %s with environment %s -- ##!!" % (node, roles['%s' % i], policy)
+                print "!!## -- %s run list will be switched to %s with environment %s -- ##!!" % (node, roles[i], policy)
 
                 # If the role isnt already set, set it
-                if roles['%s' % i] not in run_list:
-                    run_list = [roles['%s' % i]]
+                if roles[i] not in run_list:
+                    run_list = [roles[i]]
                 i += 1
 
                 # save the new run list and environment
@@ -136,3 +138,4 @@ else:
                     print "!!## -- NEW ENVIRONMENT: %s" % node.chef_environment
                 except Exception, e:
                     print "!!## -- Failed to save node -- Exception: %s -- ##!!" % e
+"""
