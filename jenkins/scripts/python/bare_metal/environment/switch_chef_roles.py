@@ -1,10 +1,11 @@
 #!/usr/bin/python
 import os
+import sys
 import json
 import argparse
 from razor_api import razor_api
 import time
-from chef import *
+#from chef import *
 
 
 parser = argparse.ArgumentParser()
@@ -15,9 +16,8 @@ parser.add_argument('--razor_ip', action="store", dest="razor_ip",
 parser.add_argument('--policy', action="store", dest="policy", 
                     required=True, help="Razor policy to set chef roles for.")
 
-parser.add_argument('--data_bag_location', action="store", dest="data_bag_loc",
-                    default="/var/lib/jenkins/rpcsqa/chef-cookbooks/data_bags/razor_node", 
-                    required=False, help="Location of chef data bags")
+parser.add_argument('--roles_location', action="store", dest="roles_location", 
+                    required=True, help="Location of the roles list json file for the environment")
 
 parser.add_argument('--chef_url', action="store", dest="chef_url", 
                     default="http://198.101.133.4:4000", 
@@ -51,7 +51,24 @@ def get_chef_name(data):
 
 razor = razor_api(results.razor_ip)
 policy = results.policy
-roles = ['role[qa-single-controller]', 'role[qa-single-api]', 'role[qa-single-compute]']
+
+# Open the role list json file
+try:
+    # Open the file
+    fo = open("%s" % results.roles_location, "r")
+except IOError:
+    print "Failed to open file %s, exiting script" % results.roles_location
+    sys.exit()
+else:
+    # read the json in
+    roles = json.loads(fo.read())
+    print json.dumps(roles, indent=4)
+
+    #close the file
+    fo.close()
+
+    # print message for debugging
+    print "%s successfully read and closed" % results.roles_location
 
 print "#################################"
 print " Switching roles and running chef-client for  '%s'  active models" % policy
@@ -94,21 +111,19 @@ else:
                 print "!!## --   "
                 print "!!## -- %s has run list: %s, and environment: %s -- ##!!" % (node, run_list, environment)
                 environment = policy
-                if i == 0:
-                    print "!!## -- First host %s, set to role %s -- ##!!" % (node, roles[i])
-                    if roles[i] not in run_list:
-                        run_list = [roles[i]]
-                    i += 1
-                elif i == 1:
-                    print "!!## -- Second host %s, set to role %s -- ##!!" % (node, roles[i])
-                    if roles[i] not in run_list:
-                        run_list = [roles[i]]
-                    i += 1
-                else:
-                    print "!!## -- Non API host %s, set to role %s -- ##!!" % (node, roles[i])
-                    if roles[i] not in run_list:
-                        run_list = [roles[i]]
+                if (i >= len(roles) - 1):
+                    i = len(roles) - 1
 
+                print "!!## -- "
+                print "!!## -- %s has run list: %s, and environment: %s -- ##!!" % (node, run_list, environment)
+                print "!!## -- %s run list will be switched to %s with environment %s -- ##!!" % (node, roles[i], policy)
+
+                # If the role isnt already set, set it
+                if roles[i] not in run_list:
+                    run_list = [roles[i]]
+                i += 1
+
+                # save the new run list and environment
                 node.run_list = run_list
                 node.chef_environment = environment
 

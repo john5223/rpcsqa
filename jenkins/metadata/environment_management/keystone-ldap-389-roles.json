@@ -2,5 +2,5 @@
     "0": "qa-ldap-389",
     "1": "qa-single-controller",
     "2": "qa-single-api",
-    "X": "qa-single-compute"
+    "3": "qa-single-compute"
 }

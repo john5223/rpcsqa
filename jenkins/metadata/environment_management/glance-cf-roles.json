@@ -1,5 +1,5 @@
 {
     "0": "qa-single-controller",
     "1": "qa-single-api",
-    "X": "qa-single-compute"
+    "2": "qa-single-compute"
 }
