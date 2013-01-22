@@ -1,6 +1,6 @@
 {
-    "0": "qa-ldap-389",
-    "1": "qa-single-controller",
-    "2": "qa-single-api",
-    "3": "qa-single-compute"
+    "0": "role[qa-ldap-389]",
+    "1": "role[qa-single-controller]",
+    "2": "role[qa-single-api]",
+    "3": "role[qa-single-compute]"
 }
