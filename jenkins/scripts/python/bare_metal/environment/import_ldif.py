@@ -100,10 +100,12 @@ else:
                print "Trying to import ldif on %s with ip %s...." % (server['node'], server['ip'])
                
                try:
-                    subprocess.call("sshpass -p %s scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet  /var/lib/jenkins/source_files/ldif/*.ldif root@%s:/root" % (server['root_password'], server['ip']), shell=True)
+                    out = subprocess.check_output("sshpass -p %s scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet  /var/lib/jenkins/source_files/ldif/*.ldif root@%s:/root" % (server['root_password'], server['ip']), shell=True)
+                    print out
                     print "SCP of ldif successful..."
                     
-                    subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'ldapadd -x -D \"cn=admin,dc=rcbops,dc=me\" -f base.ldif -w@privatecloud'" % (server['root_password'], server['ip']), shell=True)
+                    out = subprocess.check_output("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'ldapadd -x -D \"cn=admin,dc=rcbops,dc=me\" -f base.ldif -w@privatecloud'" % (server['root_password'], server['ip']), shell=True)
+                    print out
                     print "Import successful..."
                     
                     
