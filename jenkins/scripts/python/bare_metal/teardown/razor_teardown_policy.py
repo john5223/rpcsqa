@@ -65,15 +65,21 @@ def getrootpass(data):
     
 def getip_from_data_bag(uuid):
     data_bag_loc  = results.data_bag_loc
+    ans = None
     try:
         with open('%s/%s.json' % (data_bag_loc, uuid) ) as f: 
             ans = f.read()
         ans =  json.loads(ans)
-        ip = ans['network_interfaces'][0]['address']
+        ip = ans['network_interfaces']['debian'][0]['address']
         return str(ip)
     except IOError as e:
+        print ans
         print e
         return ''
+    except Exception, ee:
+        print ans
+        print ee
+        raise Exception(ee)
 
 
 #############################################################
