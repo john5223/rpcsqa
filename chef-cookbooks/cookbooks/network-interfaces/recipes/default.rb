@@ -85,24 +85,18 @@ case node['platform']
 
   when "redhat", "centos", "fedora"
     
-    ruby_block "gather current network config files" do
-      block do
-        iface_scripts_dir = "/etc/sysconfig/network-scripts"
-        #puts "scripts directory: #{iface_scripts_dir}"
-        Dir.chdir("#{iface_scripts_dir}")
-        #puts Dir.pwd
-        $all_iface_files = Dir.glob("ifcfg-*")
-        $all_iface_files.each do | iface_file |
-          puts "File: #{iface_file}"
-        end
-      end
-    end
-
     ruby_block "configure ifcfg files" do
       block do
+        
+        # cd into the network-scripts directory and gather all ifcfg files
+        iface_scripts_dir = "/etc/sysconfig/network-scripts"
+        Dir.chdir("#{iface_scripts_dir}")
+        all_iface_files = Dir.glob("ifcfg-*")
+
+        # Gather the interfaces from the node, for each interface overwrite appropriate interface values
         node_interfaces = node['network_interfaces']['redhat']
         node_interfaces.each do | node_iface |
-          $all_iface_files.each do | iface_file |
+          all_iface_files.each do | iface_file |
             if iface_file =~ node_iface['device']
               #rc = Chef::Util::FileEdit.new("#{iface_file}")
               node_iface.each_pair do | k, v |
