@@ -114,8 +114,10 @@ case node['platform']
               end
 
               # Overwrite file
-              file_hash.each_pair do | k, v |
-                puts "Key: #{k}, Value: #{v}"
+              File.open(iface_file, "w") do | file |
+                file_hash.each_pair do | k, v |
+                  file.write(k + "=" + v)
+                end
               end
             end
           end
