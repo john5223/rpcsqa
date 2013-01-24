@@ -99,7 +99,7 @@ case node['platform']
           all_iface_files.each do | iface_file |
             puts "file name: #{iface_file} has class #{iface_file.class}, device: #{node_iface['device']} has class #{node_iface['device'].class}"
             if iface_file.include? node_iface['device']
-              puts "MATCH: file name: #{iface_file} has a substring ${node['device']}"
+              puts "MATCH: file name: #{iface_file} has a substring #{node['device']}"
               node_iface.each_pair do | k, v |
                 puts "key: #{k.upcase}, value #{v}"
               end
