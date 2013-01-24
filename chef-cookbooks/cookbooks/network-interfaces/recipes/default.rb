@@ -105,9 +105,9 @@ case node['platform']
                 puts "Overwritting key: #{k.upcase}, with value #{v} in file #{iface_file}."
                 rc.search_file_replace_line(/^#{k.upcase}*$/, "#{k.upcase}=\"#{v}\"")
               end
+              puts "Writing file with changes #{iface_file}."
+              rc.write_file
             end
-            puts "Writing file with changes #{iface_file}."
-            rc.write_file
           end
         end
       end
