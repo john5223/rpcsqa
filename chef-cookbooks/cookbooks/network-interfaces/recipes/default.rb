@@ -102,8 +102,8 @@ case node['platform']
               file_hash = Hash.new
               File.open(iface_file, "r") do | file |
                 while (line = file.gets)
-                  key = line.split("=").first
-                  puts "File Key : #{key}"
+                  key, value = line.split("=")
+                  puts "File Key: #{key}, Value: #{value}"
                   node_iface.each_pair do | k, v |
                     if not key == "#{k.upcase}"
                       file_hash["#{k.upcase}"] = "#{v}"
