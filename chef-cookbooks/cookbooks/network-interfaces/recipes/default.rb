@@ -103,7 +103,6 @@ case node['platform']
               File.open(iface_file, "r") do | file |
                 while (line = file.gets)
                   key, value = line.split("=")
-                  puts "KEY: #{key}, VALUE: #{value}"
                   node_iface.each_pair do | k, v |
                     if key == "#{k.upcase}"
                       file_hash["#{k.upcase}"] = "#{v}"
@@ -116,7 +115,8 @@ case node['platform']
               # Overwrite file with hash
               File.open(iface_file, "w") do | file |
                 file_hash.each_pair do | k, v |
-                  file.write(k + "=" + v)
+                  line = k + "=" + v
+                  puts line
                 end
               end
             end
