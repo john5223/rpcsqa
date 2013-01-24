@@ -87,10 +87,11 @@ case node['platform']
     
     ruby_block "gather current network config files" do
       block do
-        $iface_scripts_dir = "/etc/sysconfig/network-scripts"
+        iface_scripts_dir = "/etc/sysconfig/network-scripts"
         puts "scripts directory: #{iface_scripts_dir}"
         Dir.chdir("#{iface_scripts_dir}")
-        $all_iface_files = Dir.glob("^ifcfg-*$")
+        puts Dir.pwd
+        all_iface_files = Dir.glob("^ifcfg-*$")
         puts "iface files: #{all_iface_files}"
       end
     end
