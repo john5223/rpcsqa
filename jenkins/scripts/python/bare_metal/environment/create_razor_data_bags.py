@@ -8,16 +8,29 @@ def create_data_bag(ip, ident=None):
 	if ident is None:
 		data_bag = {
 			"id": temp_ident,
-			"network_interfaces": [
-				{
-					"auto": "true",
-	    			"type": "static",
-	    			"device": "eth0",
-	    			"netmask": "255.255.255.0",
-	    			"address": ip,
-	    			"gateway": "%s.%s.%s.%s" % ( ip_array[0], ip_array[1], ip_array[2], 1)
-				}
-			]
+			"network_interfaces": {
+				"debian": [
+					{
+						"auto": "true",
+		    			"type": "static",
+		    			"device": "eth0",
+		    			"netmask": "255.255.255.0",
+		    			"address": ip,
+		    			"gateway": "%s.%s.%s.%s" % (ip_array[0], ip_array[1], ip_array[2], 1)
+					}
+				],
+				"redhat": [
+					{
+						"device": "em1",
+						"bootproto": "none",
+						"onboot": "yes",
+						"netmask": "255.255.255.0",
+						"gateway": "%s.%s.%s.%s" % (ip_array[0], ip_array[1], ip_array[2], 1),
+						"ipaddr": ip,
+						"userctl": "no"
+					}
+				]
+			}
 		}
 
 		try:
@@ -37,16 +50,29 @@ def create_data_bag(ip, ident=None):
 	else:
 		data_bag = {
 			"id": ident,
-			"network_interfaces": [
-				{
-					"auto": "true",
-	    			"type": "static",
-	    			"device": "eth0",
-	    			"netmask": "255.255.255.0",
-	    			"address": ip,
-	    			"gateway": "%s.%s.%s.%s" % ( ip_array[0], ip_array[1], ip_array[2], 1)
-				}
-			]
+			"network_interfaces": {
+				"debian": [
+					{
+						"auto": "true",
+		    			"type": "static",
+		    			"device": "eth0",
+		    			"netmask": "255.255.255.0",
+		    			"address": ip,
+		    			"gateway": "%s.%s.%s.%s" % (ip_array[0], ip_array[1], ip_array[2], 1)
+					}
+				],
+				"redhat": [
+					{
+						"device": "em1",
+						"bootproto": "none",
+						"onboot": "yes",
+						"netmask": "255.255.255.0",
+						"gateway": "%s.%s.%s.%s" % (ip_array[0], ip_array[1], ip_array[2], 1),
+						"ipaddr": ip,
+						"userctl": "no"
+					}
+				]
+			}
 		}
 
 		try:
