@@ -98,10 +98,9 @@ case node['platform']
         node_interfaces.each do | node_iface |
           all_iface_files.each do | iface_file |
             if iface_file == "ifcfg-#{node_iface['device']}"
-              puts "MATCH: file name: #{iface_file} has a substring #{node['device']}."
+              puts "MATCH: file name: #{iface_file} with ifcfg-#{node_iface['device']}."
               node_iface.each_pair do | k, v |
                 puts "Overwritting key: #{k.upcase}, with value #{v} in file #{iface_file}."
-                puts "#{item}"
               end
               puts "Writing file with changes #{iface_file}."
             end
