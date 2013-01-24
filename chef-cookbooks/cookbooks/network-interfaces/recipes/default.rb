@@ -100,6 +100,7 @@ case node['platform']
             puts "file name: #{iface_file}, device: #{node_iface['device']}"
             if iface_file =~ node_iface['device']
               puts "MATCH"
+            end
           end
         end
       end
