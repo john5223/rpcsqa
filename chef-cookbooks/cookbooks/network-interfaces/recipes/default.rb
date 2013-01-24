@@ -106,7 +106,7 @@ case node['platform']
                   puts "File Key : #{key}"
                   node_iface.each_pair do | k, v |
                     if not key == "#{k.upcase}"
-                      file_hash["#{k}"] = "#{v}"
+                      file_hash["#{k.upcase}"] = "#{v}"
                     else
                       file_hash["#{key}"] = "#{v}"
                     end
