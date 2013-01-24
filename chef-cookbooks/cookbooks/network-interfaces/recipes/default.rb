@@ -99,10 +99,16 @@ case node['platform']
           all_iface_files.each do | iface_file |
             if iface_file == "ifcfg-#{node_iface['device']}"
               puts "MATCH: file name: #{iface_file} with ifcfg-#{node_iface['device']}."
-              node_iface.each_pair do | k, v |
-                puts "Overwritting key: #{k.upcase}, with value #{v} in file #{iface_file}."
+              file_array = Array.new
+              File.open(iface_file, "r+") do | file |
+                while (line = file.gets)
+                  node_iface.each_pair do | k, v |
+                    if line.include? "#{k.upcase}"
+                      puts "Found a Matching line: line = #{line}, key=#{k.upcase}"
+                    end
+                  end
+                end
               end
-              puts "Writing file with changes #{iface_file}."
             end
           end
         end
