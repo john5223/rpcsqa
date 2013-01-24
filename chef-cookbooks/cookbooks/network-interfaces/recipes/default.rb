@@ -97,10 +97,7 @@ case node['platform']
         node_interfaces = node['network_interfaces']['redhat']
         node_interfaces.each do | node_iface |
           all_iface_files.each do | iface_file |
-            puts "file name: #{iface_file}, device: #{node_iface['device']}"
-            if iface_file =~ node_iface['device']
-              puts "MATCH"
-            end
+            puts "file name: #{iface_file} has class #{iface_file}.class, device: #{node_iface['device']} has class #{node_iface['device']}.class"
           end
         end
       end
