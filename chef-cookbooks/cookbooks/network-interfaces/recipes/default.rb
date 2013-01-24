@@ -100,15 +100,20 @@ case node['platform']
             if iface_file == "ifcfg-#{node_iface['device']}"
               puts "MATCH: file name: #{iface_file} with ifcfg-#{node_iface['device']}."
               file_array = Array.new
-              File.open(iface_file, "r+") do | file |
+              File.open(iface_file, "r") do | file |
                 while (line = file.gets)
                   node_iface.each_pair do | k, v |
                     if line.include? "#{k.upcase}"
                       puts "Found a Matching line: line = #{line}, key=#{k.upcase}"
+                      file_array << "#{k.upcase}=\"#{v}\""
+                    else
+                      file_array << line
                     end
                   end
                 end
               end
+              file_array.each do | line |
+                puts "#{line}"
             end
           end
         end
