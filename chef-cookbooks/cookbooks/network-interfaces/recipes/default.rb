@@ -97,17 +97,13 @@ case node['platform']
         node_interfaces = node['network_interfaces']['redhat']
         node_interfaces.each do | node_iface |
           all_iface_files.each do | iface_file |
-            #puts "file name: #{iface_file} has class #{iface_file.class}, device: #{node_iface['device']} has class #{node_iface['device'].class}"
-            if iface_file.include? node_iface['device']
+            if iface_file == "ifcfg-#{node_iface['device']}"
               puts "MATCH: file name: #{iface_file} has a substring #{node['device']}."
-              rc = Chef::Util::FileEdit.new("#{iface_file}")
               node_iface.each_pair do | k, v |
                 puts "Overwritting key: #{k.upcase}, with value #{v} in file #{iface_file}."
-                item = rc.search_file_replace_line(/^#{k.upcase}/, "#{k.upcase}=\"#{v}\"")
                 puts "#{item}"
               end
               puts "Writing file with changes #{iface_file}."
-              rc.write_file
             end
           end
         end
