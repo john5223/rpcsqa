@@ -105,7 +105,7 @@ case node['platform']
                   key, value = line.split("=")
                   node_iface.each_pair do | k, v |
                     if key == "#{k.upcase}"
-                      file_hash["#{k.upcase}"] = "#{v}"
+                      file_hash["#{k.upcase}"] = "\"#{v}\""
                     else
                       file_hash["#{key}"] = "#{value}"
                     end
