@@ -103,7 +103,8 @@ case node['platform']
               rc = Chef::Util::FileEdit.new("#{iface_file}")
               node_iface.each_pair do | k, v |
                 puts "Overwritting key: #{k.upcase}, with value #{v} in file #{iface_file}."
-                rc.search_file_replace_line(/^#{k.upcase}/, "#{k.upcase}=\"#{v}\"")
+                item = rc.search_file_replace_line(/^#{k.upcase}/, "#{k.upcase}=\"#{v}\"")
+                puts "#{item}"
               end
               puts "Writing file with changes #{iface_file}."
               rc.write_file
