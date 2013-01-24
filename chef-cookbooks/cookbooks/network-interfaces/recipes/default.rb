@@ -94,6 +94,7 @@ case node['platform']
         all_iface_files = Dir.glob("ifcfg-*")
         all_iface_files.each do | iface_file |
           puts "File: #{iface_file}"
+        end
       end
     end
 
