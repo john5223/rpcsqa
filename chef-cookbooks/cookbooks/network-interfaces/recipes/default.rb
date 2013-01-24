@@ -98,6 +98,9 @@ case node['platform']
         node_interfaces.each do | node_iface |
           all_iface_files.each do | iface_file |
             puts "file name: #{iface_file} has class #{iface_file.class}, device: #{node_iface['device']} has class #{node_iface['device'].class}"
+            if iface_file.include? node_iface['device']
+              puts "MATCH: file name: #{iface_file} has a substring ${node['device']}"
+            end
           end
         end
       end
