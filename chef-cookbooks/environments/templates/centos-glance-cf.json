@@ -6,15 +6,6 @@
   "json_class": "Chef::Environment",
   "chef_type": "environment",
   "default_attributes": {
-    "mysql": {
-      "root_network_acl": "%",
-      "allow_remote_root": true
-    },
-    "nova": {
-      "network": {
-        "public_interface": "eth0"
-      }
-    }
   },
   "override_attributes": {
     "package_component": "folsom",
@@ -50,12 +41,12 @@
       "metric_provider": "collectd",
       "procmon_provider": "monit"
     },
+    "mysql": {
+      "root_network_acl": "%",
+      "allow_remote_root": true
+    },
     "nova": {
       "apply_patches": true,
-      "network": {
-        "dmz_cidr": "10.128.0.0/24",
-        "fixed_range": "172.31.0.0/24"
-      },
       "networks": [
         {
           "num_networks": "1",
@@ -63,7 +54,7 @@
           "label": "public",
           "dns1": "8.8.8.8",
           "dns2": "8.8.4.4",
-          "bridge_dev": "eth0",
+          "bridge_dev": "eth1",
           "network_size": "254",
           "ipv4_cidr": "172.31.0.0/24"
         }
@@ -75,36 +66,25 @@
     "horizon": {
       "theme": "Rackspace"
     },
-    "swift": {
-      "authmode": "keystone",
-      "swift_hash": "RANDOM_STRING"
-    },
     "developer_mode": false,
     "osops_networks": {
-      "management": "10.127.83.0/25",
-      "swift-lb": "10.127.83.0/24",
-      "nova": "10.127.83.0/25",
-      "public": "10.127.83.0/25",
-      "swift": "10.127.83.0/24",
-      "swift-private": "10.127.83.0/24"
+      "management": "10.0.0.0/24",
+      "nova": "10.0.0.0/24",
+      "public": "10.0.0.0/24"
     },
     "glance": {
       "api": {
-    		"default_store": "swift",
-    		"swift_store_user": "<Cloud Files Tenant ID>:<Rackspace Cloud Files Username>",
-    		"swift_store_key": "<Rackspace Cloud Password>",
-    		"swift_store_auth_version": "2",
-			"swift_store_auth_address": "https://identity.api.rackspacecloud.com/v2.0"
-	  },
+        "default_store": "swift",
+        "swift_store_user": "<TENANT_ID>:<TENANT_NAME>",
+        "swift_store_key": "<TENANT_PASSWORD>",
+        "swift_store_auth_version": "2",
+        "swift_store_auth_address": "https://identity.api.rackspacecloud.com/v2.0"
+      },
       "image_upload": true,
       "images": [
         "cirros",
         "precise"
       ],
-      "image": {
-        "cirros": "file:///opt/rpcs/cirros-0.3.0-x86_64-uec.tar.gz",
-        "precise": "file:///opt/rpcs/precise-server-cloudimg-amd64.tar.gz"
-      },
       "api": {
         "default_store": "swift"
       }
