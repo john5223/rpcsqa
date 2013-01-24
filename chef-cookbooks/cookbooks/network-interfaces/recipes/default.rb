@@ -114,6 +114,7 @@ case node['platform']
               end
               file_array.each do | line |
                 puts "#{line}"
+              end
             end
           end
         end
