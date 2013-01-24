@@ -88,11 +88,11 @@ case node['platform']
     ruby_block "gather current network config files" do
       block do
         iface_scripts_dir = "/etc/sysconfig/network-scripts"
-        puts "scripts directory: #{iface_scripts_dir}"
+        #puts "scripts directory: #{iface_scripts_dir}"
         Dir.chdir("#{iface_scripts_dir}")
-        puts Dir.pwd
+        #puts Dir.pwd
         $all_iface_files = Dir.glob("ifcfg-*")
-        all_iface_files.each do | iface_file |
+        $all_iface_files.each do | iface_file |
           puts "File: #{iface_file}"
         end
       end
@@ -100,12 +100,12 @@ case node['platform']
 
     ruby_block "configure ifcfg files" do
       block do
-        $node_interfaces = node['network_interfaces']['redhat']
-        $node_interfaces.each do | node_iface |
+        node_interfaces = node['network_interfaces']['redhat']
+        node_interfaces.each do | node_iface |
           $all_iface_files.each do | iface_file |
-            if $iface_file =~ $node_iface['device']
+            if iface_file =~ node_iface['device']
               #rc = Chef::Util::FileEdit.new("#{iface_file}")
-              node_iface.each_pair do |k, v|
+              node_iface.each_pair do | k, v |
                 puts "key: #{k.upcase}, value #{v}"
                 #rc.search_file_replace_line(/^#{k.upcase}*$/, "#{k.upcase}=\"#{v}\"")
               end
