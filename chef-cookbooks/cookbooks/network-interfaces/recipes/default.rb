@@ -97,14 +97,7 @@ case node['platform']
         node_interfaces = node['network_interfaces']['redhat']
         node_interfaces.each do | node_iface |
           all_iface_files.each do | iface_file |
-            if iface_file =~ node_iface['device']
-              #rc = Chef::Util::FileEdit.new("#{iface_file}")
-              node_iface.each_pair do | k, v |
-                puts "key: #{k.upcase}, value #{v}"
-                #rc.search_file_replace_line(/^#{k.upcase}*$/, "#{k.upcase}=\"#{v}\"")
-              end
-              #rc.write_file
-            end
+            puts "file name: #{iface_file}, device: #{node_iface['device']}"
           end
         end
       end
@@ -112,3 +105,12 @@ case node['platform']
   else
     puts "Not a Linux Distro, you should never see this(unless you are windows, stop being windows)."
 end
+
+#if iface_file =~ node_iface['device']
+  #rc = Chef::Util::FileEdit.new("#{iface_file}")
+  #node_iface.each_pair do | k, v |
+    #puts "key: #{k.upcase}, value #{v}"
+    #rc.search_file_replace_line(/^#{k.upcase}*$/, "#{k.upcase}=\"#{v}\"")
+  #end
+  #rc.write_file
+#end
