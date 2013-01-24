@@ -99,21 +99,22 @@ case node['platform']
           all_iface_files.each do | iface_file |
             if iface_file == "ifcfg-#{node_iface['device']}"
               puts "MATCH: file name: #{iface_file} with ifcfg-#{node_iface['device']}."
-              file_array = Array.new
+              file_hash = Hash.new
               File.open(iface_file, "r") do | file |
                 while (line = file.gets)
+                  key, value = line.split("=")
+                  puts "File Key: #{key}, Value: #{value}"
                   node_iface.each_pair do | k, v |
-                    if line.include? "#{k.upcase}"
-                      puts "Found a Matching line: line = #{line}, key=#{k.upcase}"
-                      file_array << "#{k.upcase}=\"#{v}\""
+                    if key == "#{k.upcase}"
+                      file_hash["#{k.upcase}"] = "#{v}"
                     else
-                      file_array << line
+                      file_hash["#{key}"] = "#{value}"
                     end
                   end
                 end
               end
-              file_array.each do | line |
-                puts "#{line}"
+              file_hash.each_pair do | k, v |
+                puts "Key: #{k}, Value: #{v}"
               end
             end
           end
