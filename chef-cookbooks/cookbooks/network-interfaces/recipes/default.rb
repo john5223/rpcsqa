@@ -98,12 +98,11 @@ case node['platform']
         node_interfaces.each do | node_iface |
           all_iface_files.each do | iface_file |
             if iface_file == "ifcfg-#{node_iface['device']}"
-              puts "MATCH: file name: #{iface_file} with ifcfg-#{node_iface['device']}."
               file_hash = Hash.new
+              # Add data bag items to file hash without removing items already in there
               File.open(iface_file, "r") do | file |
                 while (line = file.gets)
                   key, value = line.split("=")
-                  puts "File Key: #{key}, Value: #{value}"
                   node_iface.each_pair do | k, v |
                     if key == "#{k.upcase}"
                       file_hash["#{k.upcase}"] = "#{v}"
@@ -113,8 +112,12 @@ case node['platform']
                   end
                 end
               end
-              file_hash.each_pair do | k, v |
-                puts "Key: #{k}, Value: #{v}"
+              # Overwrite file with hash
+              File.open(iface_file, "w") do | file |
+                file_hash.each_pair do | k, v |
+                  line = "#{k}=\"#{v}\""
+                  file.write(line)
+                end
               end
             end
           end
