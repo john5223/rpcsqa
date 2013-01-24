@@ -103,12 +103,12 @@ case node['platform']
               File.open(iface_file, "r") do | file |
                 while (line = file.gets)
                   key, value = line.split("=")
-                  puts "File Key: #{key}, Value: #{value}"
+                  puts "File Key: #{key}, Value:key => "value",  #{value}"
                   node_iface.each_pair do | k, v |
-                    if not key == "#{k.upcase}"
+                    if key == "#{k.upcase}"
                       file_hash["#{k.upcase}"] = "#{v}"
                     else
-                      file_hash["#{key}"] = "#{v}"
+                      file_hash["#{key}"] = "#{value}"
                     end
                   end
                 end
