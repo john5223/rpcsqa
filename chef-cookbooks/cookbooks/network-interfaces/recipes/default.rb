@@ -91,7 +91,7 @@ case node['platform']
         puts "scripts directory: #{iface_scripts_dir}"
         Dir.chdir("#{iface_scripts_dir}")
         puts Dir.pwd
-        all_iface_files = Dir.glob("ifcfg-*")
+        $all_iface_files = Dir.glob("ifcfg-*")
         all_iface_files.each do | iface_file |
           puts "File: #{iface_file}"
         end
