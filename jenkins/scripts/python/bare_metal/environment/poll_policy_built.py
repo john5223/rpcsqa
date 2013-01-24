@@ -109,28 +109,31 @@ else:
         #remove specific active model by uuid
         #ssh into ip and reboot   
     
-    
+    count = 0
     
     active = False
     while active == False:
-        print "Polling..."
-        active = True
-        for a in active_models:
-            if 'broker_' not in active_models[a]['current_state']:
-                active = False
-                pass 
-            if results.display == "true":
-                 temp = { 'am_uuid': active_models[a]['am_uuid'], 'current_state':  active_models[a]['current_state'] }
-                 print json.dumps(temp, indent=4)
-        
-        time.sleep(30)
-        active_models = razor.simple_active_models(policy)
+        while count < 30: 
+            count += 1               
+            print "Polling..."
+            active = True
+            for a in active_models:
+                if 'broker_' not in active_models[a]['current_state']:
+                    active = False
+                    pass 
+                if results.display == "true":
+                     temp = { 'am_uuid': active_models[a]['am_uuid'], 'current_state':  active_models[a]['current_state'] }
+                     print json.dumps(temp, indent=4)
+            
+            time.sleep(30)
+            active_models = razor.simple_active_models(policy)
     
-    for a in active_models:
-        dbag_uuid = get_data_bag_UUID(active_models[a])
-        ip = getip_from_data_bag(dbag_uuid)
-        print "%s : %s " % (active_models[a]['am_uuid'], ip)
-        
-    print "Broker finished for %s " % policy
-     
-        
+    if count < 30:    
+        for a in active_models:
+            dbag_uuid = get_data_bag_UUID(active_models[a])
+            ip = getip_from_data_bag(dbag_uuid)
+            print "%s : %s " % (active_models[a]['am_uuid'], ip)
+            
+        print "Broker finished for %s " % policy
+         
+            
