@@ -115,7 +115,7 @@ case node['platform']
               # Overwrite file with hash
               File.open(iface_file, "w") do | file |
                 file_hash.each_pair do | k, v |
-                  file.write("#{k}=#{v}")
+                  file.write(k + "=" + v)
                 end
               end
             end
