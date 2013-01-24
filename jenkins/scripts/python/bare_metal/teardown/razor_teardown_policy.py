@@ -76,7 +76,7 @@ def getip_from_data_bag(uuid):
         print ans
         print e
         return ''
-    except Exeption, ee:
+    except Exception, ee:
         print ans
         print ee
         raise Exception(ee)
