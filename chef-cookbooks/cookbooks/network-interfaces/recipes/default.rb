@@ -110,13 +110,13 @@ case node['platform']
 
               # loop through all data bag stuff and update hash as needed
               node_iface.each_pair do | k, v |
-                file_hash["#{k.upcase}"] = "\"#{v}\""
+                file_hash["#{k.upcase}"] = "\"#{v}\"\n"
               end
 
               # Overwrite file
               File.open(iface_file, "w") do | file |
                 file_hash.each_pair do | k, v |
-                  line = "#{k}=#{v}\n"
+                  line = "#{k}=#{v}"
                   file.write(line)
                 end
               end
