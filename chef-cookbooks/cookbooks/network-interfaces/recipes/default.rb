@@ -9,8 +9,8 @@
 require 'digest/md5'
 
 case node['platform']
+# DEBIAN DISTROS
   when 'ubuntu', 'debian'
-    
     ruby_block "existing ifaces" do
       block do
         $ifaces_file = "/etc/network/interfaces"
@@ -33,6 +33,7 @@ case node['platform']
         $ifaces_file_munge << $marker_tpl % ['START']
         $iface_digest = Digest::MD5.hexdigest(File.read($ifaces_file))
       end
+      action :create
     end
 
     # create the interfaces file for the node using
@@ -55,6 +56,7 @@ case node['platform']
         end
         File.delete("/tmp/chef-net-iface")
       end
+      action :create
     end
 
     ruby_block "finalize interfaces file" do
@@ -66,6 +68,7 @@ case node['platform']
           end
         end
       end
+      action :create
     end
 
     execute "service networking restart" do
@@ -74,17 +77,36 @@ case node['platform']
       end
     end
 
-    route "0.0.0.0" do
-      netmask "0.0.0.0"
-      gateway "198.101.133.1"
-      device "eth0"
-      only_if do
-        $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
+    ruby_block "Gather gateways to add to routing table" do
+      block do
+        $gateway_hash = Hash.new
+        new_ifaces = node['network_interfaces']['debian']
+        new_ifaces.each do | iface |
+          iface.each_pair do | k, v |
+            if k == "gateway" || k == 'device'
+              $gateway_hash["#{k}"] = v
+            end
+          end
+        end
       end
     end
 
+    ruby_block "Set default routes" do
+      block do
+        $gateway_hash.each do | gateway |
+          # create the config gile
+          content = Chef::Provider::Route.config_file_contents(:add, 
+                                                               :target => Chef::Provider::Route.MASK[0.0.0.0],
+                                                               :netmask => Chef::Provider::Route.MASK[0.0.0.0],
+                                                               :gateway => gateway['gateway'],
+                                                               :device => gateway['device'])
+          end
+        end
+      end
+    end
+
+# RHEL DISTROS
   when "redhat", "centos", "fedora"
-    
     ruby_block "configure ifcfg files" do
       block do
         
@@ -124,7 +146,16 @@ case node['platform']
           end
         end
       end
+      action :create
     end
+
+# UNSUPPORTED DISTROS
   else
-    puts "Not a Linux Distro, you should never see this(unless you are windows, stop being windows)."
+    # As distributions get added (Windows, SUSE, etc. need to update)
+    ruby_block "Non Supported Distribution" do
+      block do
+        puts "#{node['platform']} is not supported by this cookbook."
+      end
+      action :nothing
+    end
 end
