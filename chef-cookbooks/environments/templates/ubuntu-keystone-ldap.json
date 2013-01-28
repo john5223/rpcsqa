@@ -10,31 +10,6 @@
   "override_attributes": {
     "package_component": "folsom",
     "keystone": {
-      "auth_type": "ldap",
-      "ldap": {
-        "url": "<LDAP_IP>",
-        "tree_dn": "dc=dev,dc=rcbops,dc=me",
-        "user": "admin",
-        "password": "<LDAP_ADMIN_PASS>",
-        "suffix": "dc=dev,dc=rcbops,dc=me",
-        "use_dumb_member": "false",
-
-        "user_tree_dn": "ou=Users,dc=dev,dc=rcbops,dc=me)",
-        "user_objectclass": "inetOrgPerson",
-        "user_id_attribute": "cn",
-        "user_name_attribute": "sn",
-
-        "role_tree_dn": "ou=Roles,dc=dev,dc=rcbops,dc=me",
-        "role_objectclass": "organizationalRole",
-        "role_id_attribute": "cn",
-        "role_member_attribute": "roleOccupant",
-
-        "tenant_tree_dn": "ou=Groups,dc=dev,dc=rcbops,dc=me",
-        "tenant_objectclass": "groupOfNames",
-        "tenant_id_attribute": "cn",
-        "tenant_member_attribute": "member",
-        "tenant_name_attribute": "ou"
-      },
       "admin_user": "admin",
       "users": {
         "demo": {
@@ -100,7 +75,7 @@
     "glance": {
       "api": {
         "default_store": "swift"
-      }
+      },
       "image_upload": true,
       "images": [
         "cirros",
@@ -112,6 +87,5 @@
     }
   }
 }
-
 
 
