@@ -100,7 +100,7 @@
     "glance": {
       "api": {
         "default_store": "swift"
-      }
+      },
       "image_upload": true,
       "images": [
         "cirros",
@@ -112,6 +112,5 @@
     }
   }
 }
-
 
 
