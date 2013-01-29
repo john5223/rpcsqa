@@ -33,7 +33,6 @@ case node['platform']
         $ifaces_file_munge << $marker_tpl % ['START']
         $iface_digest = Digest::MD5.hexdigest(File.read($ifaces_file))
       end
-      action :create
     end
 
     # create the interfaces file for the node using
@@ -56,7 +55,6 @@ case node['platform']
         end
         File.delete("/tmp/chef-net-iface")
       end
-      action :create
     end
 
     ruby_block "finalize interfaces file" do
@@ -68,7 +66,6 @@ case node['platform']
           end
         end
       end
-      action :create
     end
 
     execute "service networking restart" do
@@ -77,7 +74,7 @@ case node['platform']
       end
     end
 
-    ruby_block "Gather gateways to add to routing table" do
+    ruby_block "gather gateways to add to routing table" do
       block do
         $gateway_hash = Hash.new
         new_ifaces = node['network_interfaces']['debian']
@@ -89,9 +86,12 @@ case node['platform']
           end
         end
       end
+      only_if do
+        $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
+      end
     end
 
-    ruby_block "Set default routes" do
+    ruby_block "set default routes" do
       block do
         $gateway_hash.each do | gateway |
           # create the config gile
@@ -103,27 +103,37 @@ case node['platform']
           end
         end
       end
+      only_if do
+        $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
+      end
     end
 
 # RHEL DISTROS
   when "redhat", "centos", "fedora"
-    ruby_block "configure ifcfg files" do
+    ruby_block "Gather ifcfg files" do
       block do
-        
         # cd into the network-scripts directory and gather all ifcfg files
         iface_scripts_dir = "/etc/sysconfig/network-scripts"
         Dir.chdir("#{iface_scripts_dir}")
-        all_iface_files = Dir.glob("ifcfg-*")
+        $all_ifcfg_files = Dir.glob("ifcfg-*")
+      end
+    end
 
+    ruby_block "update ifcfg files" do
+      block do
         # Gather the interfaces from the node, for each interface overwrite appropriate interface values
         node_interfaces = node['network_interfaces']['redhat']
+
+        # Save the file names to an array if we change it
+        $files_changed = Array.new
+        
         node_interfaces.each do | node_iface |
-          all_iface_files.each do | iface_file |
-            if iface_file == "ifcfg-#{node_iface['device']}"
+         $all_ifcfg_files.each do | ifcfg_file |
+            if ifcfg_file == "ifcfg-#{node_iface['device']}"
               file_hash = Hash.new
               
               # Open file and save all current values in a hash
-              File.open(iface_file, "r") do | file |
+              File.open(ifcfg_file, "r") do | file |
                 while (line = file.gets)
                   key, value = line.split("=")
                   file_hash["#{key}"] = "#{value}"
@@ -131,28 +141,41 @@ case node['platform']
               end
 
               # loop through all data bag stuff and update hash as needed
+              change = false
               node_iface.each_pair do | k, v |
-                file_hash["#{k.upcase}"] = "\"#{v}\"\n"
+                if file_hash["#{k.upcase}"] != "\"#{v}\"\n"
+                  file_hash["#{k.upcase}"] = "\"#{v}\"\n"
+                  change = true
+                end
               end
 
-              # Overwrite file
-              File.open(iface_file, "w") do | file |
-                file_hash.each_pair do | k, v |
-                  line = "#{k}=#{v}"
-                  file.write(line)
+              # Overwrite file if something was added to the hash
+              if change == true
+                File.open(ifcfg_file, "w") do | file |
+                  file_hash.each_pair do | k, v |
+                    line = "#{k}=#{v}"
+                    file.write(line)
+                  end
                 end
+                # Add the name of the changed file to the array
+                $files_changed << ifcfg_file
               end
             end
           end
         end
       end
-      action :create
+    end
+
+    execute "service networking restart" do
+      only_if do
+        $files_changed.length > 0
+      end
     end
 
 # UNSUPPORTED DISTROS
   else
     # As distributions get added (Windows, SUSE, etc. need to update)
-    ruby_block "Non Supported Distribution" do
+    ruby_block "non Supported Distribution" do
       block do
         puts "#{node['platform']} is not supported by this cookbook."
       end
