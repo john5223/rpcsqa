@@ -35,4 +35,3 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         print "Server IP Address %s\n" % json.dumps(server['automatic']['ipaddress'])
         print "Server Run List: %s\n" % json.dumps(server['run_list'])
         print "Server Roles: %s\n" % json.dumps(server['automatic']['roles'], indent = 4)
-        print "##!! -- -- ##!!"
