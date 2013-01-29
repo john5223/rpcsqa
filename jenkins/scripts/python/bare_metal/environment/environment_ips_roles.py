@@ -31,7 +31,6 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     servers = Search('node', 'chef_environment:%s' % results.environment)
     for server in servers:
         print "##!! -- -- ##!!"
-        print json.dumps(server, indent=4)
         print "Server Name: %s\n" % server['name']
         print "Server IP Address %s\n" % json.dumps(server['automatic']['ipaddress'])
         print "Server Run List: %s\n" % json.dumps(server['run_list'])
