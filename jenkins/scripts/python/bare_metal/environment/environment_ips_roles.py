@@ -30,5 +30,8 @@ results = parser.parse_args()
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     servers = Search('node', 'chef_environment:%s' % results.environment)
     for server in servers:
-        print "Server %s's info: "
-        print json.dumps(server, indent=4)
+        print "##!! -- -- ##!!"
+        print "Server Name: %s\n" % server['name']
+        print "Server Run List: %s\n" % server['run_list']
+        print "Server IP Address %s\n" % server['ipaddress']
+        print "##!! -- -- ##!!"
