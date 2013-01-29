@@ -74,10 +74,37 @@ case node['platform']
       end
     end
 
-    route "0.0.0.0" do
-      netmask "0.0.0.0"
-      gateway "198.101.133.1"
-      device "eth0"
+    ruby_block "gather gateways to add to routing table" do
+      block do
+        $gateway_hash = Hash.new
+        new_ifaces = node['network_interfaces']['debian']
+        new_ifaces.each do | iface |
+          iface.each_pair do | k, v |
+            if k == "gateway" || k == 'device'
+              $gateway_hash["#{k}"] = v
+            end
+          end
+        end
+      end
+      only_if do
+        $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
+      end
+    end
+
+    ruby_block "set default routes" do
+      block do
+        $gateway_hash.each do | gateway |
+          # create the config file
+          content = Chef::Provider::Route.config_file_contents(:add, 
+                                                               :target => Chef::Provider::Route.MASK[0.0.0.0],
+                                                               :netmask => Chef::Provider::Route.MASK[0.0.0.0],
+                                                               :gateway => gateway['gateway'],
+                                                               :device => gateway['device'])
+          # HERE IS WHERE I NEED TO KICK OFF THE ADD ACTION WITH THE CONTENT I JUST CREATED
+          # I CANNOT FIND HOW TO DO THIS
+          end
+        end
+      end
       only_if do
         $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
       end
