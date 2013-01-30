@@ -136,6 +136,7 @@ case node['platform']
               File.open(ifcfg_file, "r") do | file |
                 while (line = file.gets)
                   key, value = line.split("=")
+                  puts "Adding value: #{v} to key: #{k} in file_hash"
                   file_hash["#{key}"] = "#{value}"
                 end
               end
