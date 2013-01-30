@@ -91,7 +91,7 @@ case node['platform']
       end
     end
 
-    ruby_block "setting default routes" do
+    ruby_block "adding default routes" do
       block do
         $gateway_hash.each do | gw |
           route "default route for #{gw['gateway']}" do
@@ -189,7 +189,7 @@ case node['platform']
       end
     end
 
-    ruby_block "setting default routes" do
+    ruby_block "adding default routes" do
       block do
         $gateway_hash.each do | gw |
           route "default route for #{gw['gateway']}" do
