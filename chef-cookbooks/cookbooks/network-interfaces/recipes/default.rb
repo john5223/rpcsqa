@@ -80,7 +80,7 @@ case node['platform']
         new_ifaces = node['network_interfaces']['debian']
         new_ifaces.each do | iface |
           iface.each_pair do | k, v |
-            if k == "gateway" || k == 'device'
+            if k == 'gateway' || k == 'device'
               $gateway_hash["#{k}"] = v
             end
           end
@@ -91,17 +91,15 @@ case node['platform']
       end
     end
 
-    ruby_block "set default routes" do
+    ruby_block "setting default routes" do
       block do
-        $gateway_hash.each do | gateway |
-          # create the config file
-          content = Chef::Provider::Route.config_file_contents(:add, 
-                                                               :target => Chef::Provider::Route.MASK[0.0.0.0],
-                                                               :netmask => Chef::Provider::Route.MASK[0.0.0.0],
-                                                               :gateway => gateway['gateway'],
-                                                               :device => gateway['device'])
-          # HERE IS WHERE I NEED TO KICK OFF THE ADD ACTION WITH THE CONTENT I JUST CREATED
-          # I CANNOT FIND HOW TO DO THIS
+        $gateway_hash.each do | gw |
+          route "default route for #{gw['gateway']}" do
+            target '0.0.0.0'
+            netmask '0.0.0.0'
+            gateway gw['gateway']
+            device gw['device'] 
+            action :add
           end
         end
       end
@@ -145,7 +143,7 @@ case node['platform']
               # loop through all data bag stuff and update hash as needed
               change = false
               node_iface.each_pair do | k, v |
-                if file_hash["#{k.upcase}"] != "\"#{v}\"\n"
+                if file_hash["#{k.upcase}"].nil? || file_hash["#{k.upcase}"] != "#{v}"
                   file_hash["#{k.upcase}"] = "\"#{v}\"\n"
                   change = true
                 end
@@ -168,7 +166,41 @@ case node['platform']
       end
     end
 
-    execute "service networking restart" do
+    execute "service network restart" do
+      only_if do
+        $files_changed.length > 0
+      end
+    end
+
+    ruby_block "gather gateways to add to routing table" do
+      block do
+        $gateway_hash = Hash.new
+        new_ifaces = node['network_interfaces']['redhat']
+        new_ifaces.each do | iface |
+          iface.each_pair do | k, v |
+            if k == 'gateway' || k == 'device'
+              $gateway_hash["#{k}"] = v
+            end
+          end
+        end
+      end
+      only_if do
+        $files_changed.length > 0
+      end
+    end
+
+    ruby_block "setting default routes" do
+      block do
+        $gateway_hash.each do | gw |
+          route "default route for #{gw['gateway']}" do
+            target '0.0.0.0'
+            netmask '0.0.0.0'
+            gateway gw['gateway']
+            device gw['device'] 
+            action :add
+          end
+        end
+      end
       only_if do
         $files_changed.length > 0
       end
@@ -177,7 +209,7 @@ case node['platform']
 # UNSUPPORTED DISTROS
   else
     # As distributions get added (Windows, SUSE, etc. need to update)
-    ruby_block "non Supported Distribution" do
+    ruby_block "non supported distribution" do
       block do
         puts "#{node['platform']} is not supported by this cookbook."
       end
