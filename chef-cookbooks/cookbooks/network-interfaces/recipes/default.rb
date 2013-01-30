@@ -135,10 +135,9 @@ case node['platform']
               # Open file and save all current values in a hash
               File.open(ifcfg_file, "r") do | file |
                 while (line = file.gets)
-                  line.strip
+                  line.gsub("\n", "")
                   puts "LINE: #{line}"
                   key, value = line.split("=")
-                  puts "Adding value: #{value} to key: #{key} in file_hash"
                   file_hash["#{key}"] = "#{value}"
                 end
               end
