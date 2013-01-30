@@ -144,6 +144,7 @@ case node['platform']
               change = false
               node_iface.each_pair do | k, v |
                 if file_hash["#{k.upcase}"].nil? || file_hash["#{k.upcase}"] != "#{v}"
+                  puts "Found a diff in #{ifcfg_file}: key: #{k}, value #{v}."
                   file_hash["#{k.upcase}"] = "\"#{v}\"\n"
                   change = true
                 end
