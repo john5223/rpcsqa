@@ -136,19 +136,22 @@ case node['platform']
               File.open(ifcfg_file, "r") do | file |
                 while (line = file.gets)
                   key, value = line.split("=")
+                  value.delete("\n")
                   puts "Adding value: #{value} to key: #{key} in file_hash"
-                  file_hash["#{key}"] = "#{value}".strip
+                  file_hash["#{key}"] = "#{value}"
                 end
               end
 
               # loop through all data bag stuff and update hash as needed
               change = false
               node_iface.each_pair do | k, v |
-                if file_hash["#{k.upcase}"].nil? || file_hash["#{k.upcase}"] != "\"#{v}\""
+                if file_hash["#{k.upcase}"].nil? || file_hash["#{k.upcase}"] != "#{v}"
                   puts "Found a diff in #{ifcfg_file}"
-                  puts "Current key #{k.upcase} has a value of : " + file_hash["#{k.upcase}"] + ", switching it to \"#{v}\""
-                  file_hash["#{k.upcase}"] = "\"#{v}\""
+                  puts "Current key #{k.upcase} has a value of : " + file_hash["#{k.upcase}"].strip + ", switching it to \"#{v}\""
+                  file_hash["#{k.upcase}"] = "\"#{v}\"\n"
                   change = true
+                else
+                  puts "No diff found for key #{k.upcase}"
                 end
               end
 
@@ -156,7 +159,7 @@ case node['platform']
               if change == true
                 File.open(ifcfg_file, "w") do | file |
                   file_hash.each_pair do | k, v |
-                    line = "#{k}=#{v}\n"
+                    line = "#{k}=#{v}"
                     file.write(line)
                   end
                 end
