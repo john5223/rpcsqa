@@ -135,8 +135,6 @@ case node['platform']
               # Open file and save all current values in a hash
               File.open(ifcfg_file, "r") do | file |
                 while (line = file.gets)
-                  line.gsub("\n", "")
-                  puts "LINE: #{line}"
                   key, value = line.split("=")
                   file_hash["#{key}"] = "#{value}"
                 end
@@ -145,9 +143,7 @@ case node['platform']
               # loop through all data bag stuff and update hash as needed
               change = false
               node_iface.each_pair do | k, v |
-                if file_hash["#{k.upcase}"].nil? || file_hash["#{k.upcase}"] != "#{v}\n"
-                  puts "Found a diff in #{ifcfg_file}"
-                  puts "Current key #{k.upcase} has a value of : " + file_hash["#{k.upcase}"] + ", switching it to \"#{v}\""
+                if file_hash["#{k.upcase}"].nil? || file_hash["#{k.upcase}"].strip != "#{v}"
                   file_hash["#{k.upcase}"] = "\"#{v}\""
                   change = true
                 else
