@@ -16,10 +16,10 @@
         "tree_dn": "dc=dev,dc=rcbops,dc=me",
         "user": "admin",
         "password": "<LDAP_ADMIN_PASS>",
-        "suffix": "dc=dev,dc=rcbops,dc=me",
+        "suffix": "cn=admin,dc=dev,dc=rcbops,dc=me",
         "use_dumb_member": "false",
 
-        "user_tree_dn": "ou=Users,dc=dev,dc=rcbops,dc=me)",
+        "user_tree_dn": "ou=Users,dc=dev,dc=rcbops,dc=me",
         "user_objectclass": "inetOrgPerson",
         "user_id_attribute": "cn",
         "user_name_attribute": "sn",
