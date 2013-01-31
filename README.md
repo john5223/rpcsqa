@@ -1,4 +1,4 @@
-rpcsqa
-======
+Rackspace Private Cloud Software Quality Assurance
+==================================================
 
-Quality Assurance Jenkins Scripts and Chef-Cookbooks
+Quality Assurance Scripts and Chef-Cookbooks that are used to build out and test RPCS.

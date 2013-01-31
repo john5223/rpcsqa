@@ -9,8 +9,8 @@
 require 'digest/md5'
 
 case node['platform']
+# DEBIAN DISTROS
   when 'ubuntu', 'debian'
-    
     ruby_block "existing ifaces" do
       block do
         $ifaces_file = "/etc/network/interfaces"
@@ -74,34 +74,42 @@ case node['platform']
       end
     end
 
-    route "0.0.0.0" do
-      netmask "0.0.0.0"
-      gateway "198.101.133.1"
-      device "eth0"
+    route "Adding default gateway to route" do
+      target '0.0.0.0'
+      netmask '0.0.0.0'
+      gateway '198.101.133.1'
+      device 'eth0'
       only_if do
         $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
       end
     end
 
+# RHEL DISTROS
   when "redhat", "centos", "fedora"
-    
-    ruby_block "configure ifcfg files" do
+    ruby_block "Gather ifcfg files" do
       block do
-        
         # cd into the network-scripts directory and gather all ifcfg files
         iface_scripts_dir = "/etc/sysconfig/network-scripts"
         Dir.chdir("#{iface_scripts_dir}")
-        all_iface_files = Dir.glob("ifcfg-*")
+        $all_ifcfg_files = Dir.glob("ifcfg-*")
+      end
+    end
 
+    ruby_block "update ifcfg files" do
+      block do
         # Gather the interfaces from the node, for each interface overwrite appropriate interface values
         node_interfaces = node['network_interfaces']['redhat']
+
+        # Save the file names to an array if we change it
+        $files_changed = Array.new
+        
         node_interfaces.each do | node_iface |
-          all_iface_files.each do | iface_file |
-            if iface_file == "ifcfg-#{node_iface['device']}"
+         $all_ifcfg_files.each do | ifcfg_file |
+            if ifcfg_file == "ifcfg-#{node_iface['device']}"
               file_hash = Hash.new
               
               # Open file and save all current values in a hash
-              File.open(iface_file, "r") do | file |
+              File.open(ifcfg_file, "r") do | file |
                 while (line = file.gets)
                   key, value = line.split("=")
                   file_hash["#{key}"] = "#{value}"
@@ -109,31 +117,55 @@ case node['platform']
               end
 
               # loop through all data bag stuff and update hash as needed
+              change = false
               node_iface.each_pair do | k, v |
-                file_hash["#{k.upcase}"] = "\"#{v}\"\n"
+                if file_hash["#{k.upcase}"].nil? || file_hash["#{k.upcase}"] != "#{v}"
+                  file_hash["#{k.upcase}"] = "\"#{v}\"\n"
+                  change = true
+                end
               end
 
-              # Overwrite file
-              File.open(iface_file, "w") do | file |
-                file_hash.each_pair do | k, v |
-                  line = "#{k}=#{v}"
-                  file.write(line)
+              # Overwrite file if something was added to the hash
+              if change == true
+                File.open(ifcfg_file, "w") do | file |
+                  file_hash.each_pair do | k, v |
+                    line = "#{k}=#{v}"
+                    file.write(line)
+                  end
                 end
+                # Add the name of the changed file to the array
+                $files_changed << ifcfg_file
               end
             end
           end
         end
+        puts "Changed Files Length = #{$files_changed.length}"
       end
     end
-  else
-    puts "Not a Linux Distro, you should never see this(unless you are windows, stop being windows)."
-end
 
-#if iface_file =~ node_iface['device']
-  #rc = Chef::Util::FileEdit.new("#{iface_file}")
-  #node_iface.each_pair do | k, v |
-    #puts "key: #{k.upcase}, value #{v}"
-    #rc.search_file_replace_line(/^#{k.upcase}*$/, "#{k.upcase}=\"#{v}\"")
-  #end
-  #rc.write_file
-#end
+    execute "service network restart" do
+      only_if do
+        $files_changed.length > 0
+      end
+    end
+
+    route "Adding default gateway to route" do
+      target '0.0.0.0'
+      netmask '0.0.0.0'
+      gateway '198.101.133.1'
+      device 'em1'
+      only_if do
+        $files_changed.length > 0
+      end
+    end
+
+# UNSUPPORTED DISTROS
+  else
+    # As distributions get added (Windows, SUSE, etc. need to update)
+    ruby_block "non supported distribution" do
+      block do
+        puts "#{node['platform']} is not supported by this cookbook."
+      end
+      action :nothing
+    end
+end
