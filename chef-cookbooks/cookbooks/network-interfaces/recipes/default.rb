@@ -74,35 +74,11 @@ case node['platform']
       end
     end
 
-    ruby_block "gather gateways to add to routing table" do
-      block do
-        $gateway_hash = Hash.new
-        new_ifaces = node['network_interfaces']['debian']
-        new_ifaces.each do | iface |
-          iface.each_pair do | k, v |
-            if k == 'gateway' || k == 'device'
-              $gateway_hash["#{k}"] = v
-            end
-          end
-        end
-      end
-      only_if do
-        $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
-      end
-    end
-
-    ruby_block "adding default routes" do
-      block do
-        $gateway_hash.each do | gw |
-          route "default route for #{gw['gateway']}" do
-            target '0.0.0.0'
-            netmask '0.0.0.0'
-            gateway gw['gateway']
-            device gw['device'] 
-            action :add
-          end
-        end
-      end
+    route "Adding default gateway to route" do
+      target '0.0.0.0'
+      netmask '0.0.0.0'
+      gateway '198.101.133.1'
+      device 'eth0'
       only_if do
         $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
       end
@@ -173,6 +149,7 @@ case node['platform']
             end
           end
         end
+        puts "Changed Files Length = #{$files_changed.length}"
       end
     end
 
@@ -182,35 +159,11 @@ case node['platform']
       end
     end
 
-    ruby_block "gather gateways to add to routing table" do
-      block do
-        $gateway_hash = Hash.new
-        new_ifaces = node['network_interfaces']['redhat']
-        new_ifaces.each do | iface |
-          iface.each_pair do | k, v |
-            if k == 'gateway' || k == 'device'
-              $gateway_hash["#{k}"] = v
-            end
-          end
-        end
-      end
-      only_if do
-        $files_changed.length > 0
-      end
-    end
-
-    ruby_block "adding default routes" do
-      block do
-        $gateway_hash.each do | gw |
-          route "default route for #{gw['gateway']}" do
-            target '0.0.0.0'
-            netmask '0.0.0.0'
-            gateway gw['gateway']
-            device gw['device'] 
-            action :add
-          end
-        end
-      end
+    route "Adding default gateway to route" do
+      target '0.0.0.0'
+      netmask '0.0.0.0'
+      gateway '198.101.133.1'
+      device 'em1'
       only_if do
         $files_changed.length > 0
       end
