@@ -3,6 +3,8 @@ description "This will create an openldap server for RPCS QA Team"
 run_list(
   "recipe[razor]",
   "recipe[network-interfaces]",
+  "recipe[yum::yum]",
+  "recipe[yum::epel]",
   "recipe[openldap::server]"
 )
 default_attributes(  { "openldap" => {
