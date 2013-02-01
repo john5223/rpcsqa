@@ -5,7 +5,7 @@ run_list(
   "recipe[network-interfaces]",
   "recipe[yum::yum]",
   "recipe[yum::epel]",
-  "recipe[openssh::client]"
+  "recipe[openssh::client]",
   "recipe[openldap::server]"         
 )
 default_attributes(  { "openldap" => {
