@@ -1,4 +1,4 @@
-name "qa-389"
+name "qa-389-ubuntu"
 description "This will create an 389 ldap server for RPCS QA Team"
 run_list(
   "recipe[razor]",
