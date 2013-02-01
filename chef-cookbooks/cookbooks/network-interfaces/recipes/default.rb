@@ -135,6 +135,10 @@ case node['platform']
               # Open file and save all current values in a hash
               File.open(ifcfg_file, "r") do | file |
                 while (line = file.gets)
+                  # THIS IS WHERE YOU LEFT OFF
+                  # WORKING ON GETTING THE NEW LINE CHOMPED OFF SO YOU CODE CAN BE UNIVERSAL
+                  # FOR BOTH THE CURRENT ITEMS IN THE FILE AND THE ITEMS BEING ADDED FROM THE
+                  # DATABAG.
                   line.chomp
                   puts "LINE: #{line}"
                   key, value = line.split("=")
