@@ -3,7 +3,7 @@
 # Source the file that has our environment variables
 source ~/source_files/LDAP.sh
 
-export LDAP_IP=`knife search node 'role:qa-openldap-ubuntu' | grep IP | awk '{print $2}'`
+export LDAP_IP=`knife search node 'role:qa-ldap-389-centos' | grep IP | awk '{print $2}'`
 
 template_filename='/var/lib/jenkins/rpcsqa/chef-cookbooks/environments/templates/ubuntu-keystone-ldap.json'
 environment_filename='/var/lib/jenkins/rpcsqa/chef-cookbooks/environments/ubuntu-keystone-ldap.json'

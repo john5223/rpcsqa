@@ -1,5 +1,5 @@
 {
-    "0": "role[qa-openldap]",
+    "0": "role[qa-openldap-centos]",
     "1": "role[qa-single-controller]",
     "2": "role[qa-single-api]",
     "3": "role[qa-single-compute]"
