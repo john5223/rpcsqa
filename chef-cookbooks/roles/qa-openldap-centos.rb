@@ -5,7 +5,8 @@ run_list(
   "recipe[network-interfaces]",
   "recipe[yum::yum]",
   "recipe[yum::epel]",
-  "recipe[openldap::server]"
+  "recipe[openssh::client]"
+  "recipe[openldap::server]"         
 )
 default_attributes(  { "openldap" => {
                             "rootpw" => "{SSHA}rcZMditrBFedx2lGWSVjMUnWLLz+kEjV", 
