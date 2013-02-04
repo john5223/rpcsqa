@@ -1,9 +1,12 @@
-name "qa-openldap"
+name "qa-openldap-centos"
 description "This will create an openldap server for RPCS QA Team"
 run_list(
   "recipe[razor]",
   "recipe[network-interfaces]",
-  "recipe[openldap::server]"
+  "recipe[yum::yum]",
+  "recipe[yum::epel]",
+  "recipe[openssh]",
+  "recipe[openldap::server]"         
 )
 default_attributes(  { "openldap" => {
                             "rootpw" => "{SSHA}rcZMditrBFedx2lGWSVjMUnWLLz+kEjV", 
