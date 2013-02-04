@@ -135,7 +135,7 @@ case node['platform']
             if ifcfg_file == "ifcfg-#{node_iface['device']}"
               
               # Save the MD5 of the current file
-              $ifcfg_file_digest = Digest::MD5.hexdigest(File.read($ifcfg_file))
+              ifcfg_file_digest = Digest::MD5.hexdigest(File.read(ifcfg_file))
               
               # Create an empty hash
               file_hash = Hash.new
@@ -143,39 +143,27 @@ case node['platform']
               # Open file and save all current values in a hash
               File.open(ifcfg_file, "r") do | file |
                 while (line = file.gets)
-                  line.chomp
                   key, value = line.split("=")
                   file_hash["#{key}"] = "#{value}"
                 end
               end
 
               # loop through all data bag stuff and update hash as needed
-              change = false
               node_iface.each_pair do | k, v |
-                if file_hash["#{k.upcase}"].nil?
-                  puts "Empty Key, Set it to #{k.upcase} with value: #{v}"
-                  file_hash["#{k.upcase}"] = "\"#{v}\""
-                  change = true
-                elsif file_hash["#{k.upcase}"].eql?("#{v}")
-                  puts "Key already has expected value, ignore it."
-                else
-                  puts "Key exists, but is wrong, configure it to be #{k.upcase} with value: #{v}"
-                  file_hash["#{k.upcase}"] = "\"#{v}\""
-                  change = true
-                end
+                file_hash["#{k.upcase}"] = "\"#{v}\"\n"
               end
 
               # Overwrite file if something was added to the hash
-              if change == true
-                File.open(ifcfg_file, "w") do | file |
-                  file_hash.each_pair do | k, v |
-                    line = "#{k}=#{v}\n"
-                    file.write(line)
-                  end
+              File.open(ifcfg_file, "w") do | file |
+                file_hash.each_pair do | k, v |
+                  line = "#{k}=#{v}"
+                  file.write(line)
                 end
-                # Add the name of the changed file to the array
-                $files_changed << ifcfg_file
               end
+
+              # if the file changes, save it to the array
+              if ifcfg_file_digest != Digest::MD5.hexdigest(File.read(ifcfg_file))
+                $files_changed << ifcfg_file
             end
           end
         end
