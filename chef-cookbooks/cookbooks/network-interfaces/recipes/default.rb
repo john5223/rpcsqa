@@ -143,6 +143,7 @@ case node['platform']
               # Open file and save all current values in a hash
               File.open(ifcfg_file, "r") do | file |
                 while (line = file.gets)
+                  line.chomp
                   key, value = line.split("=")
                   file_hash["#{key}"] = "#{value}"
                 end
@@ -153,13 +154,13 @@ case node['platform']
               node_iface.each_pair do | k, v |
                 if file_hash["#{k.upcase}"].nil?
                   puts "Empty Key, Set it to #{k.upcase} with value: #{v}"
-                  file_hash["#{k.upcase}"] = "\"#{v}\"\n"
+                  file_hash["#{k.upcase}"] = "\"#{v}\""
                   change = true
-                elsif file_hash["#{k.upcase}"] ~= "#{v}"
+                elsif file_hash["#{k.upcase}"].eql?("#{v}")
                   puts "Key already has expected value, ignore it."
                 else
                   puts "Key exists, but is wrong, configure it to be #{k.upcase} with value: #{v}"
-                  file_hash["#{k.upcase}"] = "\"#{v}\"\n"
+                  file_hash["#{k.upcase}"] = "\"#{v}\""
                   change = true
                 end
               end
