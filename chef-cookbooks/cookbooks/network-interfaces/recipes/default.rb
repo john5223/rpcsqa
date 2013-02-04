@@ -9,8 +9,10 @@
 require 'digest/md5'
 
 case node['platform']
+
 # DEBIAN DISTROS
   when 'ubuntu', 'debian'
+    
     ruby_block "existing ifaces" do
       block do
         $ifaces_file = "/etc/network/interfaces"
@@ -110,6 +112,7 @@ case node['platform']
 
 # RHEL DISTROS
   when "redhat", "centos", "fedora"
+    
     ruby_block "Gather ifcfg files" do
       block do
         # cd into the network-scripts directory and gather all ifcfg files
@@ -135,12 +138,6 @@ case node['platform']
               # Open file and save all current values in a hash
               File.open(ifcfg_file, "r") do | file |
                 while (line = file.gets)
-                  # THIS IS WHERE YOU LEFT OFF
-                  # WORKING ON GETTING THE NEW LINE CHOMPED OFF SO YOU CODE CAN BE UNIVERSAL
-                  # FOR BOTH THE CURRENT ITEMS IN THE FILE AND THE ITEMS BEING ADDED FROM THE
-                  # DATABAG.
-                  line.chomp
-                  puts "LINE: #{line}"
                   key, value = line.split("=")
                   file_hash["#{key}"] = "#{value}"
                 end
