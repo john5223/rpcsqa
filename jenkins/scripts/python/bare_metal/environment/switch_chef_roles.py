@@ -69,7 +69,7 @@ else:
     print "%s successfully read and closed" % results.roles_location
 
 print "#################################"
-print " Switching roles and running chef-client for  '%s'  active models" % policy
+print " Switching roles for  '%s'  active models" % policy
 print "Display only: %s " % results.display_only
 
 # create the roles list from the ordered json
