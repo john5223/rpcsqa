@@ -86,6 +86,7 @@ case node['platform']
 
 # RHEL DISTROS
   when "redhat", "centos", "fedora"
+    
     ruby_block "Gather ifcfg files" do
       block do
         # cd into the network-scripts directory and gather all ifcfg files
@@ -106,6 +107,11 @@ case node['platform']
         node_interfaces.each do | node_iface |
          $all_ifcfg_files.each do | ifcfg_file |
             if ifcfg_file == "ifcfg-#{node_iface['device']}"
+              
+              # Save the MD5 of the current file
+              ifcfg_file_digest = Digest::MD5.hexdigest(File.read(ifcfg_file))
+              
+              # Create an empty hash
               file_hash = Hash.new
               
               # Open file and save all current values in a hash
@@ -117,33 +123,46 @@ case node['platform']
               end
 
               # loop through all data bag stuff and update hash as needed
-              change = false
               node_iface.each_pair do | k, v |
-                if file_hash["#{k.upcase}"].nil? || file_hash["#{k.upcase}"] != "#{v}"
-                  file_hash["#{k.upcase}"] = "\"#{v}\"\n"
-                  change = true
-                end
+                file_hash["#{k.upcase}"] = "\"#{v}\"\n"
               end
 
               # Overwrite file if something was added to the hash
-              if change == true
-                File.open(ifcfg_file, "w") do | file |
-                  file_hash.each_pair do | k, v |
-                    line = "#{k}=#{v}"
-                    file.write(line)
-                  end
+              File.open(ifcfg_file, "w") do | file |
+                file_hash.each_pair do | k, v |
+                  line = "#{k}=#{v}"
+                  file.write(line)
                 end
-                # Add the name of the changed file to the array
+              end
+
+              # if the file changes, save it to the array
+              if ifcfg_file_digest != Digest::MD5.hexdigest(File.read(ifcfg_file))
                 $files_changed << ifcfg_file
               end
             end
           end
         end
-        puts "Changed Files Length = #{$files_changed.length}"
       end
     end
 
     execute "service network restart" do
+      only_if do
+        $files_changed.length > 0
+      end
+    end
+
+    ruby_block "gather gateways to add to routing table" do
+      block do
+        $gateway_hash = Hash.new
+        new_ifaces = node['network_interfaces']['redhat']
+        new_ifaces.each do | iface |
+          iface.each_pair do | k, v |
+            if k == 'gateway' || k == 'device'
+              $gateway_hash["#{k}"] = v
+            end
+          end
+        end
+      end
       only_if do
         $files_changed.length > 0
       end
