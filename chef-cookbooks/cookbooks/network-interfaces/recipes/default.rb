@@ -74,6 +74,26 @@ case node['platform']
       end
     end
 
+    ruby_block "gather gateways to add to routing table" do
+      block do
+        $gateway_hash = Hash.new
+        new_ifaces = node['network_interfaces']['debian']
+        new_ifaces.each do | iface |
+          iface.each_pair do | k, v |
+            if k == 'gateway' || k == 'device'
+              $gateway_hash["#{k}"] = v
+            end
+          end
+        end
+      end
+      only_if do
+        $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
+      end
+    end
+
+    # need to add loop here to add all new gateways via gateway_hash using
+    # the chef provider library for route
+    # TODO: jwagner
     route "Adding default gateway to route" do
       target '0.0.0.0'
       netmask '0.0.0.0'
@@ -168,6 +188,9 @@ case node['platform']
       end
     end
 
+    # need to add loop here to add all new gateways via gateway_hash using
+    # the chef provider library for route
+    # TODO: jwagner
     route "Adding default gateway to route" do
       target '0.0.0.0'
       netmask '0.0.0.0'
