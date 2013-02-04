@@ -25,17 +25,19 @@ source ~/source_files/HELLO_WORLD.sh
 #done
 
 # ping all ips in range and reboot the good ones
+reboot_count=0
 for i in {2..254}
 do
         ip=10.0.0.$i
         results=`ping -c 2 10.0.0.$i`
-        echo -e "\n!!## -- PING RESULTS FOR IP: $ip, with len(results): ${#results} -- ##!!"
-        echo $results
 
         if [[ ${#results} > 300 ]]; then
                 echo "!!## -- Rebooting box with ip: $ip -- ##!!"
                 sshpass -p $PASS ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root $ip 'reboot'
+                reboot_count=$((reboot_count+1))
         else
                 echo "!!## -- Nothing @ $ip to reboot -- ##!!"
         fi
 done
+
+echo "!!## -- TOTAL SERVERS REBOOTED : $reboot_count -- ##!!"
