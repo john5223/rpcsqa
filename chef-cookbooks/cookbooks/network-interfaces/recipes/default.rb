@@ -133,6 +133,11 @@ case node['platform']
         node_interfaces.each do | node_iface |
          $all_ifcfg_files.each do | ifcfg_file |
             if ifcfg_file == "ifcfg-#{node_iface['device']}"
+              
+              # Save the MD5 of the current file
+              $ifcfg_file_digest = Digest::MD5.hexdigest(File.read($ifcfg_file))
+              
+              # Create an empty hash
               file_hash = Hash.new
               
               # Open file and save all current values in a hash
@@ -146,13 +151,16 @@ case node['platform']
               # loop through all data bag stuff and update hash as needed
               change = false
               node_iface.each_pair do | k, v |
-                if file_hash['#{k.upcase}'].nil? || file_hash['#{k.upcase}'] != '#{v}'
-                  puts "Found a diff in #{ifcfg_file}"
-                  puts "Current key #{k.upcase} has a value of : " + file_hash["#{k.upcase}"].strip + ", switching it to \"#{v}\""
-                  file_hash["#{k.upcase}"] = "\"#{v}\""
+                if file_hash["#{k.upcase}"].nil?
+                  puts "Empty Key, Set it to #{k.upcase} with value: #{v}"
+                  file_hash["#{k.upcase}"] = "\"#{v}\"\n"
                   change = true
+                elsif file_hash["#{k.upcase}"] ~= "#{v}"
+                  puts "Key already has expected value, ignore it."
                 else
-                  puts "No diff found for key #{k.upcase}"
+                  puts "Key exists, but is wrong, configure it to be #{k.upcase} with value: #{v}"
+                  file_hash["#{k.upcase}"] = "\"#{v}\"\n"
+                  change = true
                 end
               end
 
