@@ -1,7 +1,6 @@
 name "qa-openldap-centos"
 description "This will create an openldap server for RPCS QA Team"
 run_list(
-  "recipe[razor]",
   "recipe[network-interfaces]",
   "recipe[yum::yum]",
   "recipe[yum::epel]",
