@@ -164,6 +164,7 @@ case node['platform']
               # if the file changes, save it to the array
               if ifcfg_file_digest != Digest::MD5.hexdigest(File.read(ifcfg_file))
                 $files_changed << ifcfg_file
+              end
             end
           end
         end
