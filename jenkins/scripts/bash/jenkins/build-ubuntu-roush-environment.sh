@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Set temp file and perm file
-template_filename='/var/lib/jenkins/rpcsqa/chef-cookbooks/environments/templates/ubuntu-glance-cf.json'
-environment_filename='/var/lib/jenkins/rpcsqa/chef-cookbooks/environments/ubuntu-glance-cf.json'
+template_filename='/var/lib/jenkins/rpcsqa/chef-cookbooks/environments/templates/ubuntu-roush.json'
+environment_filename='/var/lib/jenkins/rpcsqa/chef-cookbooks/environments/ubuntu-roush.json'
 
 ## copy the environment file to the proper directory
 echo "Copying template to environment..."
