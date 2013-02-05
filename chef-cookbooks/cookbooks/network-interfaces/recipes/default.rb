@@ -88,21 +88,16 @@ case node['platform']
           end
         end
       end
-      only_if do
-        $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
-      end
     end
 
-    if $gateway_hash
-      $gateway_hash.each do | gw |
-        route "default route for #{gw['gateway']}" do
-          target '0.0.0.0'
-          netmask '0.0.0.0'
-          gateway gw['gateway']
-          device gw['device']
-          only_if do
-            $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
-          end
+    $gateway_hash.each do | gw |
+      route "default route for #{gw['gateway']}" do
+        target '0.0.0.0'
+        netmask '0.0.0.0'
+        gateway gw['gateway']
+        device gw['device']
+        only_if do
+          $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
         end
       end
     end
@@ -186,21 +181,16 @@ case node['platform']
           end
         end
       end
-      only_if do
-        $files_changed.length > 0
-      end
     end
 
-    if gateway_hash
-      $gateway_hash.each do | gw |
-        route "default route for #{gw['gateway']}" do
-          target '0.0.0.0'
-          netmask '0.0.0.0'
-          gateway gw['gateway']
-          device gw['device'] 
-          only_if do
-            $files_changed.length > 0
-          end
+    $gateway_hash.each do | gw |
+      route "default route for #{gw['gateway']}" do
+        target '0.0.0.0'
+        netmask '0.0.0.0'
+        gateway gw['gateway']
+        device gw['device'] 
+        only_if do
+          $files_changed.length > 0
         end
       end
     end
