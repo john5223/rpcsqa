@@ -94,7 +94,7 @@ case node['platform']
     end
 
     $gateway_array.each do | gw |
-      puts "Adding Device: #{gw['device']} with gateway: #{gw['gateway']}"
+      puts gw
       #route "default route for #{gw['gateway']}" do
       #  target '0.0.0.0'
       #  netmask '0.0.0.0'
@@ -188,13 +188,13 @@ case node['platform']
     end
 
     $gateway_array.each do | gw |
-      puts "Adding Device: #{gw['device']} with gateway: #{gw['gateway']}"
-      route "default route for #{gw['gateway']}" do
-        target '0.0.0.0'
-        netmask '0.0.0.0'
-        gateway gw['gateway']
-        device gw['device'] 
-      end
+      puts gw
+      #route "default route for #{gw['gateway']}" do
+      #  target '0.0.0.0'
+      #  netmask '0.0.0.0'
+      #  gateway gw['gateway']
+      #  device gw['device'] 
+      #end
     end
 
 # UNSUPPORTED DISTROS
