@@ -76,9 +76,9 @@ case node['platform']
       end
     end
 
+    $gateway_hash = Hash.new
     ruby_block "gather gateways to add to routing table" do
       block do
-        $gateway_hash = Hash.new
         new_ifaces = node['network_interfaces']['debian']
         new_ifaces.each do | iface |
           iface.each_pair do | k, v |
@@ -170,9 +170,9 @@ case node['platform']
       end
     end
 
+    $gateway_hash = Hash.new
     ruby_block "gather gateways to add to routing table" do
       block do
-        $gateway_hash = Hash.new
         new_ifaces = node['network_interfaces']['redhat']
         new_ifaces.each do | iface |
           iface.each_pair do | k, v |
