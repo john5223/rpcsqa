@@ -93,7 +93,7 @@ case node['platform']
       end
     end
 
-    puts "Outside ruby block" + gateway_array
+    puts "Outside ruby block" + $gateway_array
 
     $gateway_array.each do |gw|
       puts "bottom puts " + gw
@@ -189,7 +189,7 @@ case node['platform']
       end
     end
 
-    puts "Outside ruby block" + gateway_array
+    puts "Outside ruby block" + $gateway_array
 
     $gateway_array.each do |gw|
       puts "bottom puts " + gw
