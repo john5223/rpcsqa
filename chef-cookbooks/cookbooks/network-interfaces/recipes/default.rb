@@ -84,6 +84,7 @@ case node['platform']
           iface.each_pair do | k, v |
             if k == 'gateway' || k == 'device'
               $gateway_hash["#{k}"] = v
+              puts "placed item #{v} in gateway_hash"
             end
           end
         end
