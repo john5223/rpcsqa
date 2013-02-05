@@ -88,7 +88,7 @@ case node['platform']
               puts "placed item #{v} in gateway_hash"
             end
           end
-          gateway_array << gateway_hash
+          $gateway_array << gateway_hash
           puts "placed item #{gateway_hash} in gateway_array"
         end
       end
@@ -186,7 +186,7 @@ case node['platform']
               puts "placed item #{v} in gateway_hash"
             end
           end
-          gateway_array << gateway_hash
+          $gateway_array << gateway_hash
           puts "placed item #{gateway_hash} in gateway_array"
         end
       end
