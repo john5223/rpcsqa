@@ -93,12 +93,14 @@ case node['platform']
       end
     end
 
-    ruby_block "Add Gateways to Kernel Route Table" do
-      block do
-        $gateway_array.each do | gw |
-          add_route(gw)
-        end
-      end
+    $gateway_array.each do | gw |
+      puts "Adding Device: #{gw['device']} with gateway: #{gw['gateway']}"
+      #route "default route for #{gw['gateway']}" do
+      #  target '0.0.0.0'
+      #  netmask '0.0.0.0'
+      #  gateway gw['gateway']
+      #  device gw['device'] 
+      #end
     end
 
 # RHEL DISTROS
@@ -185,11 +187,13 @@ case node['platform']
       end
     end
 
-    ruby_block "Add Gateways to Kernel Route Table" do
-      block do
-        $gateway_array.each do | gw |
-          add_route(gw)
-        end
+    $gateway_array.each do | gw |
+      puts "Adding Device: #{gw['device']} with gateway: #{gw['gateway']}"
+      route "default route for #{gw['gateway']}" do
+        target '0.0.0.0'
+        netmask '0.0.0.0'
+        gateway gw['gateway']
+        device gw['device'] 
       end
     end
 
@@ -202,14 +206,4 @@ case node['platform']
       end
       action :nothing
     end
-end
-
-
-def add_route(gw)
-  route "adding default route for #{gateway['gateway']}" do
-    target '0.0.0.0'
-    netmask '0.0.0.0'
-    gateway gw['gateway']
-    device gw['device'] 
-  end
 end
