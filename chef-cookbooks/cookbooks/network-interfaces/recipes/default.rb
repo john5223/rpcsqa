@@ -76,15 +76,15 @@ case node['platform']
       end
     end
 
+  $gateway_array=Array.new
     ruby_block "gather gateways to add to routing table" do
       block do
-        $gateway_array=Array.new
         new_ifaces = node['network_interfaces']['debian']
         new_ifaces.each do | iface |
-          $gateway_hash = Hash.new
+          gateway_hash = Hash.new
           iface.each_pair do | k, v |
             if k == 'gateway' || k == 'device'
-              $gateway_hash["#{k}"] = v
+              gateway_hash["#{k}"] = v
               puts "placed item #{v} in gateway_hash"
             end
           end
@@ -174,21 +174,26 @@ case node['platform']
       end
     end
 
-    $gateway_hash = Hash.new
+    $gateway_array = Array.new
     ruby_block "gather gateways to add to routing table" do
       block do
         new_ifaces = node['network_interfaces']['redhat']
         new_ifaces.each do | iface |
+          gateway_hash = Hash.new
           iface.each_pair do | k, v |
             if k == 'gateway' || k == 'device'
-              $gateway_hash["#{k}"] = v
+              gateway_hash["#{k}"] = v
+              puts "placed item #{v} in gateway_hash"
             end
           end
+          gateway_array << gateway_hash
+          puts "placed item #{gateway_hash} in gateway_array"
         end
       end
     end
 
-    $gateway_hash.each do | gw |
+    $gateway_array.each do | gw |
+      puts "Gateway item #{gw}"
       route "default route for #{gw['gateway']}" do
         target '0.0.0.0'
         netmask '0.0.0.0'
