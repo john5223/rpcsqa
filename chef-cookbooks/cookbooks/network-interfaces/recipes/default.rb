@@ -205,11 +205,11 @@ case node['platform']
 end
 
 
-def add_route(gateway)
+def add_route(gw)
   route "adding default route for #{gateway['gateway']}" do
     target '0.0.0.0'
     netmask '0.0.0.0'
-    gateway gateway['gateway']
-    device gateway['device'] 
+    gateway gw['gateway']
+    device gw['device'] 
   end
 end
