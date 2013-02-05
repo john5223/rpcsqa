@@ -93,10 +93,8 @@ case node['platform']
       end
     end
 
-    puts "Outside ruby block" + $gateway_array
-
     $gateway_array.each do |gw|
-      puts "bottom puts " + gw
+      puts "BOTTOM PUTS: " + gw
       #route "default route for #{gw['gateway']}" do
       #  target '0.0.0.0'
       #  netmask '0.0.0.0'
@@ -188,8 +186,6 @@ case node['platform']
         end
       end
     end
-
-    puts "Outside ruby block" + $gateway_array
 
     $gateway_array.each do |gw|
       puts "bottom puts " + gw
