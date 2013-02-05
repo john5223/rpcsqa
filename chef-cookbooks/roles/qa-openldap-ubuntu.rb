@@ -1,7 +1,6 @@
 name "qa-openldap-ubuntu"
 description "This will create an openldap server for RPCS QA Team"
 run_list(
-  "recipe[razor]",
   "recipe[network-interfaces]",
   "recipe[openldap::server]"
 )
