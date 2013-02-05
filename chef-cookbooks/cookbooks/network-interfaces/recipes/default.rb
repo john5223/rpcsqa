@@ -76,7 +76,7 @@ case node['platform']
       end
     end
 
-  $gateway_array=Array.new
+    $gateway_array=Array.new
     ruby_block "gather gateways to add to routing table" do
       block do
         new_ifaces = node['network_interfaces']['debian']
@@ -85,7 +85,6 @@ case node['platform']
           iface.each_pair do | k, v |
             if k == 'gateway' || k == 'device'
               gateway_hash["#{k}"] = v
-              puts "placed item #{v} in gateway_hash"
             end
           end
           $gateway_array << gateway_hash
@@ -101,9 +100,6 @@ case node['platform']
         netmask '0.0.0.0'
         gateway gw['gateway']
         device gw['device']
-        only_if do
-          $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
-        end
       end
     end
 
@@ -183,7 +179,6 @@ case node['platform']
           iface.each_pair do | k, v |
             if k == 'gateway' || k == 'device'
               gateway_hash["#{k}"] = v
-              puts "placed item #{v} in gateway_hash"
             end
           end
           $gateway_array << gateway_hash
@@ -199,9 +194,6 @@ case node['platform']
         netmask '0.0.0.0'
         gateway gw['gateway']
         device gw['device'] 
-        only_if do
-          $files_changed.length > 0
-        end
       end
     end
 
