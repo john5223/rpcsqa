@@ -1,0 +1,83 @@
+{
+  "name": "rpcs",
+  "description": "",
+  "cookbook_versions": {
+  },
+  "json_class": "Chef::Environment",
+  "chef_type": "environment",
+  "default_attributes": {
+  },
+  "override_attributes": {
+    "package_component": "folsom",
+    "keystone": {
+      "admin_user": "admin",
+      "users": {
+        "demo": {
+          "roles": {
+            "Member": [
+              "demo"
+            ]
+          },
+          "default_tenant": "demo",
+          "password": "ostackdemo"
+        },
+        "admin": {
+          "roles": {
+            "admin": [
+              "admin",
+              "demo"
+            ]
+          },
+          "password": "ostackdemo"
+        }
+      },
+      "tenants": [
+        "admin",
+        "service",
+        "demo"
+      ]
+    },
+    "monitoring": {
+      "metric_provider": "collectd",
+      "procmon_provider": "monit"
+    },
+    "mysql": {
+      "root_network_acl": "%",
+      "allow_remote_root": true
+    },
+    "nova": {
+      "apply_patches": true,
+      "networks": [
+        {
+          "num_networks": "1",
+          "bridge": "br0",
+          "label": "public",
+          "dns1": "8.8.8.8",
+          "dns2": "8.8.4.4",
+          "bridge_dev": "eth1",
+          "network_size": "254",
+          "ipv4_cidr": "172.31.0.0/24"
+        }
+      ]
+    },
+    "osops": {
+      "apply_patches": true
+    },
+    "horizon": {
+      "theme": "Rackspace"
+    },
+    "developer_mode": false,
+    "osops_networks": {
+      "management": "10.0.0.0/24",
+      "nova": "10.0.0.0/24",
+      "public": "10.0.0.0/24"
+    },
+    "glance": {
+      "image_upload": true,
+      "images": [
+        "cirros",
+        "precise"
+      ]
+    }
+  }
+}
