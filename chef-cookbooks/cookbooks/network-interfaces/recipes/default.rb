@@ -92,7 +92,7 @@ case node['platform']
       end
     end
 
-    puts "gateway_array length outside ruby_block: #{$gateway_array.length}"
+    puts "gateway_array length outside ruby_block: #{gateway_array.length}"
 
     $gateway_array.each do |gw|
       puts gw
