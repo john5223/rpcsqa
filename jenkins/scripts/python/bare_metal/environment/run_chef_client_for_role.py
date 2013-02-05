@@ -102,7 +102,9 @@ else:
                    p = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'chef-client;chef-client;'" % (server['root_password'], server['ip']), shell=True)
                    if p == 0:
                        print "chef-client success..."
-                   return p
+                   else:
+                       print "chef-client failed..."
+                       sys.exit(p)
 
                except Exception, e:
                     print "chef-client FAILURE: %s " % e
