@@ -182,13 +182,15 @@ case node['platform']
             end
           end
           $gateway_array << gateway_hash
-          puts $gateway_array
+          puts "TOP PUTS: " + $gateway_array
         end
       end
     end
 
-    $gateway_array.each do | gw |
-      puts gw
+    puts "Outside ruby block" + gateway_array
+
+    $gateway_array.each do |gw|
+      puts "bottom puts " + gw
       #route "default route for #{gw['gateway']}" do
       #  target '0.0.0.0'
       #  netmask '0.0.0.0'
