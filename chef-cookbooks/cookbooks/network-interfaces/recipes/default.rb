@@ -76,9 +76,9 @@ case node['platform']
       end
     end
 
-    $gateway_hash = Hash.new
     ruby_block "gather gateways to add to routing table" do
       block do
+        $gateway_hash = Hash.new
         new_ifaces = node['network_interfaces']['debian']
         new_ifaces.each do | iface |
           iface.each_pair do | k, v |
@@ -93,14 +93,16 @@ case node['platform']
       end
     end
 
-    $gateway_hash.each do | gw |
-      route "default route for #{gw['gateway']}" do
-        target '0.0.0.0'
-        netmask '0.0.0.0'
-        gateway gw['gateway']
-        device gw['device']
-        only_if do
-          $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
+    if $gateway_hash
+      $gateway_hash.each do | gw |
+        route "default route for #{gw['gateway']}" do
+          target '0.0.0.0'
+          netmask '0.0.0.0'
+          gateway gw['gateway']
+          device gw['device']
+          only_if do
+            $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
+          end
         end
       end
     end
@@ -172,9 +174,9 @@ case node['platform']
       end
     end
 
-    $gateway_hash = Hash.new
     ruby_block "gather gateways to add to routing table" do
       block do
+        $gateway_hash = Hash.new
         new_ifaces = node['network_interfaces']['redhat']
         new_ifaces.each do | iface |
           iface.each_pair do | k, v |
@@ -189,14 +191,16 @@ case node['platform']
       end
     end
 
-    $gateway_hash.each do | gw |
-      route "default route for #{gw['gateway']}" do
-        target '0.0.0.0'
-        netmask '0.0.0.0'
-        gateway gw['gateway']
-        device gw['device'] 
-        only_if do
-          $files_changed.length > 0
+    if gateway_hash
+      $gateway_hash.each do | gw |
+        route "default route for #{gw['gateway']}" do
+          target '0.0.0.0'
+          netmask '0.0.0.0'
+          gateway gw['gateway']
+          device gw['device'] 
+          only_if do
+            $files_changed.length > 0
+          end
         end
       end
     end
