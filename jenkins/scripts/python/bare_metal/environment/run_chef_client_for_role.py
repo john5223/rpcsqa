@@ -99,7 +99,10 @@ else:
           for server in to_run_list:
                print "Trying chef-client on %s with ip %s...." % (server['node'], server['ip'])
                try:
-                    subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'chef-client;chef-client;'" % (server['root_password'], server['ip']), shell=True)
-                    print "chef-client success..."
+                   p = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'chef-client;chef-client;'" % (server['root_password'], server['ip']), shell=True)
+                   if p == 0:
+                       print "chef-client success..."
+                   return p
+
                except Exception, e:
                     print "chef-client FAILURE: %s " % e
