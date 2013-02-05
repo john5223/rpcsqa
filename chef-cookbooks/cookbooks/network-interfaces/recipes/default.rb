@@ -93,15 +93,13 @@ case node['platform']
       end
     end
 
-    $gateway_array.each { | gw |
-      puts "Gateway item #{gw}"
-      route "default route for #{gw['gateway']}" do
-        target '0.0.0.0'
-        netmask '0.0.0.0'
-        gateway gw['gateway']
-        device gw['device']
+    ruby_block "Add Gateways to Kernel Route Table" do
+      block do
+        $gateway_array.each do | gw |
+          add_route(gw)
+        end
       end
-    }
+    end
 
 # RHEL DISTROS
   when "redhat", "centos", "fedora"
@@ -187,15 +185,13 @@ case node['platform']
       end
     end
 
-    $gateway_array.each { | gw |
-      puts "Gateway item #{gw}"
-      route "default route for #{gw['gateway']}" do
-        target '0.0.0.0'
-        netmask '0.0.0.0'
-        gateway gw['gateway']
-        device gw['device'] 
+    ruby_block "Add Gateways to Kernel Route Table" do
+      block do
+        $gateway_array.each do | gw |
+          add_route(gw)
+        end
       end
-    }
+    end
 
 # UNSUPPORTED DISTROS
   else
@@ -206,4 +202,14 @@ case node['platform']
       end
       action :nothing
     end
+end
+
+
+def add_route(gateway)
+  route "adding default route for #{gateway['gateway']}" do
+    target '0.0.0.0'
+    netmask '0.0.0.0'
+    gateway gateway['gateway']
+    device gateway['device'] 
+  end
 end
