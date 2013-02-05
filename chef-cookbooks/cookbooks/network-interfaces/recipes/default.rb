@@ -88,13 +88,12 @@ case node['platform']
             end
           end
           $gateway_array << gateway_hash
-          puts "TOP PUTS: " + $gateway_array
         end
       end
     end
 
     $gateway_array.each do |gw|
-      puts "BOTTOM PUTS: " + gw
+      puts gw
       #route "default route for #{gw['gateway']}" do
       #  target '0.0.0.0'
       #  netmask '0.0.0.0'
