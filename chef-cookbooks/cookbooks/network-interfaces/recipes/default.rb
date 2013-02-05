@@ -93,7 +93,7 @@ case node['platform']
       end
     end
 
-    $gateway_array.each do | gw |
+    $gateway_array.each { | gw |
       puts "Gateway item #{gw}"
       route "default route for #{gw['gateway']}" do
         target '0.0.0.0'
@@ -101,7 +101,7 @@ case node['platform']
         gateway gw['gateway']
         device gw['device']
       end
-    end
+    }
 
 # RHEL DISTROS
   when "redhat", "centos", "fedora"
@@ -187,7 +187,7 @@ case node['platform']
       end
     end
 
-    $gateway_array.each do | gw |
+    $gateway_array.each { | gw |
       puts "Gateway item #{gw}"
       route "default route for #{gw['gateway']}" do
         target '0.0.0.0'
@@ -195,7 +195,7 @@ case node['platform']
         gateway gw['gateway']
         device gw['device'] 
       end
-    end
+    }
 
 # UNSUPPORTED DISTROS
   else
