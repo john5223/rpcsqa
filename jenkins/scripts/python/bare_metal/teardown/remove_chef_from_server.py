@@ -92,6 +92,7 @@ else:
                          to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
 
      if results.display_only == 'false':
+          failed_runs = 0
           for server in to_run_list:
                print "Trying to remove chef on %s with ip %s...." % (server['node'], server['ip'])
                try:
@@ -99,8 +100,13 @@ else:
                    if p == 0:
                        print "chef removal success..."
                    else:
-                       print "chef removal failed..."
-                       sys.exit(p)
+                       print "chef removal failed for server %s..." % chef_name
+                       failed_runs += 1
 
                except Exception, e:
-                    print "chef-client FAILURE: %s " % e
+                    print "chef removal FAILURE: %s " % e
+
+          if failed_runs > 0:
+              sys.exit(1)
+          else:
+              sys.exit(0)
