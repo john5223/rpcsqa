@@ -8,9 +8,6 @@ import time
 
 from chef import *
 
-import sys
-sys.stdout.flush()
-
 
 parser = argparse.ArgumentParser()
 # Get the ip of the server you want to remove
@@ -94,7 +91,6 @@ print "Tearing down and rebooting  '%s'  active models" % policy
 print "Display only: %s " % results.display_only
 
 active_models = razor.simple_active_models(policy)
-
 
 if active_models == {}:
     print "'%s' active models: 0 " % (policy)
