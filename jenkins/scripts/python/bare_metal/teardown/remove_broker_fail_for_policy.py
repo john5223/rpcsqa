@@ -13,10 +13,6 @@ parser.add_argument('--razor_ip', action="store", dest="razor_ip",
 parser.add_argument('--policy', action="store", dest="policy", 
                     required=True, help="Policy to teardown from razor and reboot nodes")
 
-parser.add_argument('--data_bag_location', action="store", dest="data_bag_loc",
-                    default="/var/lib/jenkins/rpcsqa/chef-cookbooks/data_bags/razor_node", 
-                    required=False, help="Policy to teardown from razor and reboot nodes")
-
 parser.add_argument('--display', action="store", dest="display", 
                     default="true", 
                     required=False, help="Display the node information only (will not reboot or teardown am)")
