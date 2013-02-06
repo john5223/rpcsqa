@@ -17,8 +17,7 @@ parser.add_argument('--razor_ip', action="store", dest="razor_ip",
 parser.add_argument('--policy', action="store", dest="policy", 
                     required=True, help="Policy to teardown from razor and reboot nodes")
 
-parser.add_argument('--data_bag_location', action="store", dest="data_bag_loc", 
-                    #default="/home/john/git/rpcsqa/chef-cookbooks/data_bags/razor_node",
+parser.add_argument('--data_bag_location', action="store", dest="data_bag_loc",
                     default="/var/lib/jenkins/rpcsqa/chef-cookbooks/data_bags/razor_node", 
                     required=False, help="Policy to teardown from razor and reboot nodes")
 
@@ -182,8 +181,11 @@ else:
             
             print "Trying to restart server with ip %s...." % ip
             try:
-                subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
-                print "Restart success."
+                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
+                if return_code != 0:
+                    print "Error: Could not restart."
+                else:
+                    print "Restart success."
             except Exception, e:
                 print "Restart FAILURE: %s " % e
                 pass

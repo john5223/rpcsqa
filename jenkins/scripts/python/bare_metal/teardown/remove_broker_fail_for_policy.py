@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import os
+import subprocess
 import json
 import argparse
 from razor_api import razor_api
@@ -13,9 +14,9 @@ parser.add_argument('--razor_ip', action="store", dest="razor_ip",
 parser.add_argument('--policy', action="store", dest="policy", 
                     required=True, help="Policy to teardown from razor and reboot nodes")
 
-parser.add_argument('--display', action="store", dest="display", 
+parser.add_argument('--display_only', action="store", dest="display_only", 
                     default="true", 
-                    required=False, help="Display the node information only (will not reboot or teardown am)")
+                    required=False, help="Display the node information only, dont remove or reboot")
 
 
 # Parse the parameters
@@ -39,7 +40,7 @@ policy = results.policy
 
 print "#################################"
 print "Polling for  '%s'  active models" % policy
-print "Display only: %s " % results.display
+print "Display only: %s " % results.display_only
 
 
 got_active = False
@@ -60,9 +61,9 @@ else:
     print "'%s' active models: %s " % (policy, len(active_models))
     print "#################################" 
     
-    for a in active_models:
+    for active in active_models:
         
-        data = active_models[a]
+        data = active_models[active]
         am_uuid = data['am_uuid']
         curr_state = data['current_state']
         
@@ -70,23 +71,28 @@ else:
             root_password = get_root_pass(data)
             ip = data['eth1_ip']
             
-            print "Removing active model..."
-            try:
-                delete = razor.remove_active_model(am_uuid)
-                print "Deleted: %s " % delete
-            except Exception, e:
-                print "Error removing active model: %s " % e
-                pass
 
-            print "Trying to restart server with ip %s...." % ip
-            try:
-                subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
-                print "Restart success."
-            except Exception, e:
-                print "Restart FAILURE: %s " % e
-                pass
+            if results.display_only == 'true':
+                print "Active Model ID: %s " % active
+                print "IP address: %s " % ip
+            else:
+                print "Removing active model..."
+                try:
+                    delete = razor.remove_active_model(am_uuid)
+                    print "Deleted: %s " % delete
+                except Exception, e:
+                    print "Error removing active model: %s " % e
+                    pass
 
-            print "Sleeping for 15 seconds..."
-            time.sleep(15)
+                print "Trying to restart server with ip %s...." % ip
+                try:
+                    subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
+                    print "Restart success."
+                except Exception, e:
+                    print "Restart FAILURE: %s " % e
+                    pass
+
+                print "Sleeping for 15 seconds..."
+                time.sleep(15)
         else:
             print "Active Model %s is not in broker_fail state, but in %s, skipping" % (am_uuid, curr_state)
