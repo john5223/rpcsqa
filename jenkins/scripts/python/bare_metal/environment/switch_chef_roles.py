@@ -121,6 +121,7 @@ else:
                         print "!!## -- NODE: %s SAVED WITH NEW ENVIRONMENT: %s -- ##!1" % (node, node.chef_environment)
                     except Exception, e:
                         print "!!## -- Failed to save node environment -- Exception: %s -- ##!!" % e
+                        sys.exit(1)
                 else:
                     print "Node %s already had the correct environment, no change" % node
                 
@@ -141,6 +142,7 @@ else:
                         print "!!## -- NODE: %s SAVED WITH NEW RUN LIST %s -- ##!!" % (node, node.run_list)
                     except Exception, e:
                         print "!!## -- Failed to save node -- Exception: %s -- ##!!" % e
+                        sys.exit(1)
                 else:
                     print "!!## -- %s already has the proper run list, not changing -- ##!!" % node
 
