@@ -116,7 +116,7 @@ else:
         print "Polling..."
         active = True
         for a in active_models:
-            if 'broker_' not in active_models[a]['current_state']:
+            if 'broker_success' not in active_models[a]['current_state']:
                 active = False
                 pass 
             if results.display == "true":
