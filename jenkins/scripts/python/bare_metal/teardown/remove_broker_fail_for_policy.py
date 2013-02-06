@@ -13,10 +13,6 @@ parser.add_argument('--razor_ip', action="store", dest="razor_ip",
 parser.add_argument('--policy', action="store", dest="policy", 
                     required=True, help="Policy to teardown from razor and reboot nodes")
 
-parser.add_argument('--display', action="store", dest="display", 
-                    default="true", 
-                    required=False, help="Display the node information only (will not reboot or teardown am)")
-
 
 # Parse the parameters
 results = parser.parse_args()
