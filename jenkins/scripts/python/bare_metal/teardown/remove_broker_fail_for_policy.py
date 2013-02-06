@@ -70,7 +70,7 @@ else:
         curr_state = data['current_state']
         
         if 'broker_fail' in curr_state:
-            root_password = get_root_pass(data)
+            root_pass = get_root_pass(data)
             ip = data['eth1_ip']
             
 
