@@ -62,6 +62,7 @@ else:
     print "'%s' active models: %s " % (policy, len(active_models))
     print "#################################" 
     
+    failed_restart = 0
     for active in active_models:
         
         data = active_models[active]
@@ -91,6 +92,7 @@ else:
 
                     if return_code != 0:
                         print "Error: Could not restart."
+                        failed_restart += 1
                     else:
                         print "Restart success."
 
@@ -102,3 +104,6 @@ else:
                 time.sleep(15)
         else:
             print "Active Model %s is not in broker_fail state, but in %s, skipping" % (am_uuid, curr_state)
+
+    if failed_restart > 0:
+        sys.exit(1)
