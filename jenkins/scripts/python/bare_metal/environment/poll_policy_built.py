@@ -125,7 +125,7 @@ else:
         time.sleep(30)
         active_models = razor.simple_active_models(policy)
 
-    if fail_count > 0 || count >= 15:
+    if fail_count > 0 or count >= 15:
         print "!!## -- One or more of the servers didnt reach broker_success status -- ##!!"
         sys.exit(1)
     else:    
