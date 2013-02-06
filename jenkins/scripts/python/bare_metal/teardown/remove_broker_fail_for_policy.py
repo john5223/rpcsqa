@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import os
+import sys
 import subprocess
 import json
 import argparse
@@ -61,6 +62,7 @@ else:
     print "'%s' active models: %s " % (policy, len(active_models))
     print "#################################" 
     
+    failed_restart = 0
     for active in active_models:
         
         data = active_models[active]
@@ -68,7 +70,7 @@ else:
         curr_state = data['current_state']
         
         if 'broker_fail' in curr_state:
-            root_password = get_root_pass(data)
+            root_pass = get_root_pass(data)
             ip = data['eth1_ip']
             
 
@@ -86,8 +88,14 @@ else:
 
                 print "Trying to restart server with ip %s...." % ip
                 try:
-                    subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
-                    print "Restart success."
+                    return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
+
+                    if return_code != 0:
+                        print "Error: Could not restart."
+                        failed_restart += 1
+                    else:
+                        print "Restart success."
+
                 except Exception, e:
                     print "Restart FAILURE: %s " % e
                     pass
@@ -96,3 +104,6 @@ else:
                 time.sleep(15)
         else:
             print "Active Model %s is not in broker_fail state, but in %s, skipping" % (am_uuid, curr_state)
+
+    if failed_restart > 0:
+        sys.exit(1)

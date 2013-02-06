@@ -60,7 +60,7 @@ razor = razor_api(results.razor_ip)
 policy = results.policy
 
 print "#################################"
-print " Attempting to run chef-cleint for role %s " % results.role
+print " Attempting to remove chef for role %s " % results.role
 print "Display only: %s " % results.display_only
 
 active_models = razor.simple_active_models(policy)
@@ -87,21 +87,27 @@ else:
                     ip = node['ipaddress']
                
                     if results.display_only == 'true':
-                         print "!!## -- ROLE %s FOUND, would run chef-client on %s with ip %s..." % (results.role, node, ip)
+                         print "!!## -- ROLE %s FOUND, would remove chef on %s with ip %s..." % (results.role, node, ip)
                     else:
-                         print "!!## -- ROLE %s FOUND, runnning chef-client on %s with ip %s..." % (results.role, node, ip)
+                         print "!!## -- ROLE %s FOUND, removing chef on %s with ip %s..." % (results.role, node, ip)
                          to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
 
      if results.display_only == 'false':
+          
+          failed_runs = 0
+          
           for server in to_run_list:
-               print "Trying chef-client on %s with ip %s...." % (server['node'], server['ip'])
+               print "Trying to remove chef on %s with ip %s...." % (server['node'], server['ip'])
                try:
-                   return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'chef-client;chef-client'" % (server['root_password'], server['ip']), shell=True)
-                   if return_code == 0:
-                       print "chef-client success..."
+                   return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'apt-get purge -y chef'" % (server['root_password'], server['ip']), shell=True)
+                   if return_code != 0:
+                       print "chef removal success..."
                    else:
-                       print "chef-client failed..."
-                       sys.exit(1)
+                       print "chef removal failed for server %s..." % server['node']
+                       failed_runs += 1
 
                except Exception, e:
-                    print "chef-client FAILURE: %s " % e
+                    print "chef removal FAILURE: %s " % e
+
+          if failed_runs > 0:
+              sys.exit(1)
