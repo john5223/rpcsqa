@@ -16,10 +16,6 @@ parser.add_argument('--razor_ip', action="store", dest="razor_ip",
 parser.add_argument('--policy', action="store", dest="policy", 
                     required=True, help="Razor policy to set chef roles for.")
 
-parser.add_argument('--data_bag_location', action="store", dest="data_bag_loc",
-                    default="/var/lib/jenkins/rpcsqa/chef-cookbooks/data_bags/razor_node", 
-                    required=False, help="Location of chef data bags")
-
 parser.add_argument('--role', action="store", dest="role", 
                     required=True, help="Chef role to run chef-client on")
 
