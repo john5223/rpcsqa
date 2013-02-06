@@ -40,7 +40,7 @@ policy = results.policy
 
 print "#################################"
 print "Polling for  '%s'  active models" % policy
-print "Display only: %s " % results.display
+print "Display only: %s " % results.display_only
 
 
 got_active = False
