@@ -92,15 +92,17 @@ else:
                          to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
 
      if results.display_only == 'false':
+          
           failed_runs = 0
+          
           for server in to_run_list:
                print "Trying to remove chef on %s with ip %s...." % (server['node'], server['ip'])
                try:
-                   p = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'apt-get purge -y chef'" % (server['root_password'], server['ip']), shell=True)
-                   if p == 0:
+                   return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'apt-get purge -y chef'" % (server['root_password'], server['ip']), shell=True)
+                   if return_code != 0:
                        print "chef removal success..."
                    else:
-                       print "chef removal failed for server %s..." % chef_name
+                       print "chef removal failed for server %s..." % server['node']
                        failed_runs += 1
 
                except Exception, e:
@@ -108,5 +110,3 @@ else:
 
           if failed_runs > 0:
               sys.exit(1)
-          else:
-              sys.exit(0)
