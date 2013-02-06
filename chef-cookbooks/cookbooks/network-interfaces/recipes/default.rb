@@ -76,9 +76,9 @@ case node['platform']
       end
     end
 
-    $gateway_array = Array.new
     ruby_block "gather gateways to add to routing table" do
       block do
+        $gateway_array = Array.new
         new_ifaces = node['network_interfaces']['debian']
         new_ifaces.each do | iface |
           gateway_hash = Hash.new
@@ -92,16 +92,17 @@ case node['platform']
       end
     end
 
-    puts "gateway_array length outside ruby_block: #{gateway_array.length}"
-
-    $gateway_array.each do |gw|
-      puts gw
-      #route "default route for #{gw['gateway']}" do
-      #  target '0.0.0.0'
-      #  netmask '0.0.0.0'
-      #  gateway gw['gateway']
-      #  device gw['device'] 
-      #end
+    # need to add loop here to add all new gateways via gateway_hash using
+    # the chef provider library for route
+    # TODO: jwagner
+    route "Adding default gateway to route" do
+      target '0.0.0.0'
+      netmask '0.0.0.0'
+      gateway '198.101.133.1'
+      device 'em1'
+      only_if do
+        $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
+      end
     end
 
 # RHEL DISTROS
@@ -171,9 +172,9 @@ case node['platform']
       end
     end
 
-    $gateway_array = Array.new
     ruby_block "gather gateways to add to routing table" do
       block do
+        $gateway_array = Array.new
         new_ifaces = node['network_interfaces']['redhat']
         new_ifaces.each do | iface |
           gateway_hash = Hash.new
@@ -183,19 +184,21 @@ case node['platform']
             end
           end
           $gateway_array << gateway_hash
-          puts "TOP PUTS: " + $gateway_array
         end
       end
     end
 
-    $gateway_array.each do |gw|
-      puts "bottom puts " + gw
-      #route "default route for #{gw['gateway']}" do
-      #  target '0.0.0.0'
-      #  netmask '0.0.0.0'
-      #  gateway gw['gateway']
-      #  device gw['device'] 
-      #end
+    # need to add loop here to add all new gateways via gateway_hash using
+    # the chef provider library for route
+    # TODO: jwagner
+    route "Adding default gateway to route" do
+      target '0.0.0.0'
+      netmask '0.0.0.0'
+      gateway '198.101.133.1'
+      device 'em1'
+      only_if do
+        $files_changed.length > 0
+      end
     end
 
 # UNSUPPORTED DISTROS
