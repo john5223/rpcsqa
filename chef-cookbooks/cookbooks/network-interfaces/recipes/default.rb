@@ -100,9 +100,6 @@ case node['platform']
       netmask '0.0.0.0'
       gateway '198.101.133.1'
       device 'eth0'
-      only_if do
-        $iface_digest != Digest::MD5.hexdigest(File.read($ifaces_file))
-      end
     end
 
 # RHEL DISTROS
@@ -196,9 +193,6 @@ case node['platform']
       netmask '0.0.0.0'
       gateway '198.101.133.1'
       device 'em1'
-      only_if do
-        $files_changed.length > 0
-      end
     end
 
 # UNSUPPORTED DISTROS
