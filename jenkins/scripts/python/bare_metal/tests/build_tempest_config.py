@@ -99,6 +99,8 @@ else:
                        #print sample_config 
                        tempest_config = str(sample_config) 
                        tempest_config = tempest_config.replace('http://127.0.0.1:5000/v2.0/',url)
+                       tempest_config = tempest_config.replace('{$KEYSTONE_IP}',url)
+                       
                        tempest_config = tempest_config.replace('{$IMAGE_ID}',image_id)
                        tempest_config = tempest_config.replace('{$IMAGE_ID_ALT',image_id)
                        
