@@ -94,31 +94,30 @@ if active_models == {}:
     print "'%s' active models: 0 " % (policy)
     print "#################################"
 else:
-    
-    
     if 'response' in active_models.keys():
         active_models = active_models['response']
     
     print "'%s' active models: %s " % (policy, len(active_models))
     print "#################################"
 
-    #For each active model
-        #get root password 
-        #find uuid from MAC addresses
-        #get data bag for that key to get ip
-        #remove specific active model by uuid
-        #ssh into ip and reboot   
-    
     count = 0
+    fail_count = 0
+    success_count = 0
     active = False
+    
     while active == False and count < 15:
         count += 1               
         print "Polling..."
         active = True
         for a in active_models:
-            if 'broker_success' not in active_models[a]['current_state']:
+            curr_state = active_models[a]['current_state']
+            if 'broker' not in curr_state:
                 active = False
-                pass 
+                pass
+            else:
+                if 'fail' in curr_state:
+                    fail_count += 1
+
             if results.display == "true":
                  temp = { 'am_uuid': active_models[a]['am_uuid'], 'current_state':  active_models[a]['current_state'] }
                  print json.dumps(temp, indent=4)
@@ -126,14 +125,13 @@ else:
         time.sleep(30)
         active_models = razor.simple_active_models(policy)
 
-    if count < 15:    
+    if fail_count > 0 || count >= 15:
+        print "!!## -- One or more of the servers didnt reach broker_success status -- ##!!"
+        sys.exit(1)
+    else:    
         for a in active_models:
             dbag_uuid = get_data_bag_UUID(active_models[a])
             ip = getip_from_data_bag(dbag_uuid)
             print "%s : %s " % (active_models[a]['am_uuid'], ip)
             
         print "!!## -- Broker finished for %s -- ##!!" % policy
-
-    else:
-        print "!!## -- One or more of the servers didnt reach broker status -- ##!!"
-        sys.exit(1)    
