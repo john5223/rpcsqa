@@ -61,9 +61,11 @@ else:
     print "#################################" 
     
     for a in active_models:
+        
         data = active_models[a]
         am_uuid = data['am_uuid']
         curr_state = data['current_state']
+        
         if 'broker_fail' in curr_state:
             root_password = get_root_pass(data)
             ip = data['eth1_ip']
@@ -72,7 +74,6 @@ else:
             try:
                 delete = razor.remove_active_model(am_uuid)
                 print "Deleted: %s " % delete
-                #pass
             except Exception, e:
                 print "Error removing active model: %s " % e
                 pass

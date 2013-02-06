@@ -102,7 +102,6 @@ else:
 
     count = 0
     fail_count = 0
-    success_count = 0
     active = False
     
     while active == False and count < 15:
