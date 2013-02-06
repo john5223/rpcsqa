@@ -110,9 +110,8 @@ else:
         #ssh into ip and reboot   
     
     count = 0
-    
     active = False
-    while active == False and count < 30:
+    while active == False and count < 15:
         count += 1               
         print "Polling..."
         active = True
@@ -127,12 +126,14 @@ else:
         time.sleep(30)
         active_models = razor.simple_active_models(policy)
 
-    if count < 30:    
+    if count < 15:    
         for a in active_models:
             dbag_uuid = get_data_bag_UUID(active_models[a])
             ip = getip_from_data_bag(dbag_uuid)
             print "%s : %s " % (active_models[a]['am_uuid'], ip)
             
-        print "Broker finished for %s " % policy
-         
-            
+        print "!!## -- Broker finished for %s -- ##!!" % policy
+
+    else:
+        print "!!## -- One or more of the servers didnt reach broker status -- ##!!"
+        sys.exit(1)    
