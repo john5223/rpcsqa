@@ -15,7 +15,7 @@ parser.add_argument('--razor_ip', action="store", dest="razor_ip",
                     required=True, help="IP for the Razor server")
 
 parser.add_argument('--policy', action="store", dest="policy", 
-                    default="qa-roush-server"
+                    default="qa-roush-server",
                     required=True, help="Razor policy to set chef roles for.")
 
 parser.add_argument('--role', action="store", dest="role", 
