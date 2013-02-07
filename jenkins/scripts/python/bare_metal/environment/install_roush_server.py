@@ -88,7 +88,7 @@ else:
                     ip = node['ipaddress']
                
                     if results.display_only == 'true':
-                         print "!!## -- ROLE %s FOUND,  %s with ip %s..." % (results.role, node, ip)
+                         print "!!## -- ROLE %s FOUND,  would install roush server on %s with ip %s..." % (results.role, node, ip)
                     else:
                          print "!!## -- ROLE %s FOUND, installing roush server on %s with ip %s..." % (results.role, node, ip)
                          to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
@@ -99,10 +99,11 @@ else:
                try:
                    return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'curl -L https://bcd46edb6e5fd45555c0-409026321750f2e680f86e05ff37dd6d.ssl.cf1.rackcdn.com/install-server.sh | bash'" % (server['root_password'], server['ip']), shell=True)
                    if return_code == 0:
-                       print "chef-client success..."
+                       print "Successfully installed roush server..."
                    else:
-                       print "chef-client failed..."
+                       print "Installing roush server failed..."
                        sys.exit(1)
 
                except Exception, e:
                     print "chef-client FAILURE: %s " % e
+                    sys.exit(1)

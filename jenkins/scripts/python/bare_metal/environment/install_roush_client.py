@@ -92,12 +92,13 @@ else:
                 ip = node['ipaddress']
             
                 if results.display_only == 'true':
-                    print "!!## -- ROLE %s FOUND,  %s with ip %s..." % (results.role, node, ip)
+                    print "!!## -- ROLE %s FOUND,  would install rouch clinet on %s with ip %s..." % (results.role, node, ip)
                 else:
                     print "!!## -- ROLE %s FOUND, installing roush client on %s with ip %s..." % (results.role, node, ip)
                     to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
 
     if results.display_only == 'false':
+        fail = False
         for server in to_run_list:
             print "Setting ROUSH_SERVER environment variable to %s on server %s" % (roush_server_ip, server['node'])
             try:
@@ -110,16 +111,21 @@ else:
             except Exception, e:
                 print "Failed to set ROUSH_SERVER environment variable for server %s @ ip: %s, error: %s" % (server['node'], server['ip'], e)
 
-            """
+            
             print "Attempting to install roush client on %s with ip %s...." % (server['node'], server['ip'])
             try:
                 return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'curl -L https://bcd46edb6e5fd45555c0-409026321750f2e680f86e05ff37dd6d.ssl.cf1.rackcdn.com/install-agent.sh | bash'" % (server['root_password'], server['ip']), shell=True)
                 if return_code == 0:
-                    print "chef-client success..."
+                    print "roush client success..."
                 else:
-                    print "chef-client failed..."
-                    sys.exit(1)
+                    print "roush client failed..."
+                    fail = True
 
             except Exception, e:
                 print "chef-client FAILURE: %s " % e
-            """
+                fail = True
+      
+      # If a client failed, exit script
+      if fail:
+          print "One or more of the roush clients failed, check logs"
+          sys.exit(1)
