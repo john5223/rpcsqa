@@ -90,12 +90,12 @@ else:
                     if results.display_only == 'true':
                          print "!!## -- ROLE %s FOUND,  %s with ip %s..." % (results.role, node, ip)
                     else:
-                         print "!!## -- ROLE %s FOUND, runnning chef-client on %s with ip %s..." % (results.role, node, ip)
+                         print "!!## -- ROLE %s FOUND, installing roush server on %s with ip %s..." % (results.role, node, ip)
                          to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
 
      if results.display_only == 'false':
           for server in to_run_list:
-               print "Trying chef-client on %s with ip %s...." % (server['node'], server['ip'])
+               print "Attempting to install roush server on %s with ip %s...." % (server['node'], server['ip'])
                try:
                    return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'curl -L https://bcd46edb6e5fd45555c0-409026321750f2e680f86e05ff37dd6d.ssl.cf1.rackcdn.com/install-server.sh | bash'" % (server['root_password'], server['ip']), shell=True)
                    if return_code == 0:
