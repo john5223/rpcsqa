@@ -98,6 +98,7 @@ else:
                     to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
 
     if results.display_only == 'false':
+        
         fail = False
         for server in to_run_list:
             print "Setting ROUSH_SERVER environment variable to %s on server %s" % (roush_server_ip, server['node'])
@@ -124,8 +125,6 @@ else:
             except Exception, e:
                 print "chef-client FAILURE: %s " % e
                 fail = True
-      
-      # If a client failed, exit script
-      if fail:
-          print "One or more of the roush clients failed, check logs"
-          sys.exit(1)
+        if fail:
+            print "One or more of the roush clients failed, check logs"
+            sys.exit(1)
