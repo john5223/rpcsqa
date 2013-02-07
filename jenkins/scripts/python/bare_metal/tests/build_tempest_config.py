@@ -102,6 +102,9 @@ else:
                        tempest_config = tempest_config.replace('{$KEYSTONE_IP}',private_ip)
                        tempest_config = tempest_config.replace('{$IMAGE_ID}',image_id)
                        tempest_config = tempest_config.replace('{$IMAGE_ID_ALT',image_id)
+                       print "##################################"
+                       print tempest_config
+                       print "##################################"
                        
                        tempest_config_path = "%s/etc/%s.conf" % (results.tempest_dir, results.policy)
                        with open(tempest_config_path, 'w') as w:
