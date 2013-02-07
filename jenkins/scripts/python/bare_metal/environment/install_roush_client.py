@@ -103,11 +103,12 @@ else:
             try:
                 return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'export ROUSH_SERVER=%s'" % (server['root_password'], server['ip'], roush_server_ip), shell=True)
                 if return_code == 0:
-                    print "Successfully exported %s to environment variable ROUSH_SERVER"
+                    print "Successfully exported %s to environment variable ROUSH_SERVER" % roush_server_ip
                 else:
-                    print "Failed to set ROUSH_SERVER environment variable for server"
+                    print "Failed to set ROUSH_SERVER environment variable for server %s @ ip: %s, exited with code %s" % (server['node'], server['ip'], return_code)
                     pass
             except Exception, e:
+                print "Failed to set ROUSH_SERVER environment variable for server %s @ ip: %s, error: %s" % (server['node'], server['ip'], e)
 
             """
             print "Attempting to install roush client on %s with ip %s...." % (server['node'], server['ip'])
