@@ -86,7 +86,7 @@ else:
             node = Node(chef_name)
             if 'role[qa-roush-server]' in node.run_list:
                 roush_server_ip = node['ipaddress']
-                print "Roush Server Node: %s with ip %s" 5 (node, roush_server_ip)
+                print "Roush Server Node: %s with ip %s" % (node, roush_server_ip)
 
             if 'role[%s]' % results.role in node.run_list:
                 ip = node['ipaddress']
