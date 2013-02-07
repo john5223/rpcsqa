@@ -103,7 +103,7 @@ else:
                    if return_code != 0:
                        print "chef removal success..."
                    else:
-                       print "chef removal failed for server %s..." % server['node']
+                       print "chef removal failed for server %s, exited with return code %i..." % (server['node'], return_code)
                        failed_runs += 1
 
                except Exception, e:
