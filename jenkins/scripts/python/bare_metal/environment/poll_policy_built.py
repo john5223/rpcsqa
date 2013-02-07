@@ -126,6 +126,10 @@ else:
 
     if fail_count > 0 or count >= 15:
         print "!!## -- One or more of the servers didnt reach broker_success status -- ##!!"
+        for a in active_models:
+            dbag_uuid = get_data_bag_UUID(active_models[a])
+            ip = getip_from_data_bag(dbag_uuid)
+            print "%s : %s " % (active_models[a]['am_uuid'], ip)
         sys.exit(1)
     else:    
         for a in active_models:
