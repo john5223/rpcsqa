@@ -92,7 +92,7 @@ else:
                 ip = node['ipaddress']
             
                 if results.display_only == 'true':
-                    print "!!## -- ROLE %s FOUND,  would install rouch clinet on %s with ip %s..." % (results.role, node, ip)
+                    print "!!## -- ROLE %s FOUND,  would install rouch client on %s with ip %s..." % (results.role, node, ip)
                 else:
                     print "!!## -- ROLE %s FOUND, installing roush client on %s with ip %s..." % (results.role, node, ip)
                     to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
