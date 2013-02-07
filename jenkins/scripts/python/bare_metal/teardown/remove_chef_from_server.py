@@ -102,6 +102,8 @@ else:
                    return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'apt-get purge -y chef'" % (server['root_password'], server['ip']), shell=True)
                    if return_code == 0:
                        print "chef removal success..."
+                   elif: return_code == 100:
+                       print "chef didnt exists on the server...."
                    else:
                        print "chef removal failed for server %s, exited with return code %i..." % (server['node'], return_code)
                        failed_runs += 1
