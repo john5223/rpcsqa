@@ -97,29 +97,29 @@ else:
                     print "!!## -- ROLE %s FOUND, installing roush client on %s with ip %s..." % (results.role, node, ip)
                     to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
 
-     if results.display_only == 'false':
-        for server in to_run_list:
-            
-            print "Setting ROUSH_SERVER environment variable to %s on server %s" % (roush_server_ip, server['node'])
-            try:
-                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'export ROUSH_SERVER=%s'" % (server['root_password'], server['ip'], roush_server_ip), shell=True)
-                if return_code == 0:
-                    print "Successfully exported %s to environment variable ROUSH_SERVER"
-                else:
-                    print "Failed to set ROUSH_SERVER environment variable for server"
-                    pass
-            except Exception, e:
+   if results.display_only == 'false':
+      for server in to_run_list:
+          
+          print "Setting ROUSH_SERVER environment variable to %s on server %s" % (roush_server_ip, server['node'])
+          try:
+              return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'export ROUSH_SERVER=%s'" % (server['root_password'], server['ip'], roush_server_ip), shell=True)
+              if return_code == 0:
+                  print "Successfully exported %s to environment variable ROUSH_SERVER"
+              else:
+                  print "Failed to set ROUSH_SERVER environment variable for server"
+                  pass
+          except Exception, e:
 
-            """
-            print "Attempting to install roush client on %s with ip %s...." % (server['node'], server['ip'])
-            try:
-                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'curl -L https://bcd46edb6e5fd45555c0-409026321750f2e680f86e05ff37dd6d.ssl.cf1.rackcdn.com/install-agent.sh | bash'" % (server['root_password'], server['ip']), shell=True)
-                if return_code == 0:
-                    print "chef-client success..."
-                else:
-                    print "chef-client failed..."
-                    sys.exit(1)
+          """
+          print "Attempting to install roush client on %s with ip %s...." % (server['node'], server['ip'])
+          try:
+              return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'curl -L https://bcd46edb6e5fd45555c0-409026321750f2e680f86e05ff37dd6d.ssl.cf1.rackcdn.com/install-agent.sh | bash'" % (server['root_password'], server['ip']), shell=True)
+              if return_code == 0:
+                  print "chef-client success..."
+              else:
+                  print "chef-client failed..."
+                  sys.exit(1)
 
-            except Exception, e:
-                print "chef-client FAILURE: %s " % e
-            """
+          except Exception, e:
+              print "chef-client FAILURE: %s " % e
+          """
