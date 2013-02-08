@@ -84,6 +84,7 @@ else:
                                 for image in images['images']:
                                     if image['name'] == 'cirros-image':
                                         image_id = image['id']
+                                        print "Image ID: %s " % image_id
                         
                    except Exception, e:
                        print e
@@ -100,8 +101,11 @@ else:
                        tempest_config = str(sample_config) 
                        tempest_config = tempest_config.replace('http://127.0.0.1:5000/v2.0/',url)
                        tempest_config = tempest_config.replace('{$KEYSTONE_IP}',private_ip)
+                       tempest_config = tempest_config.replace('localhost',private_ip)
+                       
                        tempest_config = tempest_config.replace('{$IMAGE_ID}',image_id)
                        tempest_config = tempest_config.replace('{$IMAGE_ID_ALT',image_id)
+                       
                        print "##################################"
                        print tempest_config
                        print "##################################"
