@@ -191,6 +191,6 @@ else:
                 print "Restart FAILURE: %s " % e
                 pass
             
-            print "Sleeping for 15 seconds..."
-            time.sleep(15)
+            print "Sleeping for 30 seconds..."
+            time.sleep(30)
             print "#################################"
