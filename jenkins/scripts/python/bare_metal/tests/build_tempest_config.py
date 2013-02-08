@@ -60,6 +60,7 @@ else:
                         eth1_ips = node.attributes['network']['interfaces']['eth1']['addresses'].to_dict().keys()
                         private_ip = [x for x in eth1_ips if x.count('.')>0]
                         
+                        
                         print "Private ip: %s "  % private_ip
                         if len(private_ip)>0:
                             private_ip = private_ip[0]
@@ -88,6 +89,7 @@ else:
                         
                    except Exception, e:
                        print e
+                       sys.exit(1)
                    
                    
                    tempest_dir = ''
