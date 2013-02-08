@@ -106,7 +106,7 @@ else:
                        tempest_config = tempest_config.replace('localhost',private_ip)
                        
                        tempest_config = tempest_config.replace('{$IMAGE_ID}',image_id)
-                       tempest_config = tempest_config.replace('{$IMAGE_ID_ALT',image_id)
+                       tempest_config = tempest_config.replace('{$IMAGE_ID_ALT}',image_id)
                        
                        print "##################################"
                        print tempest_config
