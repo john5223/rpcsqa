@@ -8,6 +8,7 @@ parser.add_argument('--razor_ip', action="store", dest="razor_ip", required=True
 parser.add_argument('--policy', action="store", dest="policy", required=True, help="Razor policy to set chef roles for.")
 parser.add_argument('--data_bag_location', action="store", dest="data_bag_loc", default="/var/lib/jenkins/rpcsqa/chef-cookbooks/data_bags/razor_node",  required=False, help="Location of chef data bags")
 parser.add_argument('--tempest_dir', action="store", dest="tempest_dir", required=True, default="/var/lib/jenkins/tempest/folsom/tempest", help="")
+parser.add_argument('--tempest_version', action="store", dest="tempest_version", required=False, default="folsom")
 
 #parser.add_argument('--role', action="store", dest="role", required=True, help="Chef role to run chef-client on")
 parser.add_argument('--chef_url', action="store", dest="chef_url", default="http://198.101.133.4:4000", required=False, help="client for chef")
@@ -15,6 +16,8 @@ parser.add_argument('--chef_client', action="store", dest="chef_client", default
 parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem", default="/var/lib/jenkins/rpcsqa/.chef/jenkins.pem", required=False, help="client pem for chef")
 parser.add_argument('--display_only', action="store", dest="display_only", default="true", required=False, help="Display the node information only (will not reboot or teardown am)")
 results = parser.parse_args()
+
+
 
 def get_chef_name(data):
     try:
@@ -94,7 +97,8 @@ else:
                    
                    tempest_dir = ''
                    try:
-                       sample_path = "%s/etc/base.conf" % results.tempest_dir
+                       
+                       sample_path = "%s/etc/base_%s.conf" % (results.tempest_dir, results.tempest_version)
                        
                        with open(sample_path) as f:
                            sample_config = f.read()
@@ -104,6 +108,7 @@ else:
                        tempest_config = tempest_config.replace('http://127.0.0.1:5000/v2.0/',url)
                        tempest_config = tempest_config.replace('{$KEYSTONE_IP}',private_ip)
                        tempest_config = tempest_config.replace('localhost',private_ip)
+                       tempest_config = tempest_config.replace('127.0.0.1',private_ip)
                        
                        tempest_config = tempest_config.replace('{$IMAGE_ID}',image_id)
                        tempest_config = tempest_config.replace('{$IMAGE_ID_ALT}',image_id)
