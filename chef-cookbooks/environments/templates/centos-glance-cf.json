@@ -84,10 +84,7 @@
       "images": [
         "cirros",
         "precise"
-      ],
-      "api": {
-        "default_store": "swift"
-      }
+      ]
     }
   }
 }
