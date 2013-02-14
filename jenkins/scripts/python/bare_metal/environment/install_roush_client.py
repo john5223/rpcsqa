@@ -107,7 +107,7 @@ else:
         
             print "Attempting to install roush client on %s with ip %s...." % (server['node'], server['ip'])
             try:
-                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'export ROUSH_SERVER=%s;curl -L %s | bash'" % (server['root_password'], server['ip'], roush_server_ip, results.cdn_url), shell=True)
+                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'export ROUSH_SERVER=%s;curl -L \"%s\" | bash'" % (server['root_password'], server['ip'], roush_server_ip, results.cdn_url), shell=True)
                 if return_code == 0:
                     print "roush client success..."
                 else:
