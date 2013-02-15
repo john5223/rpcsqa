@@ -97,7 +97,8 @@ else:
                         try:
                             sed_string = "sed -i -E 's/^Defaults[ \t]+requiretty/# Defaults requiretty/g' /etc/sudoers"
                             print sed_string
-                            return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s '%s'" % (server['root_password'], server['ip'], sed_string), shell=True)
+                            return_code = subprocess.check_output("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s '%s'" % (server['root_password'], server['ip'], sed_string), shell=True)
+                            print return_code
                             if return_code == 0:
                                 print "Successfully commented out requiretty..."
                             else:
