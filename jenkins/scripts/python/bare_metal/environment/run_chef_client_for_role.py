@@ -98,10 +98,11 @@ else:
                             sed_regex = "s/^Defaults[ ]\+requiretty/#Defaults requiretty/g"
                             sed_string = "sed -i -e '%s' /etc/sudoers" % sed_regex
                             print "SED STRING: %s" % sed_string
-                            return_code = subprocess.check_output("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s \'%s\'" % (server['root_password'], server['ip'], sed_string), stderr=subprocess.STDOUT, shell=True)
+                            return_code = subprocess.check_output("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s %s" % (server['root_password'], server['ip'], sed_string), stderr=subprocess.STDOUT, shell=True)
                             print "Successfully commented out requiretty..."
                         except Exception, e:
                             print "Failed to comment out requiretty..."
+                            print "Command: %s" % e.cmd
                             print "Return Code: %s..." % e.returncode
                             print "Output: %s..." % e.output
                             sys.exit(1)
