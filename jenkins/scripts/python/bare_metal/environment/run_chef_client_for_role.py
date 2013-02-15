@@ -92,7 +92,7 @@ else:
                         # Only need to comment out require tty on rhel
                         # TODO (jacob) : move this to kickstart???
                         
-                        if server['platform_family'] is 'rhel':
+                        if server['platform'] is 'rhel':
                             print "Commenting out requiretty..."
                             try:
                                 sed_string = "sed -i -E 's/^Defaults[ \t]+requiretty/# Defaults requiretty/g' /etc/sudoers"
