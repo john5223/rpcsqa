@@ -97,7 +97,6 @@ else:
                             try:
                                 sed_string = "sed -i -E 's/^Defaults[ \t]+requiretty/# Defaults requiretty/g' /etc/sudoers"
                                 return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s '%s'" % (server['root_password'], server['ip'], sed_string), shell=True)
-                                
                                 if return_code == 0:
                                     print "Successfully commented out requiretty..."
                                 else:
@@ -115,6 +114,6 @@ else:
                                 else:
                                     print "chef-client failed..."
                                     sys.exit(1)
-
                             except Exception, e:
                                 print "chef-client FAILURE: %s " % e
+                                
