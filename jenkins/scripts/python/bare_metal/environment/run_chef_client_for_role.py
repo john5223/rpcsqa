@@ -97,16 +97,17 @@ else:
                         try:
                             sed_regex = "s/^Defaults[ \\t]+requiretty/# Defaults requiretty/g"
                             sed_string = "sed -i -E '%s' /etc/sudoers" % sed_regex
-                            print sed_string
-                            return_code = subprocess.check_output("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s '%s'" % (server['root_password'], server['ip'], sed_string), shell=True)
-                            print return_code
+                            print "SED STRING: %s" % sed_string
+                            return_code = subprocess.check_output("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s '%s'" % (server['root_password'], server['ip'], sed_string), stderr=subprocess.STDOUT, shell=True)
                             if return_code == 0:
                                 print "Successfully commented out requiretty..."
                             else:
                                 print "Failed to comment out requiretty...exiting with code: %s" % return_code
                                 sys.exit(1)
                         except Exception, e:
-                            print "Failed to comment out requiretty...exiting with error: %s" % e
+                            print "Failed to comment out requiretty..."
+                            print "Return Code: %s..." % e.returncode
+                            print "Output: %s..." % e.output
                             sys.exit(1)
                     
                     print "Trying chef-client on %s with ip %s...." % (server['node'], server['ip'])
