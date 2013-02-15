@@ -88,18 +88,24 @@ else:
 
                 if results.display_only == 'false':
                     for server in to_run_list:
+                        
                         # Only need to comment out require tty on rhel
                         # TODO (jacob) : move this to kickstart???
+                        
                         if server['platform_family'] is 'rhel':
                             print "Commenting out requiretty..."
                             try:
                                 sed_string = "sed -i -E 's/^Defaults[ \t]+requiretty/# Defaults requiretty/g' /etc/sudoers"
                                 return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s '%s'" % (server['root_password'], server['ip'], sed_string), shell=True)
+                                
                                 if return_code == 0:
                                     print "Successfully commented out requiretty..."
                                 else:
                                     print "Failed to comment out requiretty...exiting"
                                     sys.exit(1)
+                            except Exception, e:
+                                print "Failed to comment out requiretty...exiting"
+                                sys.exit(1)
 
                         print "Trying chef-client on %s with ip %s...." % (server['node'], server['ip'])
                             try:
@@ -111,4 +117,4 @@ else:
                                     sys.exit(1)
 
                             except Exception, e:
-                            print "chef-client FAILURE: %s " % e
+                                print "chef-client FAILURE: %s " % e
