@@ -62,58 +62,58 @@ if active_models == {}:
 else:
     if 'response' in active_models.keys():
         active_models = active_models['response']
-        print "'%s' active models: %s " % (policy, len(active_models))
-        print "#################################"
+    print "'%s' active models: %s " % (policy, len(active_models))
+    print "#################################"
 
-        # Gather all of the active models for the policy and get information about them
-        for active in active_models:
-            data = active_models[active]
-            chef_name = get_chef_name(data)
-            root_password = get_root_pass(data)
+    # Gather all of the active models for the policy and get information about them
+    for active in active_models:
+        data = active_models[active]
+        chef_name = get_chef_name(data)
+        root_password = get_root_pass(data)
 
-            with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
-                node = Node(chef_name)
+        with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
+            node = Node(chef_name)
 
-                if 'role[%s]' % results.role in node.run_list:
-                    ip = node['ipaddress']
-                    platform_family = node['platform_family']
+            if 'role[%s]' % results.role in node.run_list:
+                ip = node['ipaddress']
+                platform_family = node['platform_family']
 
-                    if results.display_only == 'true':
-                        print "!!## -- ROLE %s FOUND, would run chef-client on %s with ip %s..." % (results.role, node, ip)
-                    else:
-                        print "!!## -- ROLE %s FOUND, runnning chef-client on %s with ip %s..." % (results.role, node, ip)
+                if results.display_only == 'true':
+                    print "!!## -- ROLE %s FOUND, would run chef-client on %s with ip %s..." % (results.role, node, ip)
+                else:
+                    print "!!## -- ROLE %s FOUND, runnning chef-client on %s with ip %s..." % (results.role, node, ip)
 
-                        # append the server to the to run list
-                        to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password, 'platform_family': platform_family})
+                    # append the server to the to run list
+                    to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password, 'platform_family': platform_family})
 
-                if results.display_only == 'false':
-                    for server in to_run_list:
-                        
-                        print server
-                        # Only need to comment out require tty on rhel
-                        # TODO (jacob) : move this to kickstart???
-                        
-                        if server['platform_family'] is 'rhel':
-                            print "Commenting out requiretty..."
-                            try:
-                                sed_string = "sed -i -E 's/^Defaults[ \t]+requiretty/# Defaults requiretty/g' /etc/sudoers"
-                                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s '%s'" % (server['root_password'], server['ip'], sed_string), shell=True)
-                                if return_code == 0:
-                                    print "Successfully commented out requiretty..."
-                                else:
-                                    print "Failed to comment out requiretty...exiting"
-                                    sys.exit(1)
-                            except Exception, e:
+            if results.display_only == 'false':
+                for server in to_run_list:
+                    
+                    print server
+                    # Only need to comment out require tty on rhel
+                    # TODO (jacob) : move this to kickstart???
+                    
+                    if server['platform_family'] is 'rhel':
+                        print "Commenting out requiretty..."
+                        try:
+                            sed_string = "sed -i -E 's/^Defaults[ \t]+requiretty/# Defaults requiretty/g' /etc/sudoers"
+                            return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s '%s'" % (server['root_password'], server['ip'], sed_string), shell=True)
+                            if return_code == 0:
+                                print "Successfully commented out requiretty..."
+                            else:
                                 print "Failed to comment out requiretty...exiting"
                                 sys.exit(1)
-                        
-                        print "Trying chef-client on %s with ip %s...." % (server['node'], server['ip'])
-                        try:
-                            return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'chef-client;chef-client'" % (server['root_password'], server['ip']), shell=True)
-                            if return_code == 0:
-                                print "chef-client success..."
-                            else:
-                                print "chef-client failed..."
-                                sys.exit(1)
                         except Exception, e:
-                            print "chef-client FAILURE: %s " % e
+                            print "Failed to comment out requiretty...exiting"
+                            sys.exit(1)
+                    
+                    print "Trying chef-client on %s with ip %s...." % (server['node'], server['ip'])
+                    try:
+                        return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'chef-client;chef-client'" % (server['root_password'], server['ip']), shell=True)
+                        if return_code == 0:
+                            print "chef-client success..."
+                        else:
+                            print "chef-client failed..."
+                            sys.exit(1)
+                    except Exception, e:
+                        print "chef-client FAILURE: %s " % e
