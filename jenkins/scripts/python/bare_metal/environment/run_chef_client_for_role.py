@@ -105,15 +105,13 @@ else:
                             except Exception, e:
                                 print "Failed to comment out requiretty...exiting"
                                 sys.exit(1)
-
                         print "Trying chef-client on %s with ip %s...." % (server['node'], server['ip'])
-                            try:
-                                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'chef-client;chef-client'" % (server['root_password'], server['ip']), shell=True)
-                                if return_code == 0:
-                                    print "chef-client success..."
-                                else:
-                                    print "chef-client failed..."
-                                    sys.exit(1)
-                            except Exception, e:
-                                print "chef-client FAILURE: %s " % e
-                                
+                        try:
+                            return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'chef-client;chef-client'" % (server['root_password'], server['ip']), shell=True)
+                            if return_code == 0:
+                                print "chef-client success..."
+                            else:
+                                print "chef-client failed..."
+                                sys.exit(1)
+                        except Exception, e:
+                            print "chef-client FAILURE: %s " % e
