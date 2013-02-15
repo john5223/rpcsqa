@@ -62,38 +62,38 @@ if active_models == {}:
 else:
     if 'response' in active_models.keys():
         active_models = active_models['response']
-        print "'%s' active models: %s " % (policy, len(active_models))
-        print "#################################"
+    print "'%s' active models: %s " % (policy, len(active_models))
+    print "#################################"
 
-        # Gather all of the active models for the policy and get information about them
-        for active in active_models:
-            data = active_models[active]
-            chef_name = get_chef_name(data)
-            root_password = get_root_pass(data)
+    # Gather all of the active models for the policy and get information about them
+    for active in active_models:
+        data = active_models[active]
+        chef_name = get_chef_name(data)
+        root_password = get_root_pass(data)
 
-            with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
-                node = Node(chef_name)
+        with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
+            node = Node(chef_name)
 
-                if 'role[%s]' % results.role in node.run_list:
-                    ip = node['ipaddress']
+            if 'role[%s]' % results.role in node.run_list:
+                ip = node['ipaddress']
 
-                    if results.display_only == 'true':
-                        print "!!## -- ROLE %s FOUND,  would install roush server on %s with ip %s..." % (results.role, node, ip)
-                    else:
-                        print "!!## -- ROLE %s FOUND, installing roush server on %s with ip %s..." % (results.role, node, ip)
-                        to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
+                if results.display_only == 'true':
+                    print "!!## -- ROLE %s FOUND,  would install roush server on %s with ip %s..." % (results.role, node, ip)
+                else:
+                    print "!!## -- ROLE %s FOUND, installing roush server on %s with ip %s..." % (results.role, node, ip)
+                    to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
 
-                if results.display_only == 'false':
-                    for server in to_run_list:
-                        print "Attempting to install roush server on %s with ip %s...." % (server['node'], server['ip'])
-                        try:
-                            return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'curl -L \"%s\" | bash'" % (server['root_password'], server['ip'], results.cdn_url), shell=True)
-                            if return_code == 0:
-                                print "Successfully installed roush server..."
-                            else:
-                                print "Installing roush server failed..."
-                                sys.exit(1)
-
-                        except Exception, e:
-                            print "chef-client FAILURE: %s " % e
+            if results.display_only == 'false':
+                for server in to_run_list:
+                    print "Attempting to install roush server on %s with ip %s...." % (server['node'], server['ip'])
+                    try:
+                        return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'curl -L \"%s\" | bash'" % (server['root_password'], server['ip'], results.cdn_url), shell=True)
+                        if return_code == 0:
+                            print "Successfully installed roush server..."
+                        else:
+                            print "Installing roush server failed..."
                             sys.exit(1)
+
+                    except Exception, e:
+                        print "chef-client FAILURE: %s " % e
+                        sys.exit(1)
