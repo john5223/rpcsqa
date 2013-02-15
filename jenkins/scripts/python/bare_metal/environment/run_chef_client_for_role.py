@@ -89,7 +89,6 @@ else:
             if results.display_only == 'false':
                 for server in to_run_list:
                     
-                    print server
                     # Only need to comment out require tty on rhel
                     # TODO (jacob) : move this to kickstart???
                     
