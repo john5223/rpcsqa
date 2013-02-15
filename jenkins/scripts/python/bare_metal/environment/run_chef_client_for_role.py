@@ -100,10 +100,10 @@ else:
                             if return_code == 0:
                                 print "Successfully commented out requiretty..."
                             else:
-                                print "Failed to comment out requiretty...exiting"
+                                print "Failed to comment out requiretty...exiting with code: %s" % return_code
                                 sys.exit(1)
                         except Exception, e:
-                            print "Failed to comment out requiretty...exiting with error %s" % e
+                            print "Failed to comment out requiretty...exiting with error: %s" % e
                             sys.exit(1)
                     
                     print "Trying chef-client on %s with ip %s...." % (server['node'], server['ip'])
