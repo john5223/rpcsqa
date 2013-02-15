@@ -95,7 +95,7 @@ else:
                     if server['platform_family'] == 'rhel':
                         print "Commenting out requiretty..."
                         try:
-                            sed_regex = "s/^Defaults[ ]\+requiretty/#Defaults requiretty/g"
+                            sed_regex = "s/^Defaults[ \\t]\+requiretty/#Defaults requiretty/g"
                             sed_string = "sed -i -e '%s' /etc/sudoers" % sed_regex
                             print "SED STRING: %s" % sed_string
                             return_code = subprocess.check_output("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s '%s'" % (server['root_password'], server['ip'], sed_string), stderr=subprocess.STDOUT, shell=True)
