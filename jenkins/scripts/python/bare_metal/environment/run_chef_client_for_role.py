@@ -76,7 +76,7 @@ else:
 
                 if 'role[%s]' % results.role in node.run_list:
                     ip = node['ipaddress']
-                    platform = node['platform_family']
+                    platform_family = node['platform_family']
 
                     if results.display_only == 'true':
                         print "!!## -- ROLE %s FOUND, would run chef-client on %s with ip %s..." % (results.role, node, ip)
@@ -84,15 +84,16 @@ else:
                         print "!!## -- ROLE %s FOUND, runnning chef-client on %s with ip %s..." % (results.role, node, ip)
 
                         # append the server to the to run list
-                        to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
+                        to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password, 'platform_family': platform_family})
 
                 if results.display_only == 'false':
                     for server in to_run_list:
                         
+                        print server
                         # Only need to comment out require tty on rhel
                         # TODO (jacob) : move this to kickstart???
                         
-                        if server['platform'] is 'rhel':
+                        if server['platform_family'] is 'rhel':
                             print "Commenting out requiretty..."
                             try:
                                 sed_string = "sed -i -E 's/^Defaults[ \t]+requiretty/# Defaults requiretty/g' /etc/sudoers"
@@ -105,6 +106,7 @@ else:
                             except Exception, e:
                                 print "Failed to comment out requiretty...exiting"
                                 sys.exit(1)
+                        
                         print "Trying chef-client on %s with ip %s...." % (server['node'], server['ip'])
                         try:
                             return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'chef-client;chef-client'" % (server['root_password'], server['ip']), shell=True)
