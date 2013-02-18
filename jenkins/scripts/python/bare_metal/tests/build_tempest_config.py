@@ -59,11 +59,15 @@ else:
                         ip = node['ipaddress']
                         
                         #print node.attributes.to_dict()
+                        net_inf = node.attributes['network']['interfaces'].to_dict()
                         
-                        eth1_ips = node.attributes['network']['interfaces']['eth1']['addresses'].to_dict().keys()
+                        
+                        if "em2" in net_inf:
+                            private_ip = net_inf['em2']['addresses']
+                        else:
+                            eth1_ips = net_inf['eth1']['addresses']
+                        
                         private_ip = [x for x in eth1_ips if x.count('.')>0]
-                        
-                        
                         print "Private ip: %s "  % private_ip
                         if len(private_ip)>0:
                             private_ip = private_ip[0]
