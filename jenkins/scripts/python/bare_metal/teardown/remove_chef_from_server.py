@@ -81,23 +81,23 @@ else:
                     print "!!## -- ROLE %s FOUND, removing chef on %s with ip %s..." % (results.role, node, ip)
                     to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
 
-            if results.display_only == 'false':
-                failed_runs = 0
+    if results.display_only == 'false':
+        failed_runs = 0
 
-                for server in to_run_list:
-                    print "Trying to remove chef on %s with ip %s...." % (server['node'], server['ip'])
-                    try:
-                        return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'apt-get remove purge -y chef; rm -rf /etc/chef'" % (server['root_password'], server['ip']), shell=True)
-                        if return_code == 0:
-                            print "chef removal success..."
-                        elif return_code == 100:
-                            print "chef didnt exists on the server...."
-                        else:
-                            print "chef removal failed for server %s, exited with return code %i..." % (server['node'], return_code)
-                            failed_runs += 1
+        for server in to_run_list:
+            print "Trying to remove chef on %s with ip %s...." % (server['node'], server['ip'])
+            try:
+                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'apt-get remove purge -y chef; rm -rf /etc/chef'" % (server['root_password'], server['ip']), shell=True)
+                if return_code == 0:
+                    print "chef removal success..."
+                elif return_code == 100:
+                    print "chef didnt exists on the server...."
+                else:
+                    print "chef removal failed for server %s, exited with return code %i..." % (server['node'], return_code)
+                    failed_runs += 1
 
-                    except Exception, e:
-                        print "chef removal FAILURE: %s " % e
+            except Exception, e:
+                print "chef removal FAILURE: %s " % e
 
-                if failed_runs > 0:
-                    sys.exit(1)
+        if failed_runs > 0:
+            sys.exit(1)

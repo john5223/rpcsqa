@@ -86,34 +86,34 @@ else:
                     # append the server to the to run list
                     to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password, 'platform_family': platform_family})
 
-            if results.display_only == 'false':
-                for server in to_run_list:
-                    
-                    # Only need to comment out require tty on rhel
-                    # TODO (jacob) : move this to kickstart???
-                    
-                    if server['platform_family'] == 'rhel':
-                        print "Commenting out requiretty..."
-                        try:
-                            sed_regex = "s/^Defaults[ \\t]+requiretty/#Defaults requiretty/g"
-                            sed_string = "sed -i -E \'%s\' /etc/sudoers" % sed_regex
-                            print "SED STRING: %s" % sed_string
-                            return_code = subprocess.check_output("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s \"%s\"" % (server['root_password'], server['ip'], sed_string), stderr=subprocess.STDOUT, shell=True)
-                            print "Successfully commented out requiretty..."
-                        except Exception, e:
-                            print "Failed to comment out requiretty..."
-                            print "Command: %s" % e.cmd
-                            print "Return Code: %s..." % e.returncode
-                            print "Output: %s..." % e.output
-                            sys.exit(1)
-                    
-                    print "Trying chef-client on %s with ip %s...." % (server['node'], server['ip'])
-                    try:
-                        return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'chef-client;chef-client'" % (server['root_password'], server['ip']), shell=True)
-                        if return_code == 0:
-                            print "chef-client success..."
-                        else:
-                            print "chef-client failed..."
-                            sys.exit(1)
-                    except Exception, e:
-                        print "chef-client FAILURE: %s " % e
+    if results.display_only == 'false' and len(to_run_list) > 0:
+        for server in to_run_list:
+            
+            # Only need to comment out require tty on rhel
+            # TODO (jacob) : move this to kickstart???
+            
+            if server['platform_family'] == 'rhel':
+                print "Commenting out requiretty..."
+                try:
+                    sed_regex = "s/^Defaults[ \\t]+requiretty/#Defaults requiretty/g"
+                    sed_string = "sed -i -E \'%s\' /etc/sudoers" % sed_regex
+                    print "SED STRING: %s" % sed_string
+                    return_code = subprocess.check_output("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s \"%s\"" % (server['root_password'], server['ip'], sed_string), stderr=subprocess.STDOUT, shell=True)
+                    print "Successfully commented out requiretty..."
+                except Exception, e:
+                    print "Failed to comment out requiretty..."
+                    print "Command: %s" % e.cmd
+                    print "Return Code: %s..." % e.returncode
+                    print "Output: %s..." % e.output
+                    sys.exit(1)
+            
+            print "Trying chef-client on %s with ip %s...." % (server['node'], server['ip'])
+            try:
+                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'chef-client;chef-client'" % (server['root_password'], server['ip']), shell=True)
+                if return_code == 0:
+                    print "chef-client success..."
+                else:
+                    print "chef-client failed..."
+                    sys.exit(1)
+            except Exception, e:
+                print "chef-client FAILURE: %s " % e

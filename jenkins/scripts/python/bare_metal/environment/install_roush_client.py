@@ -100,7 +100,7 @@ else:
                     print "!!## -- ROLE %s FOUND, installing roush client on %s with ip %s..." % (results.role, node, ip)
                     to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
 
-    if results.display_only == 'false':
+    if results.display_only == 'false' and len(to_run_list) > 0:
         
         fail = False
         for server in to_run_list:
