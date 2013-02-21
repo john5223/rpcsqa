@@ -115,6 +115,13 @@ else:
                 fo.write(to_write)
             fo.close()
             print "env.sh successfully saved"
+            
+        try:
+            fo = open("env.sh", "r")
+        except IOError:
+            print "Failed to open file env.sh"
+        else:
+            print fo.read()
 
         session = ssh_session("root", roush_server_ip, roush_server_password, True)
         print session
