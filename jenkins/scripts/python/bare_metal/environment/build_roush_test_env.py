@@ -130,7 +130,7 @@ else:
 
         print "Running roush tests on %s with ip %s...." % (server['node'], server['ip'])
         try:
-            command_string = "apt-get install git python-pip -y; mkdir /opt; cd /opt; git clone %s; cd roush-testerator; mv /root/env.sh .; source env.sh; pip install -r tools/pip-requires; nosetests tests/test_happy_path.py" % (results.roush_test_repo)
+            command_string = "apt-get install git python-pip -y; mkdir -p /opt; cd /opt; git clone %s; cd roush-testerator; mv /root/env.sh .; source env.sh; pip install -r tools/pip-requires; nosetests tests/test_happy_path.py" % (results.roush_test_repo)
             return_code = subprocess.check_output("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s \"%s\"" % (server['root_password'], server['ip'], command_string), stderr=subprocess.STDOUT, shell=True)
             print "Successfully commented out requiretty..."
         except Exception, e:
