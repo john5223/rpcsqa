@@ -129,7 +129,7 @@ else:
 
 
         print "Running roush tests on server with ip %s..." % (roush_server_ip)
-        commands=["apt-get install git python-pip -y", "git clone %s" % results.roush_test_repo, "cd roush-testerator", "cp /root/env.sh /root/roush-testerator", "source env.sh", "pip install -r /root/roush-testerator/tools/pip-requires", "nosetests /root/roush-testerator/tests/test_happy_path.py"]
+        commands=["apt-get install git python-pip -y", "git clone %s" % results.roush_test_repo, "cd roush-testerator", "cp /root/env.sh /root/roush-testerator", "pip install -r /root/roush-testerator/tools/pip-requires", "source env.sh; nosetests /root/roush-testerator/tests/test_happy_path.py"]
         for command in commands:
             try:
                 print "running command: %s on %s" % (command, roush_server_ip)
