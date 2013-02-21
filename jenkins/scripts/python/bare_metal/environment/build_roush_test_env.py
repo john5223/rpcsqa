@@ -91,7 +91,7 @@ else:
                 roush_server_ip = server.ip
                 roush_server_password = server.root_password
             else:
-                temp.append(server.node)
+                temp.append(server["node"])
                 
         for role in roush_role_list:
             roush_test_env['%s' % role] = temp.pop()
