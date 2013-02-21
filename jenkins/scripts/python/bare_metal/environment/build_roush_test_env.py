@@ -90,14 +90,16 @@ else:
 
         for server in servers:
             print server['run_list']
-            if 'role[roush-server]' in server['run_list']:
+            if 'role[qa-roush-server]' in server['run_list']:
                 print "roush server found"
                 roush_test_env['INSTANCE_SERVER_HOSTNAME'] = server['node']
                 roush_server_ip = server['ip']
                 roush_server_password = server['root_password']
-            else:
+            elif 'role[qa-roush-client]' in server['run_list']:
                 print "roush client found"
                 temp.append(server['node'])
+            else:
+                pass
                 
         for role in roush_role_list:
             roush_test_env['%s' % role] = temp.pop()
