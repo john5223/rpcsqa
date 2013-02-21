@@ -54,7 +54,7 @@ print "#################################"
 print "Display only: %s " % results.display_only
 
 active_models = razor.simple_active_models(policy)
-to_run_list = []
+servers = []
 
 if active_models == {}:
     print "'%s' active models: 0 " % (policy)
