@@ -84,13 +84,18 @@ else:
         roush_role_list = ['INSTANCE_CHEF_HOSTNAME', 'INSTANCE_COMPUTE_HOSTNAME', 'INSTANCE_CONTROLLER_HOSTNAME']
         roush_server_ip = ""
         roush_server_password = ""
+        
+        print json.dumps(servers, indent=4)
 
         for server in servers:
+            print server['run_list']
             if 'role[roush-server]' in server['run_list']:
-                roush_test_env['INSTANCE_SERVER_HOSTNAME'] = server.node
+                print "roush server found"
+                roush_test_env['INSTANCE_SERVER_HOSTNAME'] = server['node']
                 roush_server_ip = server['ip']
                 roush_server_password = server['root_password']
             else:
+                print "roush client found"
                 temp.append(server['node'])
                 
         for role in roush_role_list:
