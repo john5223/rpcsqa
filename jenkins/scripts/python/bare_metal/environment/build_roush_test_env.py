@@ -132,11 +132,11 @@ else:
         commands=["apt-get install git python-pip -y", "git clone %s" % results.roush_test_repo, "cd roush-testerator", "cp /root/env.sh /root/roush-testerator", "source env.sh", "pip install -r tools/pip-requires", "nosetests tests/test_happy_path.py"]
         for command in commands:
             try:
-                print "running command: %s" % command;
-                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s '%s'" % (server['root_password'], server['ip'], command), stderr=subprocess.STDOUT, shell=True)
-                print "Successfully commented out requiretty..."
+                print "running command: %s on %s" % (command, roush_server_ip)
+                return_code = subprocess.check_output("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s '%s'" % (roush_server_password, roush_server_ip, command), stderr=subprocess.STDOUT, shell=True)
+                print "Successfully ran command %s" % command
             except Exception, e:
-                print "Failed to comment out requiretty..."
+                print "Failed to run command %s" % command
                 print "Command: %s" % e.cmd
                 print "Return Code: %s..." % e.returncode
                 print "Output: %s..." % e.output
