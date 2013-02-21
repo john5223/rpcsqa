@@ -128,7 +128,7 @@ else:
             sys.exit(1)
 
 
-        print "Running roush tests on %s with ip %s...." % (server['node'], server['ip'])
+        print "Running roush tests on server with ip %s..." % (roush_server_ip)
         commands=["apt-get install git python-pip -y", "git clone %s" % results.roush_test_repo, "cd roush-testerator", "cp /root/env.sh /root/roush-testerator", "source env.sh", "pip install -r /root/roush-testerator/tools/pip-requires", "nosetests /root/roush-testerator/tests/test_happy_path.py"]
         for command in commands:
             try:
