@@ -133,7 +133,7 @@ else:
         for command in commands:
             try:
                 print "running command: %s on %s" % (command, roush_server_ip)
-                return_code = subprocess.check_output("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s '%s'" % (roush_server_password, roush_server_ip, command), stderr=subprocess.STDOUT, shell=True)
+                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s '%s'" % (roush_server_password, roush_server_ip, command), stderr=subprocess.STDOUT, shell=True)
                 print "Successfully ran command %s" % command
             except Exception, e:
                 print "Failed to run command %s" % command
