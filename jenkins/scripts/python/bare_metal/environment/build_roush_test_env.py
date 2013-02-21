@@ -85,7 +85,8 @@ else:
         roush_server_ip = ""
         roush_server_password = ""
         
-        print json.dumps(servers, indent=4)
+        # print json.dumps(servers, indent=4)
+        print servers
 
         for server in servers:
             print server['run_list']
