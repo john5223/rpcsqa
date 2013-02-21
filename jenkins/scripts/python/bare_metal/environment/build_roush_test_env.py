@@ -86,7 +86,7 @@ else:
         roush_server_password = ""
 
         for server in servers:
-            if "role['roush-server']" in server.run_list:
+            if "role['roush-server']" in server["run_list"]:
                 roush_test_env['INSTANCE_SERVER_HOSTNAME'] = server.node
                 roush_server_ip = server.ip
                 roush_server_password = server.root_password
