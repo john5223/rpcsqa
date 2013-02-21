@@ -102,7 +102,7 @@ else:
         except IOError:
             print "Failed to open file env.sh"
         else:
-            for k,v in roush_test_env:
+            for k,v in roush_test_env.iteritems():
                 to_write = "export %s=%s" % (k, v)
                 fo.write(to_write)
             fo.close()
