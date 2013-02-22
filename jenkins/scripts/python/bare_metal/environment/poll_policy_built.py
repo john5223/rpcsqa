@@ -124,7 +124,7 @@ else:
                         root_pass = data['root_password']
                         ip = data['eth1_ip']
                         
-                        delete = razor.remove_active_model(am_uuid)
+                        delete = razor.remove_active_model(data['am_uuid'])
                         print "Deleted: %s " % delete
                         #Restart via ssh
                         return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
