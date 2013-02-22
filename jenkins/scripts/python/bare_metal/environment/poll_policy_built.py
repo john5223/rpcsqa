@@ -112,24 +112,36 @@ if active_models:
                     try:
                         root_pass = data['root_password']
                         ip = data['eth1_ip']
+                        am_uuid = data['am_uuid']
                         
-                        delete = razor.remove_active_model(data['am_uuid'])
-                        print "Deleted: %s " % delete
-                        #Restart via ssh
-                        return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
+                        # Remove active model
+                        try:
+                            print "Removing active model %s..." % am_uuid
+                            delete = razor.remove_active_model(am_uuid)
+                            print "Deleted: %s " % delete
+                        except Exception, e:
+                            print "Error removing active model: %s " % e
+                            pass
 
-                        if return_code != 0:
-                            print "Error: Could not restart."                         
-                        else:
-                            print "Restart success."          
-                            
+                        #Restart via ssh
+                        print "Trying to restart server with ip %s...." % ip
+                        try:
+                            return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
+                            if return_code != 0:
+                                print "Error: Could not restart."                         
+                            else:
+                                print "Restart success."
+                        except Exception, e:
+                            print "Restart FAILURE: %s " % e
+                            pass
+
                         count = 0
                         time.sleep(600)                              
                     except Exception, e:
                         print "Couldn't fix broker fail: %s " % e
                         fail_count += 1
         
-            if results.display == "true":
+            if display:
                  temp = { 'am_uuid': active_models[a]['am_uuid'], 'current_state':  active_models[a]['current_state'] }
                  print json.dumps(temp, indent=4)
         
