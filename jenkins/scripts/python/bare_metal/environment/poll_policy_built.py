@@ -21,17 +21,20 @@ parser.add_argument('--policy', action="store", dest="policy",
 parser.add_argument('--data_bag_location', action="store", dest="data_bag_loc", 
                     #default="/home/john/git/rpcsqa/chef-cookbooks/data_bags/razor_node",
                     default="/var/lib/jenkins/rpcsqa/chef-cookbooks/data_bags/razor_node", 
-                    required=False, help="Policy to teardown from razor and reboot nodes")
-
+                    required=True, help="Policy to teardown from razor and reboot nodes")
 
 parser.add_argument('--display', action="store", dest="display", 
                     default="true", 
-                    required=False, help="Display the node information only (will not reboot or teardown am)")
-
+                    required=True, help="Display the node information only (will not reboot or teardown am)")
 
 # Parse the parameters
 results = parser.parse_args()
 
+# converting string display only into boolean
+if results.display == 'true':
+    display = True
+else:
+    display = False
 
 #############################################################
 #Poll active models that match policy from given input
@@ -75,11 +78,9 @@ def getip_from_data_bag(uuid):
 razor = razor_api(results.razor_ip)
 policy = results.policy
 
-
 print "#################################"
 print "Polling for  '%s'  active models" % policy
 print "Display only: %s " % results.display
-
 
 get_active = False
 while get_active == False:
@@ -88,8 +89,6 @@ while get_active == False:
         get_active = True
     except:
         time.sleep(60)
-
-
 
 if active_models:
     count = 0
