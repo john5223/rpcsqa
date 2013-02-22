@@ -179,5 +179,5 @@ if active_models:
             print "#################################"
 else:
     # No active models for the policy present, exit.
-    print "!!## -- Razor Policy %s has no active models -- ##!!"
+    print "!!## -- Razor Policy %s has no active models -- ##!!" % results.policy
     sys.exit(1)
