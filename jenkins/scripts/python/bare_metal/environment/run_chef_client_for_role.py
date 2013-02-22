@@ -54,7 +54,7 @@ razor = razor_api(results.razor_ip)
 policy = results.policy
 
 print "#################################"
-print " Attempting to run chef-cleint for role %s " % results.role
+print " Attempting to run chef-client for role %s " % results.role
 print "Display only: %s " % results.display_only
 
 active_models = razor.simple_active_models(policy)
