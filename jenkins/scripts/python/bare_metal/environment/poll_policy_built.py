@@ -91,21 +91,12 @@ while get_active == False:
 
 
 
-if active_models == {}:
-    print "'%s' active models: 0 " % (policy)
-    print "#################################"
-else:
-    if 'response' in active_models.keys():
-        active_models = active_models['response']
-    
-    print "'%s' active models: %s " % (policy, len(active_models))
-    print "#################################"
-
+if active_models:
     count = 0
     fail_count = 0
     active = False
     
-    while active == False and count < 15:
+    while not active and count < 15:
         count += 1               
         print "Polling..."
         active = True

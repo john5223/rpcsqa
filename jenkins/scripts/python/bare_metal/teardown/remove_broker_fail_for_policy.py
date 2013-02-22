@@ -65,7 +65,7 @@ if active_models:
             root_pass = get_root_pass(data)
             ip = data['eth1_ip']
             
-            if results.display_only == 'true':
+            if display_only:
                 print "Active Model ID: %s " % active
                 print "IP address: %s " % ip
             else:
