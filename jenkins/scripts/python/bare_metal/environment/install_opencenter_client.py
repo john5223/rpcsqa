@@ -71,7 +71,7 @@ if active_models:
 
      # Gather all of the active models for the policy and get information about them
     for active in active_models:
-        data = active_models['response'][active]
+        data = active_models[active]
         chef_name = get_chef_name(data)
         root_password = get_root_pass(data)
 

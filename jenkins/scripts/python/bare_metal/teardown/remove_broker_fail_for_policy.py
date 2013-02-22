@@ -57,7 +57,7 @@ while not got_active and attempt < 5:
 if active_models:
     failed_restart = 0
     for active in active_models:
-        data = active_models['response'][active]
+        data = active_models[active]
         am_uuid = data['am_uuid']
         curr_state = data['current_state']
         

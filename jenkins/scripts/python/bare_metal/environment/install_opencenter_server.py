@@ -65,7 +65,7 @@ to_run_list = []
 if active_models:
     for active in active_models:
         # Save information from each server that we will need.
-        data = active_models['response'][active]
+        data = active_models[active]
         chef_name = get_chef_name(data)
         root_password = get_root_pass(data)
 

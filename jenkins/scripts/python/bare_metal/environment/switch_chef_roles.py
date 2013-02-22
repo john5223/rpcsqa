@@ -90,7 +90,7 @@ if active_models:
     # Gather all of the active models for the policy and get information about them
     i = 0
     for active in active_models:
-        data = active_models['response'][active]
+        data = active_models[active]
         chef_name = get_chef_name(data)
 
         with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
