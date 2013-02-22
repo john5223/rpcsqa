@@ -162,3 +162,8 @@ if active_models:
             print "%s : %s " % (active_models[a]['am_uuid'], ip)
             
         print "!!## -- Broker finished for %s -- ##!!" % policy
+else:
+    # No active models for the policy present, exit.
+    print "!!## -- Razor Policy %s has no active models -- ##!!"
+    sys.exit(1)
+    
