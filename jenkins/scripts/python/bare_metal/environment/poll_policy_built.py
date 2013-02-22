@@ -113,11 +113,8 @@ else:
             curr_state = active_models[a]['current_state']
             if 'broker' not in curr_state:
                 active = False
-                pass
             else:
-                if 'fail' in curr_state:
-                    fail_count += 1
-                    
+                if 'fail' in curr_state:                    
                     #Fix broker fail 
                     root_pass = ip = ''
                     try:
@@ -132,15 +129,14 @@ else:
                         if return_code != 0:
                             print "Error: Could not restart."                         
                         else:
-                            print "Restart success."                                        
+                            print "Restart success."          
+                            
+                        count = 0
+                        time.sleep(600)                              
                     except Exception, e:
                         print "Couldn't fix broker fail: %s " % e
+                        fail_count += 1
                    
-                    
-                    
-                    
-                    
-                    
 
             if results.display == "true":
                  temp = { 'am_uuid': active_models[a]['am_uuid'], 'current_state':  active_models[a]['current_state'] }
