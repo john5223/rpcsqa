@@ -62,7 +62,10 @@ def getip_from_data_bag(uuid):
         with open('%s/%s.json' % (data_bag_loc, uuid) ) as f: 
             ans = f.read()
         ans =  json.loads(ans)
-        ip = ans['network_interfaces']['debian'][0]['address']
+        try:
+            ip = ans['network_interfaces']['debian'][0]['address']
+        except Exception, f:
+            ip = ans['network_interfaces']['redhat'][0]['address']
         return str(ip)
     except IOError as e:
         print ans
