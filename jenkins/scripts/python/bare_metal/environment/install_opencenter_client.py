@@ -103,7 +103,7 @@ if active_models:
         for server in to_run_list:
             print "Attempting to install opencenter client on %s with ip %s...." % (server['node'], server['ip'])
             try:
-                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'export opencenter_SERVER=%s;curl -L \"%s\" | bash'" % (server['root_password'], server['ip'], opencenter_server_ip, results.cdn_url), shell=True)
+                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'export opencenter_SERVER=%s;curl -L \"%s\" | bash'" % (server['root_password'], server['ip'], opencenter_server_ip, results.oc_install_url), shell=True)
                 if return_code == 0:
                     print "opencenter client success..."
                 else:
