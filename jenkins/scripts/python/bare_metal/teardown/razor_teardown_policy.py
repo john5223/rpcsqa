@@ -90,7 +90,7 @@ print "Display only: %s " % results.display_only
 
 active_models = razor.simple_active_models(policy)
 
-print json.dumps(active_models, indent=4)
+#print json.dumps(active_models, indent=4)
 
 if active_models:
     for active in active_models:
