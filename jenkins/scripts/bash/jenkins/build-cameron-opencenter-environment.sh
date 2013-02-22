@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Set temp file and perm file
-template_filename='/var/lib/jenkins/rpcsqa/chef-cookbooks/environments/templates/cameron-roush.json'
-environment_filename='/var/lib/jenkins/rpcsqa/chef-cookbooks/environments/cameron-roush.json'
+template_filename='/var/lib/jenkins/rpcsqa/chef-cookbooks/environments/templates/cameron-opencenter.json'
+environment_filename='/var/lib/jenkins/rpcsqa/chef-cookbooks/environments/cameron-opencenter.json'
 
 ## copy the environment file to the proper directory
 echo "Copying template to environment..."
