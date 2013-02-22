@@ -91,7 +91,7 @@ print json.dumps(active_models, indent=4)
 
 if active_models:
     for active in active_models:
-        data = active_models['response'][active]
+        data = active_models[active]
         private_ip = data['eth1_ip']
         am_uuid = data['am_uuid']
         chef_name = "%s%s.%s" % (data['hostname_prefix'], data['bind_number'], data['domain'])
