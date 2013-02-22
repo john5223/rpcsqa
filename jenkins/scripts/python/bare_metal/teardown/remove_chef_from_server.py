@@ -1,14 +1,13 @@
 #!/usr/bin/python
 import os
 import sys
-import subprocess
 import json
 import argparse
-from razor_api import razor_api
-import time
+import subprocess
 from chef import *
+from razor_api import razor_api
 
-
+# Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", required=True, help="IP for the Razor server")
@@ -25,8 +24,14 @@ parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem",
 
 parser.add_argument('--display_only', action="store", dest="display_only", default="true", required=False, help="Display the node information only (                will not reboot or teardown am)")
 
-# Parse the parameters
+# Save the parsed arguments
 results = parser.parse_args()
+
+# converting string display only into boolean
+if results.display_only == 'true':
+    display_only = True
+else:
+    display_only = False
 
 def get_chef_name(data):
     try:
@@ -55,18 +60,10 @@ print "Display only: %s " % results.display_only
 active_models = razor.simple_active_models(policy)
 to_run_list = []
 
-if active_models == {}:
-    print "'%s' active models: 0 " % (policy)
-    print "#################################"
-else:
-    if 'response' in active_models.keys():
-        active_models = active_models['response']
-    print "'%s' active models: %s " % (policy, len(active_models))
-    print "#################################"
-
+if active_models:
     # Gather all of the active models for the policy and get information about them
     for active in active_models:
-        data = active_models[active]
+        data = active_models['response'][active]
         chef_name = get_chef_name(data)
         root_password = get_root_pass(data)
 
@@ -75,15 +72,13 @@ else:
             if 'role[%s]' % results.role in node.run_list:
                 ip = node['ipaddress']
 
-                if results.display_only == 'true':
+                if display_only:
                     print "!!## -- ROLE %s FOUND, would remove chef on %s with ip %s..." % (results.role, node, ip)
                 else:
-                    print "!!## -- ROLE %s FOUND, removing chef on %s with ip %s..." % (results.role, node, ip)
                     to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
 
-    if results.display_only == 'false':
+    if not display_only:
         failed_runs = 0
-
         for server in to_run_list:
             print "Trying to remove chef on %s with ip %s...." % (server['node'], server['ip'])
             try:
@@ -101,3 +96,7 @@ else:
 
         if failed_runs > 0:
             sys.exit(1)
+else:
+    # No active models for the policy present, exit.
+    print "!!## -- Razor Policy %s has no active models -- ##!!"
+    sys.exit(1)

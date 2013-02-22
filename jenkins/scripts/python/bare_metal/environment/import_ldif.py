@@ -3,43 +3,29 @@ import os
 import subprocess
 import json
 import argparse
-from razor_api import razor_api
 import time
+from razor_api import razor_api
 from chef import *
 
-
+# Parse the cmd line arguments
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--razor_ip', action="store", dest="razor_ip", 
-                    required=True, help="IP for the Razor server")
+parser.add_argument('--razor_ip', action="store", dest="razor_ip", required=True, help="IP of the Razor server.")
 
-parser.add_argument('--policy', action="store", dest="policy", 
-                    required=True, help="Razor policy to set chef roles for.")
+parser.add_argument('--policy', action="store", dest="policy", required=True, help="Razor policy.")
 
-parser.add_argument('--data_bag_location', action="store", dest="data_bag_loc",
-                    default="/var/lib/jenkins/rpcsqa/chef-cookbooks/data_bags/razor_node", 
-                    required=False, help="Location of chef data bags")
+parser.add_argument('--role', action="store", dest="role", required=True, help="Chef role to run chef-client on")
 
-parser.add_argument('--role', action="store", dest="role", 
-                    required=True, help="Chef role to run chef-client on")
+parser.add_argument('--chef_url', action="store", dest="chef_url", default="http://198.101.133.4:4000", required=False, help="client for chef")
 
-parser.add_argument('--chef_url', action="store", dest="chef_url", 
-                    default="http://198.101.133.4:4000", 
-                    required=False, help="client for chef")
+parser.add_argument('--chef_client', action="store", dest="chef_client", default="jenkins", required=False, help="client for chef")
 
-parser.add_argument('--chef_client', action="store", dest="chef_client", 
-                    default="jenkins", 
-                    required=False, help="client for chef")
+parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem", default="/var/lib/jenkins/rpcsqa/.chef/jenkins.pem", required=False,                help="client pem for chef")
 
-parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem", 
-                    default="/var/lib/jenkins/rpcsqa/.chef/jenkins.pem", 
-                    required=False, help="client pem for chef")
+parser.add_argument('--display_only', action="store", dest="display_only", default="true", required=False, 
+                    help="Display the node information only (will not reboot or teardown am)")
 
-parser.add_argument('--display_only', action="store", dest="display_only", 
-                    default="true", 
-                    required=False, help="Display the node information only (will not reboot or teardown am)")
-
-# Parse the parameters
+# Save the arguments
 results = parser.parse_args()
 
 def get_chef_name(data):
@@ -68,6 +54,7 @@ print "Display only: %s " % results.display_only
 
 active_models = razor.simple_active_models(policy)
 to_run_list = []
+
 if active_models == {}:
     print "'%s' active models: 0 " % (policy)
     print "#################################"
@@ -110,12 +97,6 @@ else:
                     out = subprocess.check_output("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'ldapadd -x -D \"cn=admin,dc=dev,dc=rcbops,dc=me\" -f base.ldif -w@privatecloud'" % (server['root_password'], server['ip']), shell=True)
                     print out
                     print "Import successful..."
-                    
-                    
-               
+
                except Exception, e:
                     print "SCP FAILURE: %s " % e
-                    
-                    
-                    
-                    

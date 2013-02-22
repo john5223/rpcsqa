@@ -1,12 +1,10 @@
 #!/usr/bin/python
 import os
 import sys
-import subprocess
-import json
 import argparse
-from razor_api import razor_api
-import time
+import subprocess
 from chef import *
+from razor_api import razor_api
 
 parser = argparse.ArgumentParser()
 
@@ -26,8 +24,14 @@ parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem",
 parser.add_argument('--display_only', action="store", dest="display_only", default="true", required=False, 
                     help="Display the node information only (will not reboot or teardown am)")
 
-# Parse the parameters
+# Save the parsed arguments
 results = parser.parse_args()
+
+# converting string display only into boolean
+if results.display_only == 'true':
+    display_only = True
+else:
+    display_only = False
 
 def get_chef_name(data):
     try:
@@ -56,18 +60,10 @@ print "Display only: %s " % results.display_only
 active_models = razor.simple_active_models(policy)
 to_run_list = []
 
-if active_models == {}:
-    print "'%s' active models: 0 " % (policy)
-    print "#################################"
-else:
-    if 'response' in active_models.keys():
-        active_models = active_models['response']
-    print "'%s' active models: %s " % (policy, len(active_models))
-    print "#################################"
-
+if active_models:
     # Gather all of the active models for the policy and get information about them
     for active in active_models:
-        data = active_models[active]
+        data = active_models['response'][active]
         chef_name = get_chef_name(data)
         root_password = get_root_pass(data)
 
@@ -86,27 +82,8 @@ else:
                     # append the server to the to run list
                     to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password, 'platform_family': platform_family})
 
-    if results.display_only == 'false' and len(to_run_list) > 0:
+    if display_only and to_run_list:
         for server in to_run_list:
-            
-            # Only need to comment out require tty on rhel
-            # TODO (jacob) : move this to kickstart???
-            """
-            if server['platform_family'] == 'rhel':
-                print "Commenting out requiretty..."
-                try:
-                    sed_regex = "s/^Defaults[ \\t]+requiretty/#Defaults requiretty/g"
-                    sed_string = "sed -i -E \'%s\' /etc/sudoers" % sed_regex
-                    print "SED STRING: %s" % sed_string
-                    return_code = subprocess.check_output("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s \"%s\"" % (server['root_password'], server['ip'], sed_string), stderr=subprocess.STDOUT, shell=True)
-                    print "Successfully commented out requiretty..."
-                except Exception, e:
-                    print "Failed to comment out requiretty..."
-                    print "Command: %s" % e.cmd
-                    print "Return Code: %s..." % e.returncode
-                    print "Output: %s..." % e.output
-                    sys.exit(1)
-            """
             print "Trying chef-client on %s with ip %s...." % (server['node'], server['ip'])
             try:
                 return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'chef-client;chef-client'" % (server['root_password'], server['ip']), shell=True)
@@ -117,3 +94,28 @@ else:
                     sys.exit(1)
             except Exception, e:
                 print "chef-client FAILURE: %s " % e
+else:
+    # No active models for the policy present, exit.
+    print "!!## -- Razor Policy %s has no active models -- ##!!"
+    sys.exit(1)
+
+
+# Only need to comment out require tty on rhel
+# Moved to bottom as it is not needed anymore but I dont want to delete it
+# TODO (jacob) : move this to kickstart???
+"""
+if server['platform_family'] == 'rhel':
+    print "Commenting out requiretty..."
+    try:
+        sed_regex = "s/^Defaults[ \\t]+requiretty/#Defaults requiretty/g"
+        sed_string = "sed -i -E \'%s\' /etc/sudoers" % sed_regex
+        print "SED STRING: %s" % sed_string
+        return_code = subprocess.check_output("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s \"%s\"" % (server['root_password'], server['ip'], sed_string), stderr=subprocess.STDOUT, shell=True)
+        print "Successfully commented out requiretty..."
+    except Exception, e:
+        print "Failed to comment out requiretty..."
+        print "Command: %s" % e.cmd
+        print "Return Code: %s..." % e.returncode
+        print "Output: %s..." % e.output
+        sys.exit(1)
+"""

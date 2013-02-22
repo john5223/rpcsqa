@@ -3,12 +3,12 @@ import os
 import sys
 import json
 import argparse
-from razor_api import razor_api
-import time
 from chef import *
+from razor_api import razor_api
 
-
+# Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
+
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", 
                     required=True, help="IP for the Razor server")
 
@@ -34,8 +34,14 @@ parser.add_argument('--display_only', action="store", dest="display_only",
                     default="true", 
                     required=False, help="Display the node information only (will not reboot or teardown am)")
 
-# Parse the parameters
+# Save the parsed arguments
 results = parser.parse_args()
+
+# converting string display only into boolean
+if results.display_only == 'true':
+    display_only = True
+else:
+    display_only = False
 
 def get_chef_name(data):
     try:
@@ -80,21 +86,11 @@ for i in range(len(temp_roles)):
 # Gather the active models with the policy from the cmd line
 active_models = razor.simple_active_models(policy)
 
-if active_models == {}:
-    print "'%s' active models: 0 " % (policy)
-    print "#################################"
-else:
-    if 'response' in active_models.keys():
-        active_models = active_models['response']
-    
-    print "'%s' active models: %s " % (policy, len(active_models))
-    print "#################################"
-
-
+if active_models:
     # Gather all of the active models for the policy and get information about them
     i = 0
     for active in active_models:
-        data = active_models[active]
+        data = active_models['response'][active]
         chef_name = get_chef_name(data)
 
         with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
@@ -102,7 +98,7 @@ else:
             run_list = node.run_list
             environment = node.chef_environment
             
-            if results.display_only == 'true':
+            if display_only:
                 if (i > len(roles) - 1):
                     i = len(roles) - 1
                 print "!!## -- "
@@ -147,3 +143,7 @@ else:
                     print "!!## -- %s already has the proper run list, not changing -- ##!!" % node
 
                 i += 1
+else:
+    # No active models for the policy present, exit.
+    print "!!## -- Razor Policy %s has no active models -- ##!!"
+    sys.exit(1)

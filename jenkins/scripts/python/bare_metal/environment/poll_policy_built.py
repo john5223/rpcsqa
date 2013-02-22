@@ -137,8 +137,7 @@ else:
                     except Exception, e:
                         print "Couldn't fix broker fail: %s " % e
                         fail_count += 1
-                   
-
+        
             if results.display == "true":
                  temp = { 'am_uuid': active_models[a]['am_uuid'], 'current_state':  active_models[a]['current_state'] }
                  print json.dumps(temp, indent=4)
@@ -152,13 +151,8 @@ else:
             dbag_uuid = get_data_bag_UUID(active_models[a])
             ip = getip_from_data_bag(dbag_uuid)
             print "%s : %s " % (active_models[a]['am_uuid'], ip)
-        
-        
         sys.exit(1)
-        
-        
-        
-        
+
     else:    
         for a in active_models:
             dbag_uuid = get_data_bag_UUID(active_models[a])
