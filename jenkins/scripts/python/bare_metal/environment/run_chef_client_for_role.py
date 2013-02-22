@@ -61,11 +61,10 @@ print "Display only: %s " % results.display_only
 active_models = razor.simple_active_models(policy)
 to_run_list = []
 
-print json.dumps(active_models, indent=4)
 if active_models:
     # Gather all of the active models for the policy and get information about them
-    for active in active_models:
-        data = active_models[active]
+    for am in active_models:
+        data = active_models[am]
         chef_name = get_chef_name(data)
         root_password = get_root_pass(data)
 
