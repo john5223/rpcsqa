@@ -109,6 +109,7 @@ else:
         print "Polling..."
         active = True
         for a in active_models:
+            data = active_models[a]
             curr_state = active_models[a]['current_state']
             if 'broker' not in curr_state:
                 active = False
@@ -116,6 +117,30 @@ else:
             else:
                 if 'fail' in curr_state:
                     fail_count += 1
+                    
+                    #Fix broker fail 
+                    root_pass = ip = ''
+                    try:
+                        root_pass = data['root_password']
+                        ip = data['eth1_ip']
+                        
+                        delete = razor.remove_active_model(am_uuid)
+                        print "Deleted: %s " % delete
+                        #Restart via ssh
+                        return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
+
+                        if return_code != 0:
+                            print "Error: Could not restart."                         
+                        else:
+                            print "Restart success."                                        
+                    except Exception, e:
+                        print "Couldn't fix broker fail: %s " % e
+                   
+                    
+                    
+                    
+                    
+                    
 
             if results.display == "true":
                  temp = { 'am_uuid': active_models[a]['am_uuid'], 'current_state':  active_models[a]['current_state'] }
@@ -130,7 +155,13 @@ else:
             dbag_uuid = get_data_bag_UUID(active_models[a])
             ip = getip_from_data_bag(dbag_uuid)
             print "%s : %s " % (active_models[a]['am_uuid'], ip)
+        
+        
         sys.exit(1)
+        
+        
+        
+        
     else:    
         for a in active_models:
             dbag_uuid = get_data_bag_UUID(active_models[a])
