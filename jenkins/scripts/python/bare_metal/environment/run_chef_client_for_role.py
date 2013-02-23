@@ -75,7 +75,7 @@ if active_models:
                 ip = node['ipaddress']
                 platform_family = node['platform_family']
 
-                if results.display_only == 'true':
+                if display_only:
                     print "!!## -- ROLE %s FOUND, would run chef-client on %s with ip %s..." % (results.role, node, ip)
                 else:
                     print "!!## -- ROLE %s FOUND, runnning chef-client on %s with ip %s..." % (results.role, node, ip)
@@ -83,7 +83,7 @@ if active_models:
                     # append the server to the to run list
                     to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password, 'platform_family': platform_family})
 
-    if display_only and to_run_list:
+    if not display_only and to_run_list:
         for server in to_run_list:
             print "Trying chef-client on %s with ip %s...." % (server['node'], server['ip'])
             try:
