@@ -2,9 +2,9 @@
 import os
 import sys
 import argparse
-import subprocess
 from chef import *
 from razor_api import razor_api
+from subprocess import check_call, CalledProcessError
 
 # Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
@@ -54,8 +54,8 @@ def get_root_pass(data):
 razor = razor_api(results.razor_ip)
 policy = results.policy
 
-print "Attempting to install opencenter server for role %s..." % results.role
-print "Display only: %s " % results.display_only
+print "!!## -- Attempting to install opencenter server for role %s -- ##!!" % results.role
+print "!!## -- Display only: %s " % results.display_only
 
 # Gather the active models from Razor for the given policy.
 active_models = razor.simple_active_models(policy)
@@ -78,26 +78,28 @@ if active_models:
 
                 # debug vs. run.
                 if display_only:
-                    print "!!## -- ROLE %s FOUND,  would install opencenter server on %s with ip %s..." % (results.role, node, ip)
+                    print "!!## -- Role %s found, would install OpenCenter server on %s with ip %s --##!!" % (results.role, node, ip)
                 else:
                     # save the server and its info to the run list.
                     to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
 
     if not display_only and to_run_list:
+        failure = False
         for server in to_run_list:
-            print "Attempting to install opencenter server on %s with ip %s...." % (server['node'], server['ip'])
+            print "!!## -- Attempting to install OpenCenter server on %s with ip %s --##!!" % (server['node'], server['ip'])
             try:
                 # run the command to install opencenter server.
-                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'curl -L \"%s\" | bash'" % (server['root_password'], server['ip'], results.oc_install_url), shell=True)
-                if return_code == 0:
-                    print "Successfully installed opencenter server..."
-                else:
-                    print "Installing opencenter server failed..."
-                    sys.exit(1)
-
-            except Exception, e:
-                print "Installing opencenter server failed...Exception: %s " % e
-                sys.exit(1)
+                check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'curl -L \"%s\" | bash'" % (server['root_password'], server['ip'], results.oc_install_url), shell=True)
+                print "!!## -- Sucessfully installed OpenCenter server on server with ip: %s --##!!" % server['ip']
+            except CalledProcessError, cpe:
+                print "!!## -- Failed to install OpenCenter server on server with ip: %s --##!!" % server['ip']
+                print "!!## -- Return Code: %s -- ##!!" % cpe.returncode
+                print "!!## -- Command: %s -- ##!!" % cpe.cmd
+                print "!!## -- Output: %s -- ##!!" % cpe.output
+                failure = True
+        if failure:
+            print "!!## -- One or more servers failed to install...check logs --##!!"
+            sys.exit(1)
 else:
     # No active models for the policy present, exit.
     print "!!## -- Razor Policy %s has no active models -- ##!!"

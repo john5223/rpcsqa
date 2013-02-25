@@ -3,8 +3,8 @@ import os
 import json
 import time
 import argparse
-import subprocess
 from razor_api import razor_api
+from subprocess import check_call, CalledProcessError
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", 
@@ -68,9 +68,8 @@ def getip_from_data_bag(uuid):
 razor = razor_api(results.razor_ip)
 policy = results.policy
 
-print "#################################"
-print "Polling for  '%s'  active models" % policy
-print "Display only: %s " % results.display
+print "!!## -- Polling for  '%s'  active models --##!!" % policy
+print "!!## -- Display only: %s --##!!" % results.display
 
 get_active = False
 while get_active == False:
@@ -87,7 +86,7 @@ if active_models:
     
     while not active and count < 15:
         count += 1               
-        print "Polling..."
+        print "!!## -- Polling --##!!"
         active = True
         for a in active_models:
             data = active_models[a]
@@ -105,29 +104,27 @@ if active_models:
                         
                         # Remove active model
                         try:
-                            print "Removing active model %s..." % am_uuid
+                            print "!!## -- Removing active model %s --##!!" % am_uuid
                             delete = razor.remove_active_model(am_uuid)
-                            print "Deleted: %s " % delete
+                            print "!!## -- Deleted: %s " % delete
                         except Exception, e:
-                            print "Error removing active model: %s " % e
+                            print "!!## -- Error removing active model: %s --##!!" % e
                             pass
 
                         #Restart via ssh
-                        print "Trying to restart server with ip %s...." % ip
+                        print "Trying to restart server with ip %s --##!!" % ip
                         try:
-                            return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
-                            if return_code != 0:
-                                print "Error: Could not restart."                         
-                            else:
-                                print "Restart success."
-                        except Exception, e:
-                            print "Restart FAILURE: %s " % e
-                            pass
-
-                        count = 0
+                            check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
+                            print "!!## -- Sucessfully restarted server with ip: %s --##!!" % ip
+                        except CalledProcessError, cpe:
+                            print "!!## -- Failed to restart server with ip: %s --##!!" % ip
+                            print "!!## -- Return Code: %s --##!!" % cpe.returncode
+                            print "!!## -- Command: %s --##!!" % cpe.cmd
+                            print "!!## -- Output: %s --##!!" % cpe.output
+                            fail_count +=1
                         time.sleep(600)                              
                     except Exception, e:
-                        print "Couldn't fix broker fail: %s " % e
+                        print "Couldn't fix broker fail: %s --##!!" % e
                         fail_count += 1
         
             if display:

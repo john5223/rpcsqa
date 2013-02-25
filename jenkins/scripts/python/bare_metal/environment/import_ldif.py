@@ -1,11 +1,11 @@
 #!/usr/bin/python
 import os
-import subprocess
 import json
-import argparse
 import time
-from razor_api import razor_api
+import argparse
 from chef import *
+from razor_api import razor_api
+from subprocess import check_call, CalledProcessError
 
 # Parse the cmd line arguments
 parser = argparse.ArgumentParser()
@@ -25,8 +25,14 @@ parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem",
 parser.add_argument('--display_only', action="store", dest="display_only", default="true", required=False, 
                     help="Display the node information only (will not reboot or teardown am)")
 
-# Save the arguments
+# Save the parsed arguments
 results = parser.parse_args()
+
+# converting string display only into boolean
+if results.display_only == 'true':
+    display_only = True
+else:
+    display_only = False
 
 def get_chef_name(data):
     try:
@@ -48,22 +54,13 @@ def get_root_pass(data):
 razor = razor_api(results.razor_ip)
 policy = results.policy
 
-print "#################################"
-print " Attempting to import ldif for role %s " % results.role
-print "Display only: %s " % results.display_only
+print "!!## -- Attempting to import ldif for role %s -- ##!!" % results.role
+print "!!## -- Display only: %s -- ##!!" % results.display_only
 
 active_models = razor.simple_active_models(policy)
 to_run_list = []
 
-if active_models == {}:
-    print "'%s' active models: 0 " % (policy)
-    print "#################################"
-else:
-     if 'response' in active_models.keys():
-          active_models = active_models['response']
-     print "'%s' active models: %s " % (policy, len(active_models))
-     print "#################################"
-
+if active_models:
      # Gather all of the active models for the policy and get information about them
      for active in active_models:
           data = active_models[active]
@@ -76,27 +73,33 @@ else:
                if 'role[%s]' % results.role in node.run_list:
                     ip = node['ipaddress']
                
-                    if results.display_only == 'true':
-                         print "!!## -- ROLE %s FOUND, would run scp ldif on %s with ip %s..." % (results.role, node, ip)
+                    if display_only:
+                         print "!!## -- Role %s found, would run scp ldif on %s with ip %s -- ##!!" % (results.role, node, ip)
                     else:
-                         print "!!## -- ROLE %s FOUND, runnning scp of ldif files on %s with ip %s..." % (results.role, node, ip)
+                         print "!!## -- Role %s found, runnning scp of ldif files on %s with ip %s -- ##!!" % (results.role, node, ip)
                          to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
 
-     if results.display_only == 'false':
+     if not display_only:
           for server in to_run_list:
-               print "Trying to import ldif on %s with ip %s...." % (server['node'], server['ip'])
-               
+               print "!!## -- Trying to import ldif on %s with ip %s...." % (server['node'], server['ip'])
                try:
-                   
-                    print "Trying to scp ldif files..."
-                    out = subprocess.check_output("sshpass -p %s scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet  /var/lib/jenkins/source_files/ldif/*.ldif root@%s:/root" % (server['root_password'], server['ip']), shell=True)
-                    print out
-                    print "SCP of ldif successful..."
-                    
-                    print "Trying to import ldif files on ldap server..."
-                    out = subprocess.check_output("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'ldapadd -x -D \"cn=admin,dc=dev,dc=rcbops,dc=me\" -f base.ldif -w@privatecloud'" % (server['root_password'], server['ip']), shell=True)
-                    print out
-                    print "Import successful..."
-
-               except Exception, e:
-                    print "SCP FAILURE: %s " % e
+                    print "!!## -- Trying to scp ldif files  -- ##!!"
+                    check_call_return = subprocess.check_call("sshpass -p %s scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet  /var/lib/jenkins/source_files/ldif/*.ldif root@%s:/root" % (server['root_password'], server['ip']), shell=True)
+                except CalledProcessError, cpe:
+                    print "!!## -- Failed to copy ldif files  -- ##!!"
+                    print "!!## -- Return Code: %s  -- ##!!" % cpe.returncode
+                    print "!!## -- Command: %s -- ##!!" % cpe.cmd
+                    print "!!## -- Output: %s -- ##!!" % cpe.output
+                
+                try:
+                    print "!!## -- Trying to import ldif files on ldap server  -- ##!!"
+                    check_call_return = subprocess.check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'ldapadd -x -D \"cn=admin,dc=dev,dc=rcbops,dc=me\" -f base.ldif -w@privatecloud'" % (server['root_password'], server['ip']), shell=True)
+                except CalledProcessError, cpe:
+                    print "!!## -- Failed to import ldif files on ldap server -- ##!!"
+                    print "!!## -- Return Code: %s..." % cpe.returncode
+                    print "!!## -- Command: %s" % cpe.cmd
+                    print "!!## -- Output: %s..." % cpe.output
+else:
+    # No active models for the policy present, exit.
+    print "!!## -- Razor Policy %s has no active models -- ##!!" % results.policy
+    sys.exit(1)

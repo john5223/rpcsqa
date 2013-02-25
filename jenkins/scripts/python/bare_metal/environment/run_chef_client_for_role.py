@@ -3,10 +3,11 @@ import os
 import sys
 import json
 import argparse
-import subprocess
 from chef import *
 from razor_api import razor_api
+from subprocess import check_call, CalledProcessError
 
+# Parse the cmd line args
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", required=True, help="IP for the Razor server")
@@ -54,9 +55,8 @@ def get_root_pass(data):
 razor = razor_api(results.razor_ip)
 policy = results.policy
 
-print "#################################"
-print " Attempting to run chef-client for role %s " % results.role
-print "Display only: %s " % results.display_only
+print "!!## -- Attempting to run chef-client for role %s -- ##!!" % results.role
+print "!!## -- Display only: %s -- ##!!" % results.display_only
 
 active_models = razor.simple_active_models(policy)
 to_run_list = []
@@ -76,24 +76,29 @@ if active_models:
                 platform_family = node['platform_family']
 
                 if display_only:
-                    print "!!## -- ROLE %s FOUND, would run chef-client on %s with ip %s..." % (results.role, node, ip)
+                    print "!!## -- Role %s found, would run chef-client on %s with ip %s..." % (results.role, node, ip)
                 else:
                     # append the server to the to run list
-                    print "!!## -- ROLE %s FOUND, runnning chef-client on %s with ip %s..." % (results.role, node, ip)
+                    print "!!## -- Role %s found, runnning chef-client on %s with ip %s..." % (results.role, node, ip)
                     to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password, 'platform_family': platform_family})
 
     if not display_only and to_run_list:
+        failed_runs = False
         for server in to_run_list:
-            print "Trying chef-client on %s with ip %s...." % (server['node'], server['ip'])
+            print "!!## -- Trying chef-client on %s with ip %s -- ##!!" % (server['node'], server['ip'])
             try:
-                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'chef-client;chef-client'" % (server['root_password'], server['ip']), shell=True)
-                if return_code == 0:
-                    print "chef-client success..."
-                else:
-                    print "chef-client failed..."
-                    sys.exit(1)
-            except Exception, e:
-                print "chef-client FAILURE: %s " % e
+                check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'chef-client;chef-client'" % (server['root_password'], server['ip']), shell=True)
+                print "!!## -- Successful chef-client run on server with ip: %s -- ##!!" % server['ip']
+            except CalledProcessError, cpe:
+                print "!!## -- Failed to fully run chef-client on server with ip: %s -- ##!!" % server['ip']
+                print "!!## -- Return Code: %s -- ##!!" % cpe.returncode
+                print "!!## -- Command: %s -- ##!!" % cpe.cmd
+                print "!!## -- Output: %s -- ##!!" % cpe.output
+                failed_runs = True
+
+        if failed_runs:
+            print "!!## -- One or more chef-client runs failed...check logs -- ##!!"
+            sys.exit(1)
 else:
     # No active models for the policy present, exit.
     print "!!## -- Razor Policy %s has no active models -- ##!!"

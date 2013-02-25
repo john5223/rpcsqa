@@ -3,9 +3,9 @@ import os
 import sys
 import json
 import argparse
-import subprocess
 from chef import *
 from razor_api import razor_api
+from subprocess import check_call, CalledProcessError
 
 # Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
@@ -59,14 +59,15 @@ def get_root_pass(data):
 razor = razor_api(results.razor_ip)
 policy = results.policy
 
-print " Attempting to install opencenter client for role %s " % results.role
-print "Display only: %s " % results.display_only
+print "!!## -- Attempting to install opencenter client for role %s --##!!" % results.role
+print "!!## -- Display only: %s  -- ##!!" % results.display_only
 
 # Gather the active models from Razor for the given policy
 active_models = razor.simple_active_models(policy)
 to_run_list = []
 
 if active_models:
+    # When we come across our OpenCenter Server in the roles, save its ip
     opencenter_server_ip = ''
 
      # Gather all of the active models for the policy and get information about them
@@ -79,7 +80,7 @@ if active_models:
             # Get the node with the chef name we are looking for.
             node = Node(chef_name)
             
-            # If the run list for the node is a opencenter server, save its information.
+            # If the run list for the node is a opencenter server, save its ip.
             if 'role[qa-opencenter-server]' in node.run_list:
                 opencenter_server_ip = node['ipaddress']
 
@@ -90,7 +91,7 @@ if active_models:
             
                 # debug print vs. run
                 if display_only:
-                    print "!!## -- ROLE %s FOUND,  would install opencenter client on %s with ip %s..." % (results.role, node, ip)
+                    print "!!## -- Role %s found,  would install opencenter client on %s with ip %s -- ##!!" % (results.role, node, ip)
                 else:
                     # save the server to our run list
                     to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
@@ -101,20 +102,18 @@ if active_models:
 
         # Loop through the servers in the run list and install opencenter client.
         for server in to_run_list:
-            print "Attempting to install opencenter client on %s with ip %s...." % (server['node'], server['ip'])
+            print "!!## -- Attempting to install opencenter client on %s with ip %s -- ##!!" % (server['node'], server['ip'])
             try:
-                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'export opencenter_SERVER=%s;curl -L \"%s\" | bash'" % (server['root_password'], server['ip'], opencenter_server_ip, results.oc_install_url), shell=True)
-                if return_code == 0:
-                    print "opencenter client success..."
-                else:
-                    print "opencenter client failed..."
-                    failure = True
-
-            except Exception, e:
-                print "chef-client FAILURE: %s " % e
+                check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'export opencenter_SERVER=%s;curl -L \"%s\" | bash'" % (server['root_password'], server['ip'], opencenter_server_ip, results.oc_install_url), shell=True)
+                print "!!## -- OpenCenter client installed sucessfully on server with ip %s -- ##!!" % server['ip']
+            except CalledProcessError, cpe:
+                print "!!## -- Failed to install OpenCenter client on server with ip: %s --##!!" % server['ip']
+                print "!!## -- Return Code: %s -- ##!!" % cpe.returncode
+                print "!!## -- Command: %s -- ##!!" % cpe.cmd
+                print "!!## -- Output: %s -- ##!!" % cpe.output
                 failure = True
         if failure:
-            print "One or more of the opencenter clients failed, check logs"
+            print "!!## -- One or more of the opencenter clients failed, check logs -- ##!!"
             sys.exit(1)
 else:
     # No active models for the policy present, exit.

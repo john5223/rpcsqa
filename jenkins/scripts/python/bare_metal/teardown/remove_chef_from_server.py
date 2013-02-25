@@ -3,9 +3,9 @@ import os
 import sys
 import json
 import argparse
-from subprocess import check_call, CalledProcessError
 from chef import *
 from razor_api import razor_api
+from subprocess import check_call, CalledProcessError
 
 # Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
@@ -53,9 +53,8 @@ def get_root_pass(data):
 razor = razor_api(results.razor_ip)
 policy = results.policy
 
-print "#################################"
-print " Attempting to remove chef for role %s " % results.role
-print "Display only: %s " % results.display_only
+print "!!## -- Attempting to remove chef for role %s -- ##!!" % results.role
+print "!!## -- Display only: %s -- ##!!" % results.display_only
 
 active_models = razor.simple_active_models(policy)
 to_run_list = []
@@ -73,24 +72,24 @@ if active_models:
                 ip = node['ipaddress']
 
                 if display_only:
-                    print "!!## -- ROLE %s FOUND, would remove chef on %s with ip %s..." % (results.role, node, ip)
+                    print "!!## -- Role %s found, would remove chef on %s with ip %s -- ##!!" % (results.role, node, ip)
                 else:
                     to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
 
     if not display_only:
         failed_runs = 0
         for server in to_run_list:
-            print "Trying to remove chef on %s with ip %s...." % (server['node'], server['ip'])
+            print "!!## -- Trying to remove chef on %s with ip %s -- ##!!" % (server['node'], server['ip'])
             try:
-                return_code = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'apt-get remove --purge -y chef; rm -rf /etc/chef'" % (server['root_password'], server['ip']), shell=True)
+                check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'apt-get remove --purge -y chef; rm -rf /etc/chef'" % (server['root_password'], server['ip']), shell=True)
             except CalledProcessError, cpe:
                 if cpe.returncode == 100:
-                    "Chef removal failed...Chef didn't exist on the server"
+                    "!!## -- Chef removal failed...Chef didn't exist on the server -- ##!!"
                 else:
-                    print "Chef removal failed..."
-                    print "Return code: %i" % cpe.returncode
-                    print "Command: %s..." % cpe.cmd
-                    print "Output: %s..." % cpe.output
+                    print "!!## -- Chef removal failed -- ##!!"
+                    print "!!## -- Return code: %i -- ##!!" % cpe.returncode
+                    print "!!## -- Command: %s -- ##!!" % cpe.cmd
+                    print "!!## -- Output: %s -- ##!!" % cpe.output
                     failed_runs += 1
 
         if failed_runs > 0:

@@ -2,10 +2,10 @@
 import os
 import sys
 import argparse
-import subprocess
 from chef import *
 from razor_api import razor_api
 from ssh_session import ssh_session
+from subprocess import check_call, CalledProcessError
 
 # Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
@@ -70,7 +70,7 @@ if active_models:
             ip = node['ipaddress']
             
             if display_only:
-                print "Found server to run tests on with ip: %s and name: %s" % (ip, node)
+                print "!!## -- Found server to run tests on with ip: %s and name: %s -- ##!!" % (ip, node)
             else:
                 # append the server to the to run list.
                 servers.append({'node': node, 'ip': ip, 'root_password': root_password, 'run_list': run_list})
@@ -97,7 +97,7 @@ if active_models:
             elif 'role[qa-opencenter-client]' in server['run_list']:
                 client_temp.append(server['node'])
             else:
-                print "Server with name: %s doesnt have opencenter server or client in its run list...ignore" % server['node']
+                print "!!## -- Server with name: %s doesnt have opencenter server or client in its run list  -- ##!!" % server['node']
                 pass
                 
         # assign a opencenter test role to each client server.
@@ -109,47 +109,41 @@ if active_models:
             # Open the file
             fo = open("env.sh", "w")
         except IOError:
-            print "Failed to open file env.sh"
+            print "!!## -- Failed to open file env.sh  -- ##!!"
         else:
             for k,v in opencenter_test_env.iteritems():
                 to_write = "export %s=%s\n" % (k, v)
                 fo.write(to_write)
             fo.close()
-            print "env.sh successfully saved"
+            print "!!## -- env.sh successfully saved -- ##!!"
         
         # SCP the env.sh to the opencenter server
         session = ssh_session("root", opencenter_server_ip, opencenter_server_password, True)
-        print session
         session.scp("env.sh", "/root/")
         session.close()
         
         # Delete env.sh from current file system
-        print "Removing environment from system"
+        print "!!## -- Removing environment from system -- ##!!"
         try:
             os.remove("env.sh")
         except Exception, e:
-            print "Failed to remove file: %s" % e
+            print "!!## -- Failed to remove file: %s  -- ##!!" % e
             sys.exit(1)
 
 
         # Run the proper steps to install and run opencenter-testerator
-        print "Running opencenter tests on server with ip %s..." % (opencenter_server_ip)
+        print "!!## -- Running opencenter tests on server with ip %s  -- ##!!" % (opencenter_server_ip)
         commands=["apt-get install git python-pip -y", "git clone %s" % results.opencenter_test_repo, "pip install -r /root/opencenter-testerator/tools/pip-requires", "cat env.sh", "source env.sh; nosetests /root/opencenter-testerator/tests/test_happy_path.py"]
         
         for command in commands: 
             try:
-                print "running command: %s on %s" % (command, opencenter_server_ip)
-                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s '%s'" % (opencenter_server_password, opencenter_server_ip, command), stderr=subprocess.STDOUT, shell=True)
-                if return_code is not 0:
-                    print "Failed to run command %s, exited with code %s" % (command, return_code)
-                    sys.exit(1)
-                else:
-                    print "Successfully ran command %s" % command
-            except Exception, e:
-                print "Failed to run command %s" % command
-                print "Command: %s" % e.cmd
-                print "Return Code: %s..." % e.returncode
-                print "Output: %s..." % e.output
+                check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s '%s'" % (opencenter_server_password, opencenter_server_ip, command), stderr=subprocess.STDOUT, shell=True)
+                print "!!## -- command: %s on %s run successfully  -- ##!!" % (command, opencenter_server_ip)
+            except CalledProcessError, cpe:
+                print "!!## -- Command %s failed to run on server with ip: %s -- ##!!" % (command, opencenter_server_ip)
+                print "!!## -- Return Code: %s -- ##!!" % cpe.returncode
+                print "!!## -- Command: %s -- ##!!" % cpe.cmd
+                print "!!## -- Output: %s -- ##!!" % cpe.output
                 sys.exit(1)
 else:
     # No active models for the policy present, exit.

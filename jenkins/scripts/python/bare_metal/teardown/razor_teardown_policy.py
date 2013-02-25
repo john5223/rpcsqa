@@ -4,9 +4,9 @@ import sys
 import json
 import time
 import argparse
-import subprocess
 from chef import *
 from razor_api import razor_api
+from subprocess import check_call, CalledProcessError
 
 # Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
@@ -84,9 +84,8 @@ def getip_from_data_bag(uuid):
 razor = razor_api(results.razor_ip)
 policy = results.policy
 
-print "#################################"
-print "Tearing down and rebooting  '%s'  active models" % policy
-print "Display only: %s " % results.display_only
+print "!!## -- Tearing down and rebooting  '%s'  active models -- ##!!" % policy
+print "!!## -- Display only: %s -- ##!!" % results.display_only
 
 active_models = razor.simple_active_models(policy)
 
@@ -103,42 +102,42 @@ if active_models:
         ip = getip_from_data_bag(dbag_uuid)
         
         if display_only:
-            print "Active Model ID: %s " % active
-            print "Data Bag UUID: %s " % dbag_uuid
-            print "Public address: %s " % ip
-            print "Private address: %s " % private_ip
-            print "Chef Name: %s" % chef_name
+            print "!!## -- Active Model ID: %s -- ##!!" % active
+            print "!!## -- Data Bag UUID: %s -- ##!!" % dbag_uuid
+            print "!!## -- Public address: %s -- ##!!" % ip
+            print "!!## -- Private address: %s -- ##!!" % private_ip
+            print "!!## -- Chef Name: %s -- ##!!" % chef_name
 
-            print "Searching chef nodes..."
+            print "!!## -- Searching chef nodes -- ##!!"
             try:
                 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                     node = Node(chef_name)
                     ip = node['ipaddress']
-                    print "Node found %s, has ip %s" % (chef_name, ip)
+                    print "!!## -- Node found %s, has ip %s -- ##!!" % (chef_name, ip)
             except Exception, e:
-                print "Error findng chef node %s..." % chef_name
-                print "Exit with exception %s..." % e
+                print "!!## -- Error findng chef node %s -- ##!!" % chef_name
+                print "!!## -- Exit with exception %s -- ##!!" % e
                 pass
             
-            print "Searching chef clients..."
+            print "!!## -- Searching chef clients -- ##!!"
             try:
                 chef_api = ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client)
                 client = chef_api.api_request('GET', '/clients/%s' % chef_name)
                 print "Client: \n %s" % json.dumps(client, indent=4)
             except Exception, e:
-                print "Error printing chef clients: %s " % e
+                print "!!## -- Error printing chef clients: %s -- ##!!" % e
                 pass 
         else: 
-            print "Removing active model..."
+            print "!!## -- Removing active model -- ##!!"
             try:
                 delete = razor.remove_active_model(am_uuid)
                 print "Deleted: %s " % delete
                 #pass
             except Exception, e:
-                print "Error removing active model: %s " % e
+                print "!!## -- Error removing active model: %s -- ##!!" % e
                 pass
 
-            print "Removing chef-node..."
+            print "!!## -- Removing chef-node -- ##!!"
             try:
                  with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                     node = Node(chef_name)
@@ -148,37 +147,35 @@ if active_models:
                     else:
                         pass
             except Exception, e:
-                print "Error removing chef node: %s " % e
+                print "!!## -- Error removing chef node: %s -- ##!!" % e
                 pass
 
-            print "Searching chef clients..."
+            print "!!## -- Searching chef clients..."
             try:
                 chef_api = ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client)
                 if chef_api is not None:
                     response = chef_api.api_request('DELETE', '/clients/%s' % chef_name)
-                    print "Client %s removed with response: %s" % (chef_name, response)
+                    print "!!## -- Client %s removed with response: %s -- ##!!" % (chef_name, response)
                 else:
                     pass
             except Exception, e:
-                print "Error removing chef node: %s " % e
+                print "!!## -- Error removing chef node: %s -- ##!!" % e
                 pass
             
-            print "Trying to restart server with ip %s...." % ip
+            print "!!## -- Trying to restart server with ip %s -- ##!!" % ip
             try:
-                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
-                if return_code != 0:
-                    print "Error: Could not restart."
-                    print "Private IP : %s" % private_ip
-                    print "Public IP: %s" % ip
-                else:
-                    print "Restart success."
-            except Exception, e:
-                print "Restart FAILURE: %s " % e
-                pass
+                check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
+                print "!!## -- Restart of server with ip: %s was a success -- ##!!" % ip
+            except CalledProcessError, cpe:
+                print "!!## -- Failed to restart server -- ##!!"
+                print "!!## -- Private IP: %s, Public IP: %s -- ##!!" % (private_ip, ip)
+                print "!!## -- Exited with following error status: -- ##!!"
+                print "!!## -- Return code: %i -- ##!!" % cpe.returncode
+                print "!!## -- Command: %s -- ##!!" % cpe.cmd
+                print "!!## -- Output: %s -- ##!!" % cpe.output
             
-            print "Sleeping for 30 seconds..."
+            print "!!## -- Sleeping for 30 seconds -- ##!!"
             time.sleep(30)
-            print "#################################"
 else:
     # No active models for the policy present, exit.
     print "!!## -- Razor Policy %s has no active models -- ##!!" % results.policy
