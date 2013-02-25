@@ -94,7 +94,6 @@ if active_models:
             else:
                 print "!!## -- Node %s already had the correct environment, no change" % node
 
-
             # add network_interfaces to the nodes run run_list
             try:
                 node.run_list.append('recipe[network-interfaces]')
