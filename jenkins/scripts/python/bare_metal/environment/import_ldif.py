@@ -88,7 +88,7 @@ if active_models:
                 except CalledProcessError, cpe:
                     print "!!## -- Failed to copy ldif files  -- ##!!"
                     print "!!## -- Return Code: %s  -- ##!!" % cpe.returncode
-                    print "!!## -- Command: %s -- ##!!" % cpe.cmd
+                    #print "!!## -- Command: %s -- ##!!" % cpe.cmd
                     print "!!## -- Output: %s -- ##!!" % cpe.output
                 
                 try:
