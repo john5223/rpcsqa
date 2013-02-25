@@ -62,7 +62,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         if username in chef_environment['override_attributes']['keystone']['tenants']:
             environments[env_name]['OS_TENANT_NAME'] = environments[env_name]['OS_USERNAME']
         else:
-            print "Tenant does not exist for %s" % 
+            print "Tenant does not exist for %s" % username
             sys.exit(1)
 
     print "Saved environment information for nodes: %s" % environments
