@@ -69,7 +69,7 @@
     "developer_mode": false,
     "osops_networks": {
       "management": "198.101.133.0/24",
-      "nova": "1198.101.133.0/24",
+      "nova": "198.101.133.0/24",
       "public": "198.101.133.0/24"
     },
     "glance": {
