@@ -96,9 +96,14 @@ if active_models:
 
 
             # add network_interfaces to the nodes run run_list
-            node.run_list.append('recipe[network-interfaces]')
-            node.save()
-
+            try:
+                node.run_list.append('recipe[network-interfaces]')
+                node.save()
+                print "!!## -- Node: %s saved with new run list %s -- ##!!" % (node, node.run_list)
+            except Exception, e:
+                print "!!## -- Failed to save node %s with new run list -- Exception: %s -- ##!!" % (node, e)
+                sys.exit(1)
+            
             # sleep for 5 seconds to give chef time
             time.sleep(5)
 
