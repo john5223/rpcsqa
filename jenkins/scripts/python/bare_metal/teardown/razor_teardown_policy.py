@@ -168,6 +168,8 @@ if active_models:
                 return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
                 if return_code != 0:
                     print "Error: Could not restart."
+                    print "Private IP : %s" % private_ip
+                    print "Public IP: %s" % ip
                 else:
                     print "Restart success."
             except Exception, e:
