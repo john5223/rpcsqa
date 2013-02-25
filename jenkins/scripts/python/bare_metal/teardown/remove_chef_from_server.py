@@ -82,8 +82,8 @@ if active_models:
         for server in to_run_list:
             print "Trying to remove chef on %s with ip %s...." % (server['node'], server['ip'])
             try:
-                return_code = subprocess.check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'apt-get remove --purge -y chef; rm -rf /etc/chef'" % (server['root_password'], server['ip']), shell=True)
-            except subprocess.CalledProcessError, cpe:
+                return_code = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'apt-get remove --purge -y chef; rm -rf /etc/chef'" % (server['root_password'], server['ip']), shell=True)
+            except CalledProcessError, cpe:
                 if cpe.returncode == 100:
                     "Chef removal failed...Chef didn't exist on the server"
                 else:
