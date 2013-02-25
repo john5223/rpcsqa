@@ -20,9 +20,10 @@ parser.add_argument('--chef_client', action="store", dest="chef_client", default
 
 parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem", default="/var/lib/jenkins/rpcsqa/.chef/jenkins.pem", required=True,                help="Location of chef client pem file")
 
-parser.add_argument('--opencenter_test_repo', action="store", dest="opencenter_test_repo", default="https://github.com/galstrom21/opencenter-testerator.git",                required=True, help="URL of opencenter test git repo")
+parser.add_argument('--opencenter_test_repo', action="store", dest="opencenter_test_repo", 
+                    default="https://github.com/galstrom21/opencenter-testerator.git", required=True, help="URL of opencenter test git repo")
 
-parser.add_argument('--display_only', action="store", dest="display_only", default="true", required=False, 
+parser.add_argument('--display_only', action="store", dest="display_only", default="true", required=True, 
                     help="Display the node information only (will not reboot or teardown am)")
 
 # Save the parsed arguments
@@ -53,15 +54,10 @@ def get_root_pass(data):
 
 razor = razor_api(results.razor_ip)
 policy = results.policy
-
-print "Display only: %s " % results.display_only
-
 active_models = razor.simple_active_models(policy)
 servers = []
 
 if active_models:
-    print "'%s' active models: %s " % (policy, len(active_models))
-
     # Gather all of the active models for the policy and get information about them.
     for active in active_models:
         data = active_models['response'][active]

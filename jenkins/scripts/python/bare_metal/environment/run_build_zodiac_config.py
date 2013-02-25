@@ -1,10 +1,8 @@
 #!/usr/bin/python
-
 import os
-import subprocess
 import argparse
+import subprocess
 from ssh_session import ssh_session
-
 
 """
     This script connects to our blank ubuntu server and dl's and runs the set-up bash.
@@ -18,13 +16,12 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--source', action="store", dest="source",
                     required=True, default="workspace/scripts/bash/build_zodiac_config.sh", help="Path to source file ")
 
-
 #For the destination get....
 #################################
 parser.add_argument('--destination', action="store", dest="destination",
                     required=True, default="~", help="The location to get the setup file")
 
-
+# Get the hostname of the host
 parser.add_argument('--host_name', action="store", dest="host_name", 
                     required=True, help="Hostname/IP for the Server")
 
@@ -58,7 +55,4 @@ session.ssh('chmod 0755 %s/%s' % (results.destination, filename))
 print "Running the script: %s" % results.destination
 session.sudo_ssh('sudo %s/./%s' % (results.destination, filename))
 
-
 session.close()
-
-print "!!## -- Ending Setup for Bare Metal -- ##!!"

@@ -1,17 +1,12 @@
 #!/usr/bin/python
 import os
 import json
-import argparse
-from razor_api import razor_api
 import time
+import argparse
 import subprocess
-
-import sys
-sys.stdout.flush()
-
+from razor_api import razor_api
 
 parser = argparse.ArgumentParser()
-# Get the ip of the server you want to remove
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", 
                     required=True, help="IP for the Razor server")
 
@@ -19,9 +14,8 @@ parser.add_argument('--policy', action="store", dest="policy",
                     required=True, help="Policy to teardown from razor and reboot nodes")
 
 parser.add_argument('--data_bag_location', action="store", dest="data_bag_loc", 
-                    #default="/home/john/git/rpcsqa/chef-cookbooks/data_bags/razor_node",
-                    default="/var/lib/jenkins/rpcsqa/chef-cookbooks/data_bags/razor_node", 
-                    required=True, help="Policy to teardown from razor and reboot nodes")
+                    default="/var/lib/jenkins/rpcsqa/chef-cookbooks/data_bags/razor_node", required=True, 
+                    help="Policy to teardown from razor and reboot nodes")
 
 parser.add_argument('--display', action="store", dest="display", 
                     default="true", 
@@ -41,8 +35,6 @@ else:
 #   -- once policies are broker_* status then run nmap_chef_client
 #############################################################
 
-#####
-
 def get_data_bag_UUID(data):
     try:
         eth = ['eth0_mac', 'eth1_mac', 'eth2_mac', 'eth3_mac' ]
@@ -54,14 +46,12 @@ def get_data_bag_UUID(data):
     except:
         return ''
     
-
 def getrootpass(data):
     if 'root_password' in data:
         return data['root_password']
     else:
         return ''
-  
-    
+
 def getip_from_data_bag(uuid):
     try:
         data_bag_loc  = results.data_bag_loc

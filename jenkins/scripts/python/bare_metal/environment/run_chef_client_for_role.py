@@ -78,9 +78,8 @@ if active_models:
                 if display_only:
                     print "!!## -- ROLE %s FOUND, would run chef-client on %s with ip %s..." % (results.role, node, ip)
                 else:
-                    print "!!## -- ROLE %s FOUND, runnning chef-client on %s with ip %s..." % (results.role, node, ip)
-
                     # append the server to the to run list
+                    print "!!## -- ROLE %s FOUND, runnning chef-client on %s with ip %s..." % (results.role, node, ip)
                     to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password, 'platform_family': platform_family})
 
     if not display_only and to_run_list:
