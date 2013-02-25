@@ -103,7 +103,7 @@ if active_models:
             except Exception, e:
                 print "!!## -- Failed to save node %s with new run list -- Exception: %s -- ##!!" % (node, e)
                 sys.exit(1)
-            
+
             # sleep for 5 seconds to give chef time
             time.sleep(5)
 
@@ -112,7 +112,7 @@ if active_models:
                 check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'chef-client;chef-client'" % (password, ip), shell=True)
                 print "!!## -- Successful chef-client run on server with ip %s -- ##!!" % ip
             except CalledProcessError, cpe:
-                print "!!## -- Failed to run chef-client on server with ip: %s -- ##!!" % (command, opencenter_server_ip)
+                print "!!## -- Failed to run chef-client on server with ip: %s -- ##!!" % (command, ip)
                 print "!!## -- Return Code: %s -- ##!!" % cpe.returncode
                 #print "!!## -- Command: %s -- ##!!" % cpe.cmd
                 print "!!## -- Output: %s -- ##!!" % cpe.output
