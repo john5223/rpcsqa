@@ -94,7 +94,7 @@ if active_models:
             except CalledProcessError, cpe:
                 print "!!## -- Failed to install OpenCenter server on server with ip: %s --##!!" % server['ip']
                 print "!!## -- Return Code: %s -- ##!!" % cpe.returncode
-                print "!!## -- Command: %s -- ##!!" % cpe.cmd
+                #print "!!## -- Command: %s -- ##!!" % cpe.cmd
                 print "!!## -- Output: %s -- ##!!" % cpe.output
                 failure = True
         if failure:

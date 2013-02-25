@@ -92,7 +92,7 @@ if active_models:
             except CalledProcessError, cpe:
                 print "!!## -- Failed to fully run chef-client on server with ip: %s -- ##!!" % server['ip']
                 print "!!## -- Return Code: %s -- ##!!" % cpe.returncode
-                print "!!## -- Command: %s -- ##!!" % cpe.cmd
+                #print "!!## -- Command: %s -- ##!!" % cpe.cmd
                 print "!!## -- Output: %s -- ##!!" % cpe.output
                 failed_runs = True
 

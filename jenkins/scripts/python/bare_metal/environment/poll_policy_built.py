@@ -119,7 +119,7 @@ if active_models:
                         except CalledProcessError, cpe:
                             print "!!## -- Failed to restart server with ip: %s --##!!" % ip
                             print "!!## -- Return Code: %s --##!!" % cpe.returncode
-                            print "!!## -- Command: %s --##!!" % cpe.cmd
+                            #print "!!## -- Command: %s --##!!" % cpe.cmd
                             print "!!## -- Output: %s --##!!" % cpe.output
                             fail_count +=1
                         time.sleep(600)                              

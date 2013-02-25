@@ -3,8 +3,8 @@ import os
 import sys
 import time
 import argparse
-import subprocess
 from razor_api import razor_api
+from subprocess import check_call, CalledProcessError
 
 # Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
@@ -40,9 +40,8 @@ def get_root_pass(data):
 razor = razor_api(results.razor_ip)
 policy = results.policy
 
-print "#################################"
-print "Polling for  '%s'  active models" % policy
-print "Display only: %s " % results.display_only
+print "!!## -- Polling for  '%s'  active models -- ##!!" % policy
+print "!!## -- Display only: %s -- ##!!" % results.display_only
 
 got_active = False
 attempt = 0
@@ -66,35 +65,32 @@ if active_models:
             ip = data['eth1_ip']
             
             if display_only:
-                print "Active Model ID: %s " % active
-                print "IP address: %s " % ip
+                print "!!## -- Active Model ID: %s -- ##!!" % active
+                print "!!## -- IP address: %s -- ##!!" % ip
             else:
-                print "Removing active model..."
+                print "!!## -- Removing active model  -- ##!!"
                 try:
                     delete = razor.remove_active_model(am_uuid)
                     print "Deleted: %s " % delete
                 except Exception, e:
-                    print "Error removing active model: %s " % e
+                    print "!!## -- Error removing active model: %s -- ##!!" % e
                     pass
 
-                print "Trying to restart server with ip %s...." % ip
+                print "!!## -- Trying to restart server with ip %s -- ##!!" % ip
                 try:
-                    return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
+                    check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
+                    print "!!## -- Restart successful on server with ip: %s -- ##!!" % ip
+                except CalledProcessError, cpe:
+                    print "!!## -- Failed to restart server with ip: %s -- ##!!" % ip
+                    print "!!## -- Exited with following error status: -- ##!!"
+                    print "!!## -- Return code: %i -- ##!!" % cpe.returncode
+                    #print "!!## -- Command: %s -- ##!!" % cpe.cmd
+                    print "!!## -- Output: %s -- ##!!" % cpe.output
 
-                    if return_code != 0:
-                        print "Error: Could not restart."
-                        failed_restart += 1
-                    else:
-                        print "Restart success."
-
-                except Exception, e:
-                    print "Restart FAILURE: %s " % e
-                    pass
-
-                print "Sleeping for 30 seconds..."
+                print "!!## -- Sleeping for 30 seconds -- ##!!"
                 time.sleep(30)
         else:
-            print "Active Model %s is not in broker_fail state, but in %s, skipping" % (am_uuid, curr_state)
+            print "!!## -- Active Model %s is not in broker_fail state, but in %s, skipping -- ##!!" % (am_uuid, curr_state)
 
     if failed_restart > 0:
         sys.exit(1)

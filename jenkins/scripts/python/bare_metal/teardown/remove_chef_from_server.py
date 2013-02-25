@@ -88,7 +88,7 @@ if active_models:
                 else:
                     print "!!## -- Chef removal failed -- ##!!"
                     print "!!## -- Return code: %i -- ##!!" % cpe.returncode
-                    print "!!## -- Command: %s -- ##!!" % cpe.cmd
+                    #print "!!## -- Command: %s -- ##!!" % cpe.cmd
                     print "!!## -- Output: %s -- ##!!" % cpe.output
                     failed_runs += 1
 

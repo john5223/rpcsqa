@@ -97,7 +97,7 @@ if active_models:
                 except CalledProcessError, cpe:
                     print "!!## -- Failed to import ldif files on ldap server -- ##!!"
                     print "!!## -- Return Code: %s..." % cpe.returncode
-                    print "!!## -- Command: %s" % cpe.cmd
+                    #print "!!## -- Command: %s" % cpe.cmd
                     print "!!## -- Output: %s..." % cpe.output
 else:
     # No active models for the policy present, exit.

@@ -142,7 +142,7 @@ if active_models:
             except CalledProcessError, cpe:
                 print "!!## -- Command %s failed to run on server with ip: %s -- ##!!" % (command, opencenter_server_ip)
                 print "!!## -- Return Code: %s -- ##!!" % cpe.returncode
-                print "!!## -- Command: %s -- ##!!" % cpe.cmd
+                #print "!!## -- Command: %s -- ##!!" % cpe.cmd
                 print "!!## -- Output: %s -- ##!!" % cpe.output
                 sys.exit(1)
 else:

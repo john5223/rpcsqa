@@ -171,7 +171,7 @@ if active_models:
                 print "!!## -- Private IP: %s, Public IP: %s -- ##!!" % (private_ip, ip)
                 print "!!## -- Exited with following error status: -- ##!!"
                 print "!!## -- Return code: %i -- ##!!" % cpe.returncode
-                print "!!## -- Command: %s -- ##!!" % cpe.cmd
+                #print "!!## -- Command: %s -- ##!!" % cpe.cmd
                 print "!!## -- Output: %s -- ##!!" % cpe.output
             
             print "!!## -- Sleeping for 30 seconds -- ##!!"
