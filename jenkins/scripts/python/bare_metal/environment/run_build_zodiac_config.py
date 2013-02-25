@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import os
 import argparse
-import subprocessfrom ssh_session import ssh_session
+from ssh_session import ssh_session
 
 """
     This script connects to our blank ubuntu server and dl's and runs the set-up bash.
