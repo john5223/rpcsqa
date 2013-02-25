@@ -137,7 +137,7 @@ if active_models:
         
         for command in commands: 
             try:
-                check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s '%s'" % (opencenter_server_password, opencenter_server_ip, command), stderr=subprocess.STDOUT, shell=True)
+                check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s '%s'" % (opencenter_server_password, opencenter_server_ip, command), shell=True)
                 print "!!## -- command: %s on %s run successfully  -- ##!!" % (command, opencenter_server_ip)
             except CalledProcessError, cpe:
                 print "!!## -- Command %s failed to run on server with ip: %s -- ##!!" % (command, opencenter_server_ip)

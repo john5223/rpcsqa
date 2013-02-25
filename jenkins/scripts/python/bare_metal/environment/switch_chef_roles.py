@@ -62,7 +62,7 @@ try:
     # Open the file
     fo = open("%s" % results.roles_location, "r")
 except IOError:
-    print "Failed to open file %s, exiting script" % results.roles_location
+    print "!!## -- Failed to open file %s, exiting script -- ##!!" % results.roles_location
     sys.exit()
 else:
     # read the json in
@@ -72,11 +72,10 @@ else:
     fo.close()
 
     # print message for debugging
-    print "%s successfully read and closed" % results.roles_location
+    print "!!## -- %s successfully read and closed -- ##!!" % results.roles_location
 
-print "#################################"
-print " Switching roles for  '%s'  active models" % policy
-print "Display only: %s " % results.display_only
+print "!!## -- Switching roles for  '%s'  active models -- ##!!" % policy
+print "!!## -- Display only: %s -- ##!!" % results.display_only
 
 # create the roles list from the ordered json
 roles = []
@@ -101,7 +100,6 @@ if active_models:
             if display_only:
                 if (i > len(roles) - 1):
                     i = len(roles) - 1
-                print "!!## -- "
                 print "!!## -- %s has run list: %s, and environment: %s -- ##!!" % (node, run_list, environment)
                 print "!!## -- %s run list will be switched to %s with environment %s -- ##!!" % (node, roles[i], policy)
                 i += 1
@@ -114,12 +112,12 @@ if active_models:
                     try:
                         node.chef_environment = environment
                         node.save()
-                        print "!!## -- NODE: %s SAVED WITH NEW ENVIRONMENT: %s -- ##!1" % (node, node.chef_environment)
+                        print "!!## -- NODE: %s SAVED WITH NEW ENVIRONMENT: %s -- ##!!" % (node, node.chef_environment)
                     except Exception, e:
                         print "!!## -- Failed to save node environment -- Exception: %s -- ##!!" % e
                         sys.exit(1)
                 else:
-                    print "Node %s already had the correct environment, no change" % node
+                    print "!!## -- Node %s already had the correct environment, no change" % node
                 
                 # This sets the last X amount of boxes to the last role in the role list
                 if (i >= len(roles) - 1):
