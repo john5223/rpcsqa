@@ -70,16 +70,16 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
 if not display_only and environments:
     print "!!## -- Trying to write environments to /var/lib/jenkins/.supernova -- ##!!"
     # open and write .supernova based off of environments dict.
-        try:
-            # Open the file
-            fo = open("/var/lib/jenkins/.supernova", "w")
-        except IOError:
-            print "!!## -- Failed to open file /var/lib/jenkins/.supernova  -- ##!!"
-        else:
-            for k,v in environments.iteritems():
-                to_write = "[%s]\n" % k
-                for k2,v2 in v.iteritems():
-                    to_write = to_write + "%s = %s" % (k2,v2)
-            fo.write(to_write)
-            fo.close()
-            print "!!## -- /var/lib/jenkins/.supernova successfully saved -- ##!!"
+    try:
+        # Open the file
+        fo = open("/var/lib/jenkins/.supernova", "w")
+    except IOError:
+        print "!!## -- Failed to open file /var/lib/jenkins/.supernova  -- ##!!"
+    else:
+        for k,v in environments.iteritems():
+            to_write = "[%s]\n" % k
+            for k2,v2 in v.iteritems():
+                to_write = to_write + "%s = %s" % (k2,v2)
+        fo.write(to_write)
+        fo.close()
+        print "!!## -- /var/lib/jenkins/.supernova successfully saved -- ##!!"
