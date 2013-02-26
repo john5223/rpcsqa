@@ -97,16 +97,15 @@ if active_models:
             # if the role is opencenter-client, add to temp list.
             elif 'role[qa-opencenter-agent]' in server['run_list']:
                 client_temp.append(server['node'])
-                print "appending to client temp: %s" % server['node']
             else:
                 print "!!## -- Server with name: %s doesnt have opencenter server or client in its run list  -- ##!!" % server['node']
                 pass
                 
         # assign a opencenter test role to each client server.
-        if client_temp:
+        if not client_temp:
             print "No clients in run list"
             sys.exit(1)
-            
+
         for role in opencenter_role_list:
             opencenter_test_env['%s' % role] = client_temp.pop()
 
