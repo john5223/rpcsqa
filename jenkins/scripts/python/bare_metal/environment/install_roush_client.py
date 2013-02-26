@@ -15,7 +15,7 @@ parser.add_argument('--razor_ip', action="store", dest="razor_ip",
                     required=True, help="IP for the Razor server")
 
 parser.add_argument('--policy', action="store", dest="policy", 
-                    default="qa-roush-client",
+                    default="qa-opencenter-client",
                     required=True, help="Razor policy to set chef roles for.")
 
 parser.add_argument('--role', action="store", dest="role", 
@@ -34,7 +34,7 @@ parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem",
                     required=False, help="client pem for chef")
 
 parser.add_argument('--cdn_url', action="store", dest="cdn_url",
-                    required=True, help="The location of the install-client.sh script for roush")
+                    required=True, help="The location of the install-client.sh script for opencenter")
 
 parser.add_argument('--display_only', action="store", dest="display_only", 
                     default="true", 
@@ -64,7 +64,7 @@ razor = razor_api(results.razor_ip)
 policy = results.policy
 
 print "#################################"
-print " Attempting to install roush client for role %s " % results.role
+print " Attempting to install opencenter client for role %s " % results.role
 print "Display only: %s " % results.display_only
 
 active_models = razor.simple_active_models(policy)
@@ -79,7 +79,7 @@ else:
     print "#################################"
 
     # Gather all of the active models for the policy and get information about them
-    roush_server_ip = ''
+    opencenter_server_ip = ''
     for active in active_models:
         data = active_models[active]
         chef_name = get_chef_name(data)
@@ -87,9 +87,9 @@ else:
 
         with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             node = Node(chef_name)
-            if 'role[qa-roush-server]' in node.run_list:
-                roush_server_ip = node['ipaddress']
-                print "Roush Server Node: %s with ip %s" % (node, roush_server_ip)
+            if 'role[qa-opencenter-server]' in node.run_list:
+                opencenter_server_ip = node['ipaddress']
+                print "Roush Server Node: %s with ip %s" % (node, opencenter_server_ip)
 
             if 'role[%s]' % results.role in node.run_list:
                 ip = node['ipaddress']
@@ -97,7 +97,7 @@ else:
                 if results.display_only == 'true':
                     print "!!## -- ROLE %s FOUND,  would install rouch client on %s with ip %s..." % (results.role, node, ip)
                 else:
-                    print "!!## -- ROLE %s FOUND, installing roush client on %s with ip %s..." % (results.role, node, ip)
+                    print "!!## -- ROLE %s FOUND, installing opencenter client on %s with ip %s..." % (results.role, node, ip)
                     to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
 
     if results.display_only == 'false' and len(to_run_list) > 0:
@@ -105,18 +105,18 @@ else:
         fail = False
         for server in to_run_list:
         
-            print "Attempting to install roush client on %s with ip %s...." % (server['node'], server['ip'])
+            print "Attempting to install opencenter client on %s with ip %s...." % (server['node'], server['ip'])
             try:
-                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'export ROUSH_SERVER=%s;curl -L \"%s\" | bash'" % (server['root_password'], server['ip'], roush_server_ip, results.cdn_url), shell=True)
+                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'export OPENCENTER_SERVER=%s;curl -L \"%s\" | bash -s agent %s'" % (server['root_password'], server['ip'], opencenter_server_ip, results.cdn_url, opencenter_server_ip), shell=True)
                 if return_code == 0:
-                    print "roush client success..."
+                    print "opencenter client success..."
                 else:
-                    print "roush client failed..."
+                    print "opencenter client failed..."
                     fail = True
 
             except Exception, e:
                 print "chef-client FAILURE: %s " % e
                 fail = True
         if fail:
-            print "One or more of the roush clients failed, check logs"
+            print "One or more of the opencenter clients failed, check logs"
             sys.exit(1)

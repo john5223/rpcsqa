@@ -87,13 +87,21 @@ else:
         for server in to_run_list:
             print "Attempting to install roush server on %s with ip %s...." % (server['node'], server['ip'])
             try:
-                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'curl -L \"%s\" | bash; apt-get install apache2 opencenter-dashboard -y'" % (server['root_password'], server['ip'], results.cdn_url), shell=True)
+                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'curl -L \"%s\" | bash -s server '" % (server['root_password'], server['ip'], results.cdn_url), shell=True)
                 if return_code == 0:
                     print "Successfully installed roush server..."
                 else:
                     print "Installing roush server failed..."
                     sys.exit(1)
-
+                
+                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'curl -L \"%s\" | bash -s dashboard 127.0.0.1'" % (server['root_password'], server['ip'], results.cdn_url), shell=True)
+                if return_code == 0:
+                    print "Successfully installed opencenter dashboard..."
+                else:
+                    print "Installing opencenter dashboard failed..."
+                    sys.exit(1)
+                
+                
             except Exception, e:
                 print "chef-client FAILURE: %s " % e
                 sys.exit(1)
