@@ -90,13 +90,14 @@ if active_models:
         for server in servers:
             # If the role is opencenter-server, save the server information.
             print server['run_list']
-            if 'role[qa-opencenter-server]' in server['run_list']:
+            if 'qa-opencenter-server' in server['run_list']:
                 opencenter_test_env['INSTANCE_SERVER_HOSTNAME'] = server['node']
                 opencenter_server_ip = server['ip']
                 opencenter_server_password = server['root_password']
             # if the role is opencenter-client, add to temp list.
-            elif 'role[qa-opencenter-agent]' in server['run_list']:
+            elif 'qa-opencenter-agent' in server['run_list']:
                 client_temp.append(server['node'])
+                print "appending to client temp: %s" % server['node']
             else:
                 print "!!## -- Server with name: %s doesnt have opencenter server or client in its run list  -- ##!!" % server['node']
                 pass
