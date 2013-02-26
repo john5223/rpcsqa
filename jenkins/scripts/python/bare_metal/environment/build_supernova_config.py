@@ -42,6 +42,7 @@ print "!!## -- Display only: %s -- ##!!" % results.display_only
 
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     nodes = Role(role).list
+    print type(nodes)
 
     for node in nodes:
         env_name = node.chef_environment
