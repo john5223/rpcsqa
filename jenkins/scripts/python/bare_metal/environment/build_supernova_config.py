@@ -54,7 +54,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         environments[env_name]['OS_AUTH_URL'] = node['automatic']['ipaddress']
 
         # Obtain environment of node
-        chef_environment = Environment(env_name)
+        chef_environment = Environment(env_name).to_dict()
         # Save username of node
         username = chef_environment['override_attributes']['keystone']['admin_user']
         environments[env_name]['OS_USERNAME'] = username
