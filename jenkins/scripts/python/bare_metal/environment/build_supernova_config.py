@@ -51,7 +51,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         # Create nested dictionary for chef role
         environments[env_name] = {}
         # Save ip address of node
-        environments[env_name]['OS_AUTH_URL'] = node['automatic']['ipaddress']
+        environments[env_name]['OS_AUTH_URL'] = "http://" + node['automatic']['ipaddress'] + ":8774/v1.1/"
 
         # Obtain environment of node
         chef_environment = Environment(env_name).to_dict()
