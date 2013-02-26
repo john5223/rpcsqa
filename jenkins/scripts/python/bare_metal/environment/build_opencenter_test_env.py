@@ -101,9 +101,9 @@ if active_models:
                 pass
                 
         # assign a opencenter test role to each client server.
-        if len(client_temp) == 0:
+        if client_temp:
             print "No clients in run list"
-            return sys.exit(1)
+            sys.exit(1)
             
         for role in opencenter_role_list:
             opencenter_test_env['%s' % role] = client_temp.pop()
