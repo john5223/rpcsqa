@@ -3,12 +3,12 @@ import os
 import sys
 import json
 import argparse
-from razor_api import razor_api
-import time
 from chef import *
+from razor_api import razor_api
 
-
+# Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
+
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", 
                     required=True, help="IP for the Razor server")
 
@@ -34,8 +34,14 @@ parser.add_argument('--display_only', action="store", dest="display_only",
                     default="true", 
                     required=False, help="Display the node information only (will not reboot or teardown am)")
 
-# Parse the parameters
+# Save the parsed arguments
 results = parser.parse_args()
+
+# converting string display only into boolean
+if results.display_only == 'true':
+    display_only = True
+else:
+    display_only = False
 
 def get_chef_name(data):
     try:
@@ -56,7 +62,7 @@ try:
     # Open the file
     fo = open("%s" % results.roles_location, "r")
 except IOError:
-    print "Failed to open file %s, exiting script" % results.roles_location
+    print "!!## -- Failed to open file %s, exiting script -- ##!!" % results.roles_location
     sys.exit()
 else:
     # read the json in
@@ -66,11 +72,10 @@ else:
     fo.close()
 
     # print message for debugging
-    print "%s successfully read and closed" % results.roles_location
+    print "!!## -- %s successfully read and closed -- ##!!" % results.roles_location
 
-print "#################################"
-print " Switching roles for  '%s'  active models" % policy
-print "Display only: %s " % results.display_only
+print "!!## -- Switching roles for  '%s'  active models -- ##!!" % policy
+print "!!## -- Display only: %s -- ##!!" % results.display_only
 
 # create the roles list from the ordered json
 roles = []
@@ -80,17 +85,7 @@ for i in range(len(temp_roles)):
 # Gather the active models with the policy from the cmd line
 active_models = razor.simple_active_models(policy)
 
-if active_models == {}:
-    print "'%s' active models: 0 " % (policy)
-    print "#################################"
-else:
-    if 'response' in active_models.keys():
-        active_models = active_models['response']
-    
-    print "'%s' active models: %s " % (policy, len(active_models))
-    print "#################################"
-
-
+if active_models:
     # Gather all of the active models for the policy and get information about them
     i = 0
     for active in active_models:
@@ -102,10 +97,9 @@ else:
             run_list = node.run_list
             environment = node.chef_environment
             
-            if results.display_only == 'true':
+            if display_only:
                 if (i > len(roles) - 1):
                     i = len(roles) - 1
-                print "!!## -- "
                 print "!!## -- %s has run list: %s, and environment: %s -- ##!!" % (node, run_list, environment)
                 print "!!## -- %s run list will be switched to %s with environment %s -- ##!!" % (node, roles[i], policy)
                 i += 1
@@ -118,12 +112,12 @@ else:
                     try:
                         node.chef_environment = environment
                         node.save()
-                        print "!!## -- NODE: %s SAVED WITH NEW ENVIRONMENT: %s -- ##!1" % (node, node.chef_environment)
+                        print "!!## -- NODE: %s SAVED WITH NEW ENVIRONMENT: %s -- ##!!" % (node, node.chef_environment)
                     except Exception, e:
                         print "!!## -- Failed to save node environment -- Exception: %s -- ##!!" % e
                         sys.exit(1)
                 else:
-                    print "Node %s already had the correct environment, no change" % node
+                    print "!!## -- Node %s already had the correct environment, no change" % node
                 
                 # This sets the last X amount of boxes to the last role in the role list
                 if (i >= len(roles) - 1):
@@ -147,3 +141,7 @@ else:
                     print "!!## -- %s already has the proper run list, not changing -- ##!!" % node
 
                 i += 1
+else:
+    # No active models for the policy present, exit.
+    print "!!## -- Razor Policy %s has no active models -- ##!!"
+    sys.exit(1)

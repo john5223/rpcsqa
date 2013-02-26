@@ -29,7 +29,6 @@ print razor
 
 # Collect all active models
 active_models = razor.simple_active_models()
-#print json.dumps(active_models, indent=2)
 
 # Loop through the active models and collect them
 reboot = []

@@ -1,14 +1,13 @@
 #!/usr/bin/python
 import os
 import sys
-import subprocess
 import json
 import argparse
-from razor_api import razor_api
-import time
 from chef import *
+from razor_api import razor_api
+from subprocess import check_call, CalledProcessError
 
-
+# Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", required=True, help="IP for the Razor server")
@@ -25,8 +24,14 @@ parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem",
 
 parser.add_argument('--display_only', action="store", dest="display_only", default="true", required=False, help="Display the node information only (                will not reboot or teardown am)")
 
-# Parse the parameters
+# Save the parsed arguments
 results = parser.parse_args()
+
+# converting string display only into boolean
+if results.display_only == 'true':
+    display_only = True
+else:
+    display_only = False
 
 def get_chef_name(data):
     try:
@@ -48,22 +53,13 @@ def get_root_pass(data):
 razor = razor_api(results.razor_ip)
 policy = results.policy
 
-print "#################################"
-print " Attempting to remove chef for role %s " % results.role
-print "Display only: %s " % results.display_only
+print "!!## -- Attempting to remove chef for role %s -- ##!!" % results.role
+print "!!## -- Display only: %s -- ##!!" % results.display_only
 
 active_models = razor.simple_active_models(policy)
 to_run_list = []
 
-if active_models == {}:
-    print "'%s' active models: 0 " % (policy)
-    print "#################################"
-else:
-    if 'response' in active_models.keys():
-        active_models = active_models['response']
-    print "'%s' active models: %s " % (policy, len(active_models))
-    print "#################################"
-
+if active_models:
     # Gather all of the active models for the policy and get information about them
     for active in active_models:
         data = active_models[active]
@@ -75,29 +71,30 @@ else:
             if 'role[%s]' % results.role in node.run_list:
                 ip = node['ipaddress']
 
-                if results.display_only == 'true':
-                    print "!!## -- ROLE %s FOUND, would remove chef on %s with ip %s..." % (results.role, node, ip)
+                if display_only:
+                    print "!!## -- Role %s found, would remove chef on %s with ip %s -- ##!!" % (results.role, node, ip)
                 else:
-                    print "!!## -- ROLE %s FOUND, removing chef on %s with ip %s..." % (results.role, node, ip)
                     to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
 
-    if results.display_only == 'false':
+    if not display_only:
         failed_runs = 0
-
         for server in to_run_list:
-            print "Trying to remove chef on %s with ip %s...." % (server['node'], server['ip'])
+            print "!!## -- Trying to remove chef on %s with ip %s -- ##!!" % (server['node'], server['ip'])
             try:
-                return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'apt-get remove --purge -y chef; rm -rf /etc/chef'" % (server['root_password'], server['ip']), shell=True)
-                if return_code == 0:
-                    print "chef removal success..."
-                elif return_code == 100:
-                    print "chef didnt exists on the server...."
+                check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'apt-get remove --purge -y chef; rm -rf /etc/chef'" % (server['root_password'], server['ip']), shell=True)
+            except CalledProcessError, cpe:
+                if cpe.returncode == 100:
+                    "!!## -- Chef removal failed...Chef didn't exist on the server -- ##!!"
                 else:
-                    print "chef removal failed for server %s, exited with return code %i..." % (server['node'], return_code)
+                    print "!!## -- Chef removal failed -- ##!!"
+                    print "!!## -- Return code: %i -- ##!!" % cpe.returncode
+                    #print "!!## -- Command: %s -- ##!!" % cpe.cmd
+                    print "!!## -- Output: %s -- ##!!" % cpe.output
                     failed_runs += 1
-
-            except Exception, e:
-                print "chef removal FAILURE: %s " % e
 
         if failed_runs > 0:
             sys.exit(1)
+else:
+    # No active models for the policy present, exit.
+    print "!!## -- Razor Policy %s has no active models -- ##!!"
+    sys.exit(1)

@@ -133,6 +133,8 @@ class razor_api:
 		# make the request to get active models from Razor
 		
 		am_content = self.active_models(filter)
+
+		#print json.dumps(am_content, indent=4)
 		
 		# Check the status code and return appropriately
 		if 'response' in am_content.keys():

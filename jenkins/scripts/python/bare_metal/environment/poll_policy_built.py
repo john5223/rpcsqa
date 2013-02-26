@@ -1,17 +1,13 @@
 #!/usr/bin/python
 import os
+import sys
 import json
+import time
 import argparse
 from razor_api import razor_api
-import time
-import subprocess
-
-import sys
-sys.stdout.flush()
-
+from subprocess import check_call, CalledProcessError
 
 parser = argparse.ArgumentParser()
-# Get the ip of the server you want to remove
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", 
                     required=True, help="IP for the Razor server")
 
@@ -19,26 +15,26 @@ parser.add_argument('--policy', action="store", dest="policy",
                     required=True, help="Policy to teardown from razor and reboot nodes")
 
 parser.add_argument('--data_bag_location', action="store", dest="data_bag_loc", 
-                    #default="/home/john/git/rpcsqa/chef-cookbooks/data_bags/razor_node",
-                    default="/var/lib/jenkins/rpcsqa/chef-cookbooks/data_bags/razor_node", 
-                    required=False, help="Policy to teardown from razor and reboot nodes")
-
+                    default="/var/lib/jenkins/rpcsqa/chef-cookbooks/data_bags/razor_node", required=True, 
+                    help="Policy to teardown from razor and reboot nodes")
 
 parser.add_argument('--display', action="store", dest="display", 
                     default="true", 
-                    required=False, help="Display the node information only (will not reboot or teardown am)")
-
+                    required=True, help="Display the node information only (will not reboot or teardown am)")
 
 # Parse the parameters
 results = parser.parse_args()
 
+# converting string display only into boolean
+if results.display == 'true':
+    display = True
+else:
+    display = False
 
 #############################################################
 #Poll active models that match policy from given input
 #   -- once policies are broker_* status then run nmap_chef_client
 #############################################################
-
-#####
 
 def get_data_bag_UUID(data):
     try:
@@ -51,14 +47,12 @@ def get_data_bag_UUID(data):
     except:
         return ''
     
-
 def getrootpass(data):
     if 'root_password' in data:
         return data['root_password']
     else:
         return ''
-  
-    
+
 def getip_from_data_bag(uuid):
     try:
         data_bag_loc  = results.data_bag_loc
@@ -75,11 +69,8 @@ def getip_from_data_bag(uuid):
 razor = razor_api(results.razor_ip)
 policy = results.policy
 
-
-print "#################################"
-print "Polling for  '%s'  active models" % policy
-print "Display only: %s " % results.display
-
+print "!!## -- Polling for  '%s'  active models --##!!" % policy
+print "!!## -- Display only: %s --##!!" % results.display
 
 get_active = False
 while get_active == False:
@@ -89,25 +80,14 @@ while get_active == False:
     except:
         time.sleep(60)
 
-
-
-if active_models == {}:
-    print "'%s' active models: 0 " % (policy)
-    print "#################################"
-else:
-    if 'response' in active_models.keys():
-        active_models = active_models['response']
-    
-    print "'%s' active models: %s " % (policy, len(active_models))
-    print "#################################"
-
+if active_models:
     count = 0
     fail_count = 0
     active = False
     
-    while active == False and count < 15:
+    while not active and count < 15:
         count += 1               
-        print "Polling..."
+        print "!!## -- Polling --##!!"
         active = True
         for a in active_models:
             data = active_models[a]
@@ -121,25 +101,34 @@ else:
                     try:
                         root_pass = data['root_password']
                         ip = data['eth1_ip']
+                        am_uuid = data['am_uuid']
                         
-                        delete = razor.remove_active_model(data['am_uuid'])
-                        print "Deleted: %s " % delete
-                        #Restart via ssh
-                        return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
+                        # Remove active model
+                        try:
+                            print "!!## -- Removing active model %s --##!!" % am_uuid
+                            delete = razor.remove_active_model(am_uuid)
+                            print "!!## -- Deleted: %s " % delete
+                        except Exception, e:
+                            print "!!## -- Error removing active model: %s --##!!" % e
+                            pass
 
-                        if return_code != 0:
-                            print "Error: Could not restart."                         
-                        else:
-                            print "Restart success."          
-                            
-                        count = 0
+                        #Restart via ssh
+                        print "Trying to restart server with ip %s --##!!" % ip
+                        try:
+                            check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
+                            print "!!## -- Sucessfully restarted server with ip: %s --##!!" % ip
+                        except CalledProcessError, cpe:
+                            print "!!## -- Failed to restart server with ip: %s --##!!" % ip
+                            print "!!## -- Return Code: %s --##!!" % cpe.returncode
+                            #print "!!## -- Command: %s --##!!" % cpe.cmd
+                            print "!!## -- Output: %s --##!!" % cpe.output
+                            fail_count +=1
                         time.sleep(600)                              
                     except Exception, e:
-                        print "Couldn't fix broker fail: %s " % e
+                        print "Couldn't fix broker fail: %s --##!!" % e
                         fail_count += 1
-                   
-
-            if results.display == "true":
+        
+            if display:
                  temp = { 'am_uuid': active_models[a]['am_uuid'], 'current_state':  active_models[a]['current_state'] }
                  print json.dumps(temp, indent=4)
         
@@ -152,13 +141,8 @@ else:
             dbag_uuid = get_data_bag_UUID(active_models[a])
             ip = getip_from_data_bag(dbag_uuid)
             print "%s : %s " % (active_models[a]['am_uuid'], ip)
-        
-        
         sys.exit(1)
-        
-        
-        
-        
+
     else:    
         for a in active_models:
             dbag_uuid = get_data_bag_UUID(active_models[a])
@@ -166,3 +150,8 @@ else:
             print "%s : %s " % (active_models[a]['am_uuid'], ip)
             
         print "!!## -- Broker finished for %s -- ##!!" % policy
+else:
+    # No active models for the policy present, exit.
+    print "!!## -- Razor Policy %s has no active models -- ##!!"
+    sys.exit(1)
+    

@@ -1,5 +1,7 @@
 #!/usr/bin/python
-import os, json, argparse
+import os
+import json
+import argparse
 
 def create_data_bag(ip, ident=None):
 
@@ -92,21 +94,19 @@ def create_data_bag(ip, ident=None):
 
 
 # MAIN PROGRAM
-
 # Gather the arguments from the command line
 parser = argparse.ArgumentParser()
 
 # Path to JSON file of MACs
-parser.add_argument('--file_path', action="store", dest="file_path", 
-					required=True, default=None, help="Path to the JSON file")
+parser.add_argument('--file_path', action="store", dest="file_path", required=True, default=None, help="Path to the JSON file")
 
 # Parse the parameters
 results = parser.parse_args()
 
+# Get the path to the JSON File
 path = os.path.abspath(results.file_path)
 
-print path
-#open JSON file
+# Open the file and write macs to ips
 try:
 	fo = open(path, 'r')
 except IOError:

@@ -1,14 +1,14 @@
 #!/usr/bin/python
 import os
 import sys
-import subprocess
-import json
+import time
 import argparse
 from razor_api import razor_api
-import time
+from subprocess import check_call, CalledProcessError
 
+# Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
-# Get the ip of the server you want to remove
+
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", 
                     required=True, help="IP for the Razor server")
 
@@ -20,13 +20,14 @@ parser.add_argument('--display_only', action="store", dest="display_only",
                     required=False, help="Display the node information only, dont remove or reboot")
 
 
-# Parse the parameters
+# Save the parsed arguments
 results = parser.parse_args()
 
-#############################################################
-#Poll active models that match policy from given input
-#   -- once policies are broker_* status then run nmap_chef_client
-#############################################################
+# converting string display only into boolean
+if results.display_only == 'true':
+    display_only = True
+else:
+    display_only = False
 
 #### METHODS ####
 def get_root_pass(data):
@@ -39,32 +40,22 @@ def get_root_pass(data):
 razor = razor_api(results.razor_ip)
 policy = results.policy
 
-print "#################################"
-print "Polling for  '%s'  active models" % policy
-print "Display only: %s " % results.display_only
-
+print "!!## -- Polling for  '%s'  active models -- ##!!" % policy
+print "!!## -- Display only: %s -- ##!!" % results.display_only
 
 got_active = False
-while got_active == False:
+attempt = 0
+while not got_active and attempt < 5:
     try:
         active_models = razor.simple_active_models(policy)
+        attempt += 1
         got_active = True
     except:
         time.sleep(60)
 
-if active_models == {}:
-    print "'%s' active models: 0 " % (policy)
-    print "#################################"
-else:
-    if 'response' in active_models.keys():
-        active_models = active_models['response']
-    
-    print "'%s' active models: %s " % (policy, len(active_models))
-    print "#################################" 
-    
+if active_models:
     failed_restart = 0
     for active in active_models:
-        
         data = active_models[active]
         am_uuid = data['am_uuid']
         curr_state = data['current_state']
@@ -73,37 +64,38 @@ else:
             root_pass = get_root_pass(data)
             ip = data['eth1_ip']
             
-
-            if results.display_only == 'true':
-                print "Active Model ID: %s " % active
-                print "IP address: %s " % ip
+            if display_only:
+                print "!!## -- Active Model ID: %s -- ##!!" % active
+                print "!!## -- IP address: %s -- ##!!" % ip
             else:
-                print "Removing active model..."
+                print "!!## -- Removing active model  -- ##!!"
                 try:
                     delete = razor.remove_active_model(am_uuid)
                     print "Deleted: %s " % delete
                 except Exception, e:
-                    print "Error removing active model: %s " % e
+                    print "!!## -- Error removing active model: %s -- ##!!" % e
                     pass
 
-                print "Trying to restart server with ip %s...." % ip
+                print "!!## -- Trying to restart server with ip %s -- ##!!" % ip
                 try:
-                    return_code = subprocess.call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
+                    check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
+                    print "!!## -- Restart successful on server with ip: %s -- ##!!" % ip
+                except CalledProcessError, cpe:
+                    print "!!## -- Failed to restart server with ip: %s -- ##!!" % ip
+                    print "!!## -- Exited with following error status: -- ##!!"
+                    print "!!## -- Return code: %i -- ##!!" % cpe.returncode
+                    #print "!!## -- Command: %s -- ##!!" % cpe.cmd
+                    print "!!## -- Output: %s -- ##!!" % cpe.output
 
-                    if return_code != 0:
-                        print "Error: Could not restart."
-                        failed_restart += 1
-                    else:
-                        print "Restart success."
-
-                except Exception, e:
-                    print "Restart FAILURE: %s " % e
-                    pass
-
-                print "Sleeping for 15 seconds..."
-                time.sleep(15)
+                print "!!## -- Sleeping for 30 seconds -- ##!!"
+                time.sleep(30)
         else:
-            print "Active Model %s is not in broker_fail state, but in %s, skipping" % (am_uuid, curr_state)
+            print "!!## -- Active Model %s is not in broker_fail state, but in %s, skipping -- ##!!" % (am_uuid, curr_state)
 
     if failed_restart > 0:
         sys.exit(1)
+else:
+    # No active models for the policy present, exit.
+    print "!!## -- Razor Policy %s has no active models -- ##!!"
+    sys.exit(1)
+    
