@@ -41,25 +41,32 @@ print "!!## -- Attempting to build supernova conf for role %s -- ##!!" % results
 print "!!## -- Display only: %s -- ##!!" % results.display_only
 
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
-    print "Searching for node of role:%s" % role
+    print "!!## -- Searching for node of role: %s -- ##!!" % role
     nodes = Search('node').query("role:%s" % role)
     for node in nodes:
+        
         # # DEBUG
+        
         # print json.dumps(node)
         env_name = node['chef_environment']
-        print "Saving environment for environment: " + env_name
+        print "!!## -- Saving environment for environment: %s -- ##!!" % env_name
+        
         # Create nested dictionary for chef role
         environments[env_name] = {}
+        
         # Save ip address of node
         environments[env_name]['OS_AUTH_URL'] = "http://" + node['automatic']['ipaddress'] + ":5000/v2.0/"
 
         # Obtain environment of node
         chef_environment = Environment(env_name).to_dict()
+        
         # Save username of node
         username = chef_environment['override_attributes']['keystone']['admin_user']
         environments[env_name]['OS_USERNAME'] = username
+        
         # Save password of node
         environments[env_name]['OS_PASSWORD'] = chef_environment['override_attributes']['keystone']['users']["%s" % username]['password']
+        
         # Save tenant of user exists in tenants
         if username in chef_environment['override_attributes']['keystone']['tenants']:
             environments[env_name]['OS_TENANT_NAME'] = environments[env_name]['OS_USERNAME']
@@ -67,7 +74,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             print "Tenant does not exist for %s" % username
             sys.exit(1)
 
-    print "Saved environment information for nodes: %s" % environments
+    print "!!## -- Saved environment information for nodes: %s -- ##!!" % environments
 
 if not display_only and environments:
     print "!!## -- Trying to write environments to /var/lib/jenkins/.supernova -- ##!!"
@@ -78,9 +85,9 @@ if not display_only and environments:
     except IOError:
         print "!!## -- Failed to open file /var/lib/jenkins/.supernova  -- ##!!"
     else:
-        for k,v in environments.iteritems():
+        for k, v in environments.iteritems():
             to_write = "[%s]\n" % k
-            for k2,v2 in v.iteritems():
+            for k2, v2 in v.iteritems():
                 to_write = to_write + "%s = %s\n" % (k2,v2)
             fo.write(to_write)
         fo.close()
