@@ -42,9 +42,7 @@ print "!!## -- Display only: %s -- ##!!" % results.display_only
 
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     nodes = Search("role:%s" % role)
-    print type(nodes)
-    print dict(nodes)
-    for node in nodes:
+    for node in nodes.iteritmes():
         env_name = node.chef_environment
         print "Saving environment for environment: " + node.chef_environment
         # Create nested dictionary for chef role
