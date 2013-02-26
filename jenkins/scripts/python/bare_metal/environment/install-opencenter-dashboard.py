@@ -96,11 +96,11 @@ if active_models:
                     # save the server to our run list
                     to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
     
-    # if we are not in debug, check the length of the run list and run the subprocesses to install oc client.
+    # if we are not in debug, check the length of the run list and run the subprocesses to install oc dashboard.
     if not display_only and to_run_list:
         failure = False
 
-        # Loop through the servers in the run list and install opencenter client.
+        # Loop through the servers in the run list and install opencenter dashboard.
         for server in to_run_list:
             print "!!## -- Attempting to install opencenter dashboard on %s with ip %s -- ##!!" % (server['node'], server['ip'])
             try:
