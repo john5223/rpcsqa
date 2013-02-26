@@ -42,7 +42,7 @@ print "!!## -- Display only: %s -- ##!!" % results.display_only
 
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     print "Searching for node of role:%s" % role
-    nodes = Search('node', "role:%s" % role).list()
+    nodes = Search('node').query("role:%s" % role)
     print nodes
     for node in nodes:
         print node
