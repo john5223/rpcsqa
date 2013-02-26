@@ -43,11 +43,9 @@ print "!!## -- Display only: %s -- ##!!" % results.display_only
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     print "Searching for node of role:%s" % role
     nodes = Search('node').query("role:%s" % role)
-    print nodes
     for node in nodes:
-        print node
-        env_name = node.chef_environment
-        print "Saving environment for environment: " + node.chef_environment
+        env_name = node['chef_environment']
+        print "Saving environment for environment: " + env_name
         # Create nested dictionary for chef role
         environments[env_name] = {}
         # Save ip address of node
