@@ -82,6 +82,6 @@ if not display_only and environments:
             to_write = "[%s]\n" % k
             for k2,v2 in v.iteritems():
                 to_write = to_write + "%s = %s\n" % (k2,v2)
-        fo.write(to_write)
+            fo.write(to_write)
         fo.close()
         print "!!## -- /var/lib/jenkins/.supernova successfully saved -- ##!!"
