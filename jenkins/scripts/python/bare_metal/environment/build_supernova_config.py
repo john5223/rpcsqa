@@ -35,7 +35,7 @@ else:
 #############################################################
 
 role = results.role
-envrionments = {}
+environments = {}
 
 print "!!## -- Attempting to build supernova conf for role %s -- ##!!" % results.role
 print "!!## -- Display only: %s -- ##!!" % results.display_only
