@@ -44,6 +44,8 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     print "Searching for node of role:%s" % role
     nodes = Search('node').query("role:%s" % role)
     for node in nodes:
+        # DEBUG
+        print json.dumps(node)
         env_name = node['chef_environment']
         print "Saving environment for environment: " + env_name
         # Create nested dictionary for chef role
