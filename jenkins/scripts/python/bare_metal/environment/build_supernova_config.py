@@ -41,7 +41,7 @@ print "!!## -- Attempting to build supernova conf for role %s -- ##!!" % results
 print "!!## -- Display only: %s -- ##!!" % results.display_only
 
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
-    nodes = Role(role).list
+    nodes = Search("role:%s" % role)
     print type(nodes)
     print nodes
     for node in nodes:
