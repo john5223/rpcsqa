@@ -12,7 +12,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", required=True, help="IP of the Razor server")
 
-parser.add_argument('--policy', action="store", dest="policy", default="qa-opencenter-client", required=True, 
+parser.add_argument('--policy', action="store", dest="policy", default="qa-opencenter-agent", required=True, 
                     help="Razor policy name to install against.")
 
 parser.add_argument('--role', action="store", dest="role", required=True, help="Chef Role to install against")
@@ -59,7 +59,7 @@ def get_root_pass(data):
 razor = razor_api(results.razor_ip)
 policy = results.policy
 
-print "!!## -- Attempting to install opencenter client for role %s --##!!" % results.role
+print "!!## -- Attempting to install opencenter agent for role %s --##!!" % results.role
 print "!!## -- Display only: %s  -- ##!!" % results.display_only
 
 # Gather the active models from Razor for the given policy
@@ -91,29 +91,29 @@ if active_models:
             
                 # debug print vs. run
                 if display_only:
-                    print "!!## -- Role %s found,  would install opencenter client on %s with ip %s -- ##!!" % (results.role, node, ip)
+                    print "!!## -- Role %s found,  would install opencenter agent on %s with ip %s -- ##!!" % (results.role, node, ip)
                 else:
                     # save the server to our run list
                     to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
     
-    # if we are not in debug, check the length of the run list and run the subprocesses to install oc client.
+    # if we are not in debug, check the length of the run list and run the subprocesses to install oc agent.
     if not display_only and to_run_list:
         failure = False
 
-        # Loop through the servers in the run list and install opencenter client.
+        # Loop through the servers in the run list and install opencenter agent.
         for server in to_run_list:
-            print "!!## -- Attempting to install opencenter client on %s with ip %s -- ##!!" % (server['node'], server['ip'])
+            print "!!## -- Attempting to install opencenter agent on %s with ip %s -- ##!!" % (server['node'], server['ip'])
             try:
                 check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'curl -L \"%s\" | bash -s agent %s'" % (server['root_password'], server['ip'], results.oc_install_url, opencenter_server_ip), shell=True)
-                print "!!## -- OpenCenter client installed sucessfully on server with ip %s -- ##!!" % server['ip']
+                print "!!## -- OpenCenter agent installed sucessfully on server with ip %s -- ##!!" % server['ip']
             except CalledProcessError, cpe:
-                print "!!## -- Failed to install OpenCenter client on server with ip: %s --##!!" % server['ip']
+                print "!!## -- Failed to install OpenCenter agent on server with ip: %s --##!!" % server['ip']
                 print "!!## -- Return Code: %s -- ##!!" % cpe.returncode
                 #print "!!## -- Command: %s -- ##!!" % cpe.cmd
                 print "!!## -- Output: %s -- ##!!" % cpe.output
                 failure = True
         if failure:
-            print "!!## -- One or more of the opencenter clients failed, check logs -- ##!!"
+            print "!!## -- One or more of the opencenter agents failed, check logs -- ##!!"
             sys.exit(1)
 else:
     # No active models for the policy present, exit.
