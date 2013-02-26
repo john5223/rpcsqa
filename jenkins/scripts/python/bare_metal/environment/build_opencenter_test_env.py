@@ -77,7 +77,7 @@ if active_models:
 
     if not display_only and servers:
         # create test env dictionary for env.sh.
-        opencenter_test_env = {'ROUSH_ENDPOINT': 'http://127.0.0.1:8080'}
+        opencenter_test_env = {'OPENCENTER_ENDPOINT': 'http://127.0.0.1:8080'}
         # temporary list of servers that are clients.
         client_temp = []
         # Role list for env.sh.
