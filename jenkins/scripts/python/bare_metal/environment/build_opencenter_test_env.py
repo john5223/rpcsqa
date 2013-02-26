@@ -94,13 +94,17 @@ if active_models:
                 opencenter_server_ip = server['ip']
                 opencenter_server_password = server['root_password']
             # if the role is opencenter-client, add to temp list.
-            elif 'role[qa-opencenter-client]' in server['run_list']:
+            elif 'role[qa-opencenter-agent]' in server['run_list']:
                 client_temp.append(server['node'])
             else:
                 print "!!## -- Server with name: %s doesnt have opencenter server or client in its run list  -- ##!!" % server['node']
                 pass
                 
         # assign a opencenter test role to each client server.
+        if len(client_temp) == 0:
+            print "No clients in run list"
+            return sys.exit(1)
+            
         for role in opencenter_role_list:
             opencenter_test_env['%s' % role] = client_temp.pop()
 
@@ -133,7 +137,11 @@ if active_models:
 
         # Run the proper steps to install and run opencenter-testerator
         print "!!## -- Running opencenter tests on server with ip %s  -- ##!!" % (opencenter_server_ip)
-        commands=["apt-get install git python-pip -y", "git clone %s" % results.opencenter_test_repo, "pip install -r /root/opencenter-testerator/tools/pip-requires", "cat env.sh", "source env.sh; nosetests /root/opencenter-testerator/tests/test_happy_path.py"]
+        commands=["apt-get install git python-pip -y", 
+                  "if [ ! -d 'roush-testerator' ]; then git clone %s; fi" % results.opencenter_test_repo, 
+                  "pip install -r /root/roush-testerator/tools/pip-requires", 
+                  "cat env.sh", 
+                  "source env.sh; nosetests /root/opencenter-testerator/tests/test_happy_path.py"]
         
         for command in commands: 
             try:
