@@ -56,7 +56,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         # Obtain environment of node
         chef_environment = Environment(env_name)
         # Save username of node
-        username = chef_envrionment['override_attributes']['keystone']['admin_user']
+        username = chef_environment['override_attributes']['keystone']['admin_user']
         environments[env_name]['OS_USERNAME'] = username
         # Save password of node
         environments[env_name]['OS_PASSWORD'] = chef_environment['override_attributes']['keystone']['users']["%s" % username]['password']
