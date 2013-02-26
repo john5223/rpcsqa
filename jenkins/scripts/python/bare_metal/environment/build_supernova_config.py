@@ -41,8 +41,8 @@ print "!!## -- Attempting to build supernova conf for role %s -- ##!!" % results
 print "!!## -- Display only: %s -- ##!!" % results.display_only
 
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
-    nodes = Search("role:%s" % role)
-    for node in nodes.iteritmes():
+    nodes = Search("role:%s" % role).list()
+    for node in nodes:
         env_name = node.chef_environment
         print "Saving environment for environment: " + node.chef_environment
         # Create nested dictionary for chef role
