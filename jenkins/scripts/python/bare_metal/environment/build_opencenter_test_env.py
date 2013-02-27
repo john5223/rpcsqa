@@ -124,10 +124,10 @@ if active_models:
         
         with open("/tmp/env-%s.sh" % opencenter_server_ip,"r") as fo:
             print fo.read()
-        
+            
         # SCP the env.sh to the opencenter server
         session = ssh_session("root", opencenter_server_ip, opencenter_server_password, True)
-        session.scp("/tmp/env-%s.sh" % opencenter_server_ip, "/root/")
+        session.scp("/tmp/env-%s.sh" % (opencenter_server_ip), "/root/env.sh")
         session.close()
         
         # Delete env.sh from current file system
