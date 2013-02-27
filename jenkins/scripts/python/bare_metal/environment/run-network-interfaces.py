@@ -111,7 +111,7 @@ if active_models:
                 check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'chef-client;chef-client'" % (password, ip), shell=True)
                 print "!!## -- Successful chef-client run on server with ip %s -- ##!!" % ip
             except CalledProcessError, cpe:
-                print "!!## -- Failed to run chef-client on server with ip: %s -- ##!!" % (command, ip)
+                print "!!## -- Failed to run chef-client on server with ip: %s -- ##!!" % ip
                 print "!!## -- Return Code: %s -- ##!!" % cpe.returncode
                 #print "!!## -- Command: %s -- ##!!" % cpe.cmd
                 print "!!## -- Output: %s -- ##!!" % cpe.output
