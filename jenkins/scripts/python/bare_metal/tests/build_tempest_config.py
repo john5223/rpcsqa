@@ -78,36 +78,36 @@ if active_models:
                                 image_id = image['id']
                                 #print "Image ID: %s " % image_id
                         
-                    except Exception, e:
-                        print " Failure to add keystone info to tempest config. Exited with exception: %s" % e
-                        sys.exit(1)
-                    
-                    tempest_dir = ''
-                    try:
-                        sample_path = "%s/etc/base_%s.conf" % (results.tempest_dir, results.tempest_version)
-                       
-                        with open(sample_path) as f:
-                            sample_config = f.read()
-                       
-                        #print sample_config 
-                        tempest_config = str(sample_config) 
-                        tempest_config = tempest_config.replace('http://127.0.0.1:5000/v2.0/', url)
-                        tempest_config = tempest_config.replace('{$KEYSTONE_IP}', ip)
-                        tempest_config = tempest_config.replace('localhost', ip)
-                        tempest_config = tempest_config.replace('127.0.0.1', ip)
-                        tempest_config = tempest_config.replace('{$IMAGE_ID}', image_id)
-                        tempest_config = tempest_config.replace('{$IMAGE_ID_ALT}', image_id)
-                       
-                        #print "##################################"
-                        #print tempest_config
-                        #print "##################################"
-                       
-                        tempest_config_path = "%s/etc/%s.conf" % (results.tempest_dir, results.policy)
-                        with open(tempest_config_path, 'w') as w:
-                            w.write(tempest_config)
-                       
-                    except Exception, e:
-                        print "Failed to write temptest config, exited with exception: %s" % e
+                except Exception, e:
+                    print " Failure to add keystone info to tempest config. Exited with exception: %s" % e
+                    sys.exit(1)
+                
+                tempest_dir = ''
+                try:
+                    sample_path = "%s/etc/base_%s.conf" % (results.tempest_dir, results.tempest_version)
+                   
+                    with open(sample_path) as f:
+                        sample_config = f.read()
+                   
+                    #print sample_config 
+                    tempest_config = str(sample_config) 
+                    tempest_config = tempest_config.replace('http://127.0.0.1:5000/v2.0/', url)
+                    tempest_config = tempest_config.replace('{$KEYSTONE_IP}', ip)
+                    tempest_config = tempest_config.replace('localhost', ip)
+                    tempest_config = tempest_config.replace('127.0.0.1', ip)
+                    tempest_config = tempest_config.replace('{$IMAGE_ID}', image_id)
+                    tempest_config = tempest_config.replace('{$IMAGE_ID_ALT}', image_id)
+                   
+                    #print "##################################"
+                    #print tempest_config
+                    #print "##################################"
+                   
+                    tempest_config_path = "%s/etc/%s.conf" % (results.tempest_dir, results.policy)
+                    with open(tempest_config_path, 'w') as w:
+                        w.write(tempest_config)
+                   
+                except Exception, e:
+                    print "Failed to write temptest config, exited with exception: %s" % e
 else:
     # No active models for the policy present, exit.
     print "!!## -- Razor Policy %s has no active models -- ##!!"
