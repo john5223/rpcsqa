@@ -129,7 +129,7 @@ if active_models:
         # SCP the env.sh to the opencenter server
         try:
             print "!!## -- Transfering the environment file to the server: %s -- ##!!" % opencenter_server_ip
-            check_call_return = check_call("sshpass -p %s scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s %s root@%s:/root" % (opencenter_server_password, opencenter_server_ip, env_file, opencenter_server_ip), shell=True)
+            check_call_return = check_call("sshpass -p %s scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet %s root@%s:/root" % (opencenter_server_password, env_file, opencenter_server_ip), shell=True)
         except CalledProcessError, cpe:
             print "!!## -- Failed to transfer environment file  -- ##!!"
             print "!!## -- Return Code: %s  -- ##!!" % cpe.returncode
