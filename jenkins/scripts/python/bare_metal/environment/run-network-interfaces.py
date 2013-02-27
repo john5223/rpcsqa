@@ -126,6 +126,9 @@ if active_models:
                 print "!!## -- Failed to remove network-interfaces from the nodes run list, error %s -- ##!!" % e
                 failed_run = True
 
+            # Sleep for 5 second to give chef time
+            time.sleep(5)
+
     # If a run failed, fail the script
     if failed_run:
         print "!!## -- One or more of the chef-client runs failed, see logs -- ##!!"
