@@ -119,7 +119,7 @@ if active_models:
 
             # Once chef client has run, remove network-interfaces from the run list
             try:
-                node.run_list.remove('recipe[network-interfaces')
+                node.run_list.remove('recipe[network-interfaces]')
                 node.save()
                 print "!!## -- Removed network-interfaces from the nodes run list -- ##!!"
             except Exception, e:
