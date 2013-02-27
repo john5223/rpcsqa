@@ -117,6 +117,15 @@ if active_models:
                 print "!!## -- Output: %s -- ##!!" % cpe.output
                 failed_run = True
 
+            # Once chef client has run, remove network-interfaces from the run list
+            try:
+                node.run_list.remove('recipe[network-interfaces')
+                node.save()
+                print "!!## -- Removed network-interfaces from the nodes run list -- ##!!"
+            except Exception, e:
+                print "!!## -- Failed to remove network-interfaces from the nodes run list, error %s -- ##!!" % e
+                failed_run = True
+
     # If a run failed, fail the script
     if failed_run:
         print "!!## -- One or more of the chef-client runs failed, see logs -- ##!!"
