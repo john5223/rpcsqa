@@ -11,6 +11,8 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('--role', action="store", dest="role", default="qa-single-controller", required=True, help="Chef role to set variables for.")
 
+parser.add_argument('--username', action="store", dest="username", default="demo", required=True, help="Username to authenticate with OpenStack.")
+
 parser.add_argument('--chef_url', action="store", dest="chef_url", default="http://198.101.133.4:4000", required=False, help="client for chef")
 
 parser.add_argument('--chef_client', action="store", dest="chef_client", default="jenkins", required=False, help="client for chef")
@@ -35,6 +37,7 @@ else:
 #############################################################
 
 role = results.role
+username = results.username
 environments = {}
 
 print "!!## -- Attempting to build supernova conf for role %s -- ##!!" % results.role
@@ -60,8 +63,10 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         # Obtain environment of node
         chef_environment = Environment(env_name).to_dict()
         
-        # Save username of node
-        username = chef_environment['override_attributes']['keystone']['admin_user']
+        # Check if username is in environment
+        if username not in chef_environment['override_attributes']['keystone']['users']:
+            print "!!## -- Error: username %s not in environment -- ##!!" % username
+            sys.exit(1)
         environments[env_name]['OS_USERNAME'] = username
         
         # Save password of node
