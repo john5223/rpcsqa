@@ -69,7 +69,6 @@ active_models = razor.simple_active_models(policy)
 
 if active_models:
     # Gather all of the active models for the policy and get information about them
-    i = 0
     failed_run = False
     for active in active_models:
         data = active_models[active]
