@@ -112,7 +112,7 @@ if active_models:
         # open and write env.sh based off of opencenter_test_env dict.
         try:
             # Open the file
-            fo = open("env.sh", "w")
+            fo = open("/tmp/env-%s.sh" % opencenter_server_ip, "w")
         except IOError:
             print "!!## -- Failed to open file env.sh  -- ##!!"
         else:
@@ -122,15 +122,18 @@ if active_models:
             fo.close()
             print "!!## -- env.sh successfully saved -- ##!!"
         
+        with open("/tmp/env-%s.sh" % opencenter_server_ip,"r") as fo:
+            print fo.read()
+        
         # SCP the env.sh to the opencenter server
         session = ssh_session("root", opencenter_server_ip, opencenter_server_password, True)
-        session.scp("env.sh", "/root/")
+        session.scp("/tmp/env-%s.sh" % opencenter_server_ip, "/root/")
         session.close()
         
         # Delete env.sh from current file system
         print "!!## -- Removing environment from system -- ##!!"
         try:
-            os.remove("env.sh")
+            os.remove("/tmp/env-%s.sh" % opencenter_server_ip)
         except Exception, e:
             print "!!## -- Failed to remove file: %s  -- ##!!" % e
             sys.exit(1)
