@@ -73,9 +73,7 @@
       "public": "198.101.133.0/24"
     },
     "glance": {
-      "api": {
-	"default_store": "file"
-      },
+      "api": {"default_store": "file"},
       "image_upload": true,
       "images": [
         "cirros",
