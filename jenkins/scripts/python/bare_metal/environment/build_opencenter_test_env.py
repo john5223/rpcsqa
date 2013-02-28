@@ -145,7 +145,7 @@ if active_models:
                   "if [ ! -d 'roush-testerator' ]; then git clone %s; fi" % results.opencenter_test_repo, 
                   "pip install -r /root/roush-testerator/tools/pip-requires", 
                   "cat env.sh", 
-                  "source env.sh; nosetests /root/roush-testerator/tests/test_happy_path.py"]
+                  "source env.sh; nosetests /root/roush-testerator/tests/test_happy_path.py -v"]
         
         for command in commands: 
             try:
