@@ -48,6 +48,15 @@ def get_root_pass(data):
     else:
         return ''
 
+def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
+    command = "sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l %s %s '%s'" % 
+            (passwd, user, server_ip, remote_cmd)
+    try:
+        ret = check_call(command, shell=True)
+        return {'success': True, 'return': ret, 'exception': None}
+    except CalledProcessError, cpe:
+        return {'success': False, 'retrun': None, 'exception': cpe}
+
 #############################################################
 #Collect active models that match policy from given input
 #############################################################
@@ -86,14 +95,15 @@ if active_models:
         failed_runs = False
         for server in to_run_list:
             print "!!## -- Trying chef-client on %s with ip %s -- ##!!" % (server['node'], server['ip'])
-            try:
-                check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'chef-client;chef-client'" % (server['root_password'], server['ip']), shell=True)
-                print "!!## -- Successful chef-client run on server with ip: %s -- ##!!" % server['ip']
-            except CalledProcessError, cpe:
-                print "!!## -- Failed to fully run chef-client on server with ip: %s -- ##!!" % server['ip']
-                print "!!## -- Return Code: %s -- ##!!" % cpe.returncode
-                #print "!!## -- Command: %s -- ##!!" % cpe.cmd
-                print "!!## -- Output: %s -- ##!!" % cpe.output
+            remote_return = run_remote_ssh_cmd(server['ip'], 'root', server['root_password'], 'chef-client')
+            if remote_return['success']:
+                print "!!## -- chef-client successful on server with ip: %s -- ##!!" % server['ip']
+            else:
+                print "!!## -- chef-client failed to run on server: %s with ip: %s -- ##!!" % (server['node'], server['ip'])
+                print "!!## -- Return Code: %s -- ##!!" % remote_return['cpe'].returncode
+                # This print will print the password, use it wisely (jacob).
+                #print "!!## -- Command: %s -- ##!!" % remote_return['cpe'].cmd
+                print "!!## -- Output: %s -- ##!!" % remote_return['cpe'].output
                 failed_runs = True
 
         if failed_runs:
@@ -103,24 +113,3 @@ else:
     # No active models for the policy present, exit.
     print "!!## -- Razor Policy %s has no active models -- ##!!"
     sys.exit(1)
-
-
-# Only need to comment out require tty on rhel
-# Moved to bottom as it is not needed anymore but I dont want to delete it
-# TODO (jacob) : move this to kickstart???
-"""
-if server['platform_family'] == 'rhel':
-    print "Commenting out requiretty..."
-    try:
-        sed_regex = "s/^Defaults[ \\t]+requiretty/#Defaults requiretty/g"
-        sed_string = "sed -i -E \'%s\' /etc/sudoers" % sed_regex
-        print "SED STRING: %s" % sed_string
-        return_code = subprocess.check_output("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s \"%s\"" % (server['root_password'], server['ip'], sed_string), stderr=subprocess.STDOUT, shell=True)
-        print "Successfully commented out requiretty..."
-    except Exception, e:
-        print "Failed to comment out requiretty..."
-        print "Command: %s" % e.cmd
-        print "Return Code: %s..." % e.returncode
-        print "Output: %s..." % e.output
-        sys.exit(1)
-"""
