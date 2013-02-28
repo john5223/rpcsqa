@@ -69,7 +69,6 @@ active_models = razor.simple_active_models(policy)
 
 if active_models:
     # Gather all of the active models for the policy and get information about them
-    i = 0
     failed_run = False
     for active in active_models:
         data = active_models[active]
@@ -111,11 +110,14 @@ if active_models:
                 check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'chef-client;chef-client'" % (password, ip), shell=True)
                 print "!!## -- Successful chef-client run on server with ip %s -- ##!!" % ip
             except CalledProcessError, cpe:
-                print "!!## -- Failed to run chef-client on server with ip: %s -- ##!!" % (command, ip)
+                print "!!## -- Failed to run chef-client on server with ip: %s -- ##!!" % ip
                 print "!!## -- Return Code: %s -- ##!!" % cpe.returncode
                 #print "!!## -- Command: %s -- ##!!" % cpe.cmd
                 print "!!## -- Output: %s -- ##!!" % cpe.output
                 failed_run = True
+
+            # Sleep for 5 second to give chef time
+            time.sleep(5)
 
     # If a run failed, fail the script
     if failed_run:

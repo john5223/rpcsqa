@@ -122,13 +122,20 @@ if active_models:
             fo.close()
             print "!!## -- env.sh successfully saved -- ##!!"
         
-        with open("/tmp/env-%s.sh" % opencenter_server_ip,"r") as fo:
+        env_file = "/tmp/env-%s.sh" % opencenter_server_ip
+        with open(env_file, "r") as fo:
             print fo.read()
             
         # SCP the env.sh to the opencenter server
-        session = ssh_session("root", opencenter_server_ip, opencenter_server_password, True)
-        session.scp("/tmp/env-%s.sh" % (opencenter_server_ip), "/root/env.sh")
-        session.close()
+        try:
+            print "!!## -- Transfering the environment file to the server: %s -- ##!!" % opencenter_server_ip
+            check_call_return = check_call("sshpass -p %s scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet %s root@%s:/root/env.sh" % (opencenter_server_password, env_file, opencenter_server_ip), shell=True)
+        except CalledProcessError, cpe:
+            print "!!## -- Failed to transfer environment file  -- ##!!"
+            print "!!## -- Return Code: %s  -- ##!!" % cpe.returncode
+            #print "!!## -- Command: %s -- ##!!" % cpe.cmd
+            print "!!## -- Output: %s -- ##!!" % cpe.output
+            
         
         # Delete env.sh from current file system
         print "!!## -- Removing environment from system -- ##!!"
@@ -144,8 +151,8 @@ if active_models:
         commands=["apt-get install git python-pip -y", 
                   "if [ ! -d 'roush-testerator' ]; then git clone %s; fi" % results.opencenter_test_repo, 
                   "pip install -r /root/roush-testerator/tools/pip-requires", 
-                  "cat env.sh", 
-                  "source env.sh; nosetests /root/roush-testerator/tests/test_happy_path.py -v"]
+                  "cat /root/env.sh", 
+                  "source /root/env.sh; nosetests /root/roush-testerator/tests/test_happy_path.py -v"]
         
         for command in commands: 
             try:
