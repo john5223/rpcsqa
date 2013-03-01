@@ -63,7 +63,7 @@ try:
     fo = open("%s" % results.roles_location, "r")
 except IOError:
     print "!!## -- Failed to open file %s, exiting script -- ##!!" % results.roles_location
-    sys.exit()
+    sys.exit(1)
 else:
     # read the json in
     temp_roles = json.loads(fo.read())
