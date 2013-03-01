@@ -39,22 +39,9 @@ if results.display_only == 'true':
 else:
     display_only = False
 
-def get_chef_name(data):
-    try:
-        name = "%s%s.%s" % (data['hostname_prefix'], data['bind_number'], data['domain'])
-        return name
-    except Exception, e:
-        return ''
-
-def get_root_pass(data):
-    if 'root_password' in data:
-        return data['root_password']
-    else:
-        return ''
-
 """
 Steps
-1. Gather all the nodes in the given environments
+1. Gather all the nodes in the given environment
 2. Gather all the nodes whos role is not qa based
 3. Find the role in the environment
 4. Find the name of the node that has the role
@@ -65,21 +52,24 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     razor = razor_api(results.razor_ip)
     nodes = Search('node').query("chef_environment:%s" % results.chef_environment)
     for node in nodes:
-        # Get the am uuid from chef
-        am_uuid = node['razor_metadata']['razor_active_model_uuid']
-        
         # Debug Printing
         print "Name: %s" % node['name']
         print "IP: %s" % node['ipaddress']
         print "run_list: %s" % node['run_list']
+        
+        # Get the am uuid from chef
+        am_uuid = node['razor_metadata']['razor_active_model_uuid']
         print "Razor AM UUID: %s" % am_uuid
         
         # Get the AM password from Razor
-        passwd = razor.get_active_model_pass(am_uuid)
-        if passwd['status_code'] == 200:
-            print "Razor AM Password: %s" % passwd['password']
-        else:
-            print "!!## -- Error getting password for active model, exited with error code: %s -- ##!!" % passwd['status_code']
-            sys.exit(1)
+        try:
+            passwd = razor.get_active_model_pass(am_uuid)
+            if passwd['status_code'] == 200:
+                print "Razor AM Password: %s" % passwd['password']
+            else:
+                print "!!## -- Error getting password for active model, exited with error code: %s -- ##!!" % passwd['status_code']
+                sys.exit(1)
+        except Exception, e:
+            print "Error: %s" % e
 
-        
+
