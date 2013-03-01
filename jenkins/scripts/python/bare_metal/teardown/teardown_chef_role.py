@@ -51,12 +51,13 @@ Steps
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     razor = razor_api(results.razor_ip)
     nodes = Search('node').query("chef_environment:%s" % results.chef_environment)
-    for node in nodes:
+    for n in nodes:
+        node = Node(node['name'])
         # Debug Printing
         print "Name: %s" % node['name']
         print "IP: %s" % node['ipaddress']
         print "run_list: %s" % node['run_list']
-        
+
         # Get the am uuid from chef
         am_uuid = node['razor_metadata']['razor_active_model_uuid']
         print "Razor AM UUID: %s" % am_uuid
