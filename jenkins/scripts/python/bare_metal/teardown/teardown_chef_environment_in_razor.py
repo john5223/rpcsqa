@@ -129,6 +129,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 failed_runs = True
 
             # Sleep for 20 seconds
+            print "!!## -- Sleeping for 20 seconds -- ##!!"
             time.sleep(20)
 
 if failed_runs:
