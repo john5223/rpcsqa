@@ -26,8 +26,6 @@ parser.add_argument('--razor_ip', action="store", dest="razor_ip", required=True
 parser.add_argument('--chef_environment', action="store", dest="chef_environment", required=True, 
                     help="This will be the environment to look in for Razor active models")
 
-parser.add_argument('--chef_role', action="store", dest="chef_role", required=True, help='The chef role to tear down')
-
 parser.add_argument('--chef_url', action="store", dest="chef_url", default="http://198.101.133.3:4000", required=False, help="client for chef")
 
 parser.add_argument('--chef_client', action="store", dest="chef_client", default="jenkins", required=False, help="client for chef")
@@ -62,6 +60,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     
     # Loop through the nodes in the environment and take appropriate action.
     for n in nodes:
+        # Gather info about the node
         node = Node(n['name'])
         node_name = n['name']
         node_run_list = node.run_list
