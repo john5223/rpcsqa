@@ -64,4 +64,7 @@ Steps
 
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     nodes = Search('nodes', 'chef_environment:%s' % results.chef_environment)
-    print nodes
+    for node in nodes:
+        print "Node %s" % node['name']
+        for k, v in node:
+            print "%s: %s" % (k, v)
