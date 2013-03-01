@@ -55,7 +55,6 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         print "Pre node name: %s" % n['name']
         node = Node(n['name'])
         # Debug Printing
-        print "Name: %s" % node['Node Name']
         print "IP: %s" % node['ipaddress']
         print "run_list: %s" % node.run_list
 
