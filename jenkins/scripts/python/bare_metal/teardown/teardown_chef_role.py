@@ -18,7 +18,7 @@ parser.add_argument('--razor_ip', action="store", dest="razor_ip", required=True
 parser.add_argument('--chef_environment', action="store", dest="chef_environment", required=True, 
                     help="This will be the environment to look in for Razor active models")
 
-parser.add_argument('chef_role', action="store", dest='chef_role', required=True, help='The chef role to tear down')
+parser.add_argument('--chef_role', action="store", dest="chef_role", required=True, help='The chef role to tear down')
 
 parser.add_argument('--chef_url', action="store", dest="chef_url", default="http://198.101.133.3:4000", required=False, help="client for chef")
 
