@@ -55,12 +55,12 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         print "Pre node name: %s" % n['name']
         node = Node(n['name'])
         # Debug Printing
-        print "Name: %s" % node.attributes['name']
-        print "IP: %s" % node.attributes['ipaddress']
+        print "Name: %s" % node['Node Name']
+        print "IP: %s" % node['ipaddress']
         print "run_list: %s" % node.run_list
 
         # Get the am uuid from chef
-        am_uuid = node.attributes['razor_metadata']['razor_active_model_uuid']
+        am_uuid = node.normal['razor_metadata']['razor_active_model_uuid']
         print "Razor AM UUID: %s" % am_uuid
         
         # Get the AM password from Razor
