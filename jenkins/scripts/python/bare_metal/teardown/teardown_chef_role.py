@@ -63,4 +63,5 @@ Steps
 """
 
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
-    chef_env = Environment(results.chef_environment)
+    nodes = Search('nodes', 'chef_environment:%s' % results.chef_environment)
+    print nodes
