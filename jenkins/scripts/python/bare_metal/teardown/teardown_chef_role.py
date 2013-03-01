@@ -52,6 +52,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     razor = razor_api(results.razor_ip)
     nodes = Search('node').query("chef_environment:%s" % results.chef_environment)
     for n in nodes:
+        print "Pre node name: %s" % n['name']
         node = Node(n['name'])
         # Debug Printing
         print "Name: %s" % node['name']
