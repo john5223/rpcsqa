@@ -43,7 +43,6 @@ else:
 Steps
 1. Gather all the nodes in the given environment
 2. Gather all the nodes whos role is not qa based
-3. Find the role in the environment
 4. Find the name of the node that has the role
 5. Find the active model in razor with the node name found
 6. Tear it down ( remove chef node, client, active model, then reboot)
@@ -72,4 +71,4 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 sys.exit(1)
         except Exception, e:
             print "Error: %s" % e
-            
+
