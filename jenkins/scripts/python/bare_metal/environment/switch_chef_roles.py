@@ -51,6 +51,7 @@ def get_chef_name(data):
 
 razor = razor_api(results.razor_ip)
 policy = results.policy
+
 if results.chef_environment:
     chef_environment = results.chef_environment
 else:
