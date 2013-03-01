@@ -73,13 +73,13 @@ if active_models:
         data = active_models[active]
         chef_name = get_chef_name(data)
         root_password = get_root_pass(data)
-        platform_family = node['platform_family']
 
         with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             node = Node(chef_name)
             if 'role[%s]' % results.role in node.run_list:
                 ip = node['ipaddress']
-
+                platform_family = node['platform_family']
+                
                 if display_only:
                     print "!!## -- Role %s found, would remove chef on %s with ip %s -- ##!!" % (results.role, node, ip)
                 else:
@@ -101,10 +101,10 @@ if active_models:
                     print "Successfully removed chef from server with ip: %s" % ip
                 else:
                     print "Failed to remove chef from server with ip: %s" % ip
-                     print "!!## -- Return Code: %s -- ##!!" % remote_return['cpe'].returncode
+                     print "!!## -- Return Code: %s -- ##!!" % remote_return['exception'].returncode
                     # This print will print the password, use it wisely (jacob).
-                    #print "!!## -- Command: %s -- ##!!" % remote_return['cpe'].cmd
-                    print "!!## -- Output: %s -- ##!!" % remote_return['cpe'].output
+                    #print "!!## -- Command: %s -- ##!!" % remote_return['exception'].cmd
+                    print "!!## -- Output: %s -- ##!!" % remote_return['exception'].output
                     failed_runs += 1
 
         if failed_runs > 0:

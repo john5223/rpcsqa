@@ -99,10 +99,10 @@ if active_models:
                 print "!!## -- chef-client successful on server with ip: %s -- ##!!" % server['ip']
             else:
                 print "!!## -- chef-client failed to run on server: %s with ip: %s -- ##!!" % (server['node'], server['ip'])
-                print "!!## -- Return Code: %s -- ##!!" % remote_return['cpe'].returncode
+                print "!!## -- Return Code: %s -- ##!!" % remote_return['exception'].returncode
                 # This print will print the password, use it wisely (jacob).
-                #print "!!## -- Command: %s -- ##!!" % remote_return['cpe'].cmd
-                print "!!## -- Output: %s -- ##!!" % remote_return['cpe'].output
+                #print "!!## -- Command: %s -- ##!!" % remote_return['exception'].cmd
+                print "!!## -- Output: %s -- ##!!" % remote_return['exception'].output
                 failed_runs = True
 
         if failed_runs:
