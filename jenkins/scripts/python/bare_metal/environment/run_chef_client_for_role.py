@@ -94,7 +94,7 @@ if active_models:
         failed_runs = False
         for server in to_run_list:
             print "!!## -- Trying chef-client on %s with ip %s -- ##!!" % (server['node'], server['ip'])
-            remote_return = run_remote_ssh_cmd(server['ip'], 'root', server['root_password'], 'chef-client')
+            remote_return = run_remote_ssh_cmd(server['ip'], 'root', server['root_password'], 'chef-client;chef-client')
             if remote_return['success']:
                 print "!!## -- chef-client successful on server with ip: %s -- ##!!" % server['ip']
             else:
