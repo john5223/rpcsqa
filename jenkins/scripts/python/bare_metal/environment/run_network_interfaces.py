@@ -67,7 +67,7 @@ def get_root_pass(data):
 razor = razor_api(results.razor_ip)
 policy = results.policy
 
-if results.chef_environment:
+if results.chef_environment is not None:
     chef_environment = results.chef_environment
 else:
     chef_environment = policy
