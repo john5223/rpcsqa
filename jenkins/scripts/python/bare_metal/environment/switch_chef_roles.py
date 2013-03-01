@@ -13,7 +13,7 @@ parser.add_argument('--razor_ip', action="store", dest="razor_ip", required=True
 
 parser.add_argument('--policy', action="store", dest="policy", required=True, help="Razor policy to set chef roles for.")
 
-parser.add_argument('--chef_environment', action="store", dest="chef_environment", required=True, help="Environment to switch roles for")
+parser.add_argument('--chef_environment', action="store", dest="chef_environment", required=False, help="Environment to switch roles for")
 
 parser.add_argument('--roles_location', action="store", dest="roles_location", required=True, 
                     help="Location of the roles list json file for the environment")
@@ -51,6 +51,10 @@ def get_chef_name(data):
 
 razor = razor_api(results.razor_ip)
 policy = results.policy
+if results.chef_environment:
+    chef_environment = results.chef_environment
+else:
+    chef_environment = policy
 
 # Open the role list json file
 try:
@@ -102,8 +106,8 @@ if active_models:
                 # set the environment
                 print "!!## -- %s has environment: %s -- ##!!" % (node, environment)
                 
-                if environment != results.chef_environment:
-                    environment = results.chef_environment
+                if environment != chef_environment:
+                    environment = chef_environment
                     try:
                         node.chef_environment = environment
                         node.save()
