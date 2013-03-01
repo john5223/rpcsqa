@@ -52,7 +52,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     razor = razor_api(results.razor_ip)
     nodes = Search('node').query("chef_environment:%s" % results.chef_environment)
     for n in nodes:
-        node = Node(node['name'])
+        node = Node(n['name'])
         # Debug Printing
         print "Name: %s" % node['name']
         print "IP: %s" % node['ipaddress']
