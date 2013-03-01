@@ -52,8 +52,8 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     razor = razor_api(results.razor_ip)
     nodes = Search('node').query("chef_environment:%s" % results.chef_environment)
     for n in nodes:
-        print "Pre node name: %s" % n['name']
         node = Node(n['name'])
+        print "Node Name: %s" % n['name']
         # Debug Printing
         print "IP: %s" % node['ipaddress']
         print "run_list: %s" % node.run_list
@@ -72,5 +72,4 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 sys.exit(1)
         except Exception, e:
             print "Error: %s" % e
-
-
+            
