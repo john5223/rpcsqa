@@ -55,9 +55,12 @@ Steps
 5. Find the active model in razor with the node name found
 6. Tear it down ( remove chef node, client, active model, then reboot)
 """
+failed_runs = False
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     razor = razor_api(results.razor_ip)
     nodes = Search('node').query("chef_environment:%s" % results.chef_environment)
+    
+    # Loop through the nodes in the environment and take appropriate action.
     for n in nodes:
         node = Node(n['name'])
         node_name = n['name']
@@ -83,7 +86,8 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             print "IP: %s" % node_ip
             print "run_list: %s" % node_run_list
             print "Active model UUID: %s" % node_am_uuid
-        else: 
+        else:
+            # Remove the active model from razor
             print "!!## -- Removing active model -- ##!!"
             try:
                 delete = razor.remove_active_model(node_am_uuid)
@@ -93,33 +97,37 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 print "!!## -- Error removing active model: %s -- ##!!" % e
                 pass
 
+            # Remove the node from chef
             print "!!## -- Removing chef-node -- ##!!"
             try:
                 node.delete()
             except Exception, e:
                 print "!!## -- Error removing chef node: %s -- ##!!" % e
-                pass
+                failed_runs = True
 
+            # remove the client from chef
             print "!!## -- Removing chef clients..."
+            chef_api = ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client)
             try:
-                chef_api = ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client)
-                if chef_api is not None:
-                    response = chef_api.api_request('DELETE', '/clients/%s' % node_name)
-                    print "!!## -- Client %s removed with response: %s -- ##!!" % (node_name, response)
-                else:
-                    pass
+                response = chef_api.api_request('DELETE', '/clients/%s' % node_name)
+                print "!!## -- Client %s removed with response: %s -- ##!!" % (node_name, response)
             except Exception, e:
                 print "!!## -- Error removing chef node: %s -- ##!!" % e
-                pass
+                failed_runs = True
             
+            # reboot the server
             print "!!## -- Trying to restart server with ip %s -- ##!!" % ip
-            try:
-                run_remote_ssh_cmd(node_ip, 'root', node_pass, 'reboot 0')
-                print "!!## -- Restart of server with ip: %s was a success -- ##!!" % node_ip
-            except CalledProcessError, cpe:
-                print "!!## -- Failed to restart server -- ##!!"
-                print "!!## -- IP: %s -- ##!!" % node_ip
-                print "!!## -- Exited with following error status: -- ##!!"
-                print "!!## -- Return code: %i -- ##!!" % cpe.returncode
-                #print "!!## -- Command: %s -- ##!!" % cpe.cmd
-                print "!!## -- Output: %s -- ##!!" % cpe.output
+            remote_return = run_remote_ssh_cmd(node_ip, 'root', node_pass, 'reboot 0')
+            if remote_return['success']:
+                print "!!## -- Successful restart of server with ip %s -- ##!!" % node_ip
+            else:
+                print "!!## -- Failed to restart server with ip: %s -- ##!!" % node_ip
+                print "!!## -- Return Code: %s -- ##!!" % remote_return['cpe'].returncode
+                # This print will print the password, use it wisely (jacob).
+                #print "!!## -- Command: %s -- ##!!" % remote_return['cpe'].cmd
+                print "!!## -- Output: %s -- ##!!" % remote_return['cpe'].output
+                failed_runs = True
+
+if failed_runs:
+    print "!!## -- One or more chef-client runs failed...check logs -- ##!!"
+    sys.exit(1)
