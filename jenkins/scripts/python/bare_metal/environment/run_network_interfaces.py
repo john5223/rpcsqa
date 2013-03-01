@@ -15,6 +15,8 @@ parser.add_argument('--razor_ip', action="store", dest="razor_ip", required=True
 
 parser.add_argument('--policy', action="store", dest="policy", required=True, help="Razor policy to set chef roles for.")
 
+parser.add_argument('--chef_environment', action="store", dest="chef_environment", required=False, help="Environment to switch roles for")
+
 parser.add_argument('--chef_url', action="store", dest="chef_url", default="http://198.101.133.4:4000", required=False, help="client for chef")
 
 parser.add_argument('--chef_client', action="store", dest="chef_client", default="jenkins", required=False, help="client for chef")
@@ -53,6 +55,11 @@ def get_root_pass(data):
 razor = razor_api(results.razor_ip)
 policy = results.policy
 
+if results.chef_environment is not None:
+    chef_environment = results.chef_environment
+else:
+    chef_environment = policy
+
 print "!!## -- Switching roles for  '%s'  active models -- ##!!" % policy
 print "!!## -- Display only: %s -- ##!!" % results.display_only
 
@@ -73,8 +80,8 @@ if active_models:
             ip = node['ipaddress']
 
             # set the nodes environment
-            if environment != policy:
-                environment = policy
+            if environment != chef_environment:
+                environment = chef_environment
                 try:
                     node.chef_environment = environment
                     node.save()
