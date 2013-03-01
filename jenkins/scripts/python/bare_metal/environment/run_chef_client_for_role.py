@@ -49,8 +49,7 @@ def get_root_pass(data):
         return ''
 
 def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
-    command = "sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l %s %s '%s'" % 
-            (passwd, user, server_ip, remote_cmd)
+    command = "sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l %s %s '%s'" % (passwd, user, server_ip, remote_cmd)
     try:
         ret = check_call(command, shell=True)
         return {'success': True, 'return': ret, 'exception': None}
