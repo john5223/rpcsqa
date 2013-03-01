@@ -101,7 +101,7 @@ if active_models:
                     print "Successfully removed chef from server with ip: %s" % ip
                 else:
                     print "Failed to remove chef from server with ip: %s" % ip
-                     print "!!## -- Return Code: %s -- ##!!" % remote_return['cpe'].returncode
+                    print "!!## -- Return Code: %s -- ##!!" % remote_return['cpe'].returncode
                     # This print will print the password, use it wisely (jacob).
                     #print "!!## -- Command: %s -- ##!!" % remote_return['cpe'].cmd
                     print "!!## -- Output: %s -- ##!!" % remote_return['cpe'].output
