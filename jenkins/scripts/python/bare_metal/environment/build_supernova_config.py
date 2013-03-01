@@ -11,7 +11,9 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('--role', action="store", dest="role", default="qa-single-controller", required=True, help="Chef role to set variables for.")
 
-parser.add_argument('--username', action="store", dest="username", default="demo", required=True, help="Username to authenticate with OpenStack.")
+parser.add_argument('--username', action="store", dest="username", default="admin", required=True, help="Username to authenticate with OpenStack.")
+
+parser.add_argument('--tenant', action="store", dest="tenant", default="demo", required=True, help="Tenant to authenticate with OpenStack.")
 
 parser.add_argument('--chef_url', action="store", dest="chef_url", default="http://198.101.133.4:4000", required=False, help="client for chef")
 
@@ -73,10 +75,10 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         environments[env_name]['OS_PASSWORD'] = chef_environment['override_attributes']['keystone']['users']["%s" % username]['password']
         
         # Save tenant of user exists in tenants
-        if username in chef_environment['override_attributes']['keystone']['tenants']:
-            environments[env_name]['OS_TENANT_NAME'] = environments[env_name]['OS_USERNAME']
+        if tenant in chef_environment['override_attributes']['keystone']['tenants']:
+            environments[env_name]['OS_TENANT_NAME'] = tenant
         else:
-            print "Tenant does not exist for %s" % username
+            print "Tenant does not exist for %s" % tenant
             sys.exit(1)
 
     print "!!## -- Saved environment information for nodes: %s -- ##!!" % environments
