@@ -115,7 +115,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 failed_runs = True
             
             # reboot the server
-            print "!!## -- Trying to restart server with ip %s -- ##!!" % ip
+            print "!!## -- Trying to restart server with ip %s -- ##!!" % node_ip
             remote_return = run_remote_ssh_cmd(node_ip, 'root', node_pass, 'reboot 0')
             if remote_return['success']:
                 print "!!## -- Successful restart of server with ip %s -- ##!!" % node_ip
@@ -126,6 +126,9 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 #print "!!## -- Command: %s -- ##!!" % remote_return['cpe'].cmd
                 print "!!## -- Output: %s -- ##!!" % remote_return['cpe'].output
                 failed_runs = True
+
+            # Sleep for 20 seconds
+            time.sleep(20)
 
 if failed_runs:
     print "!!## -- One or more chef-client runs failed...check logs -- ##!!"
