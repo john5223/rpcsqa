@@ -63,7 +63,7 @@ Steps
 """
 
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
-    nodes = Search('nodes', 'chef_environment:%s' % results.chef_environment)
+    nodes = Search('node').query("chef_environment:%s" % results.chef_environment)
     for node in nodes:
         print "Node %s" % node['name']
         for k, v in node:
