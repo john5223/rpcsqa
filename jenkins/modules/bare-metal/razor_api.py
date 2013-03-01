@@ -281,6 +281,6 @@ class razor_api:
 
 		passwd = ''
 		if r.status_code == 200:
-			passwd = r.content['response']['@model']['@root_password']
+			passwd = r.content['response'][1]['@model']['@root_password']
 
 		return {'status_code': r.status_code, 'password': passwd}
