@@ -46,6 +46,14 @@ def get_root_pass(data):
     else:
         return ''
 
+def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
+    command = "sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l %s %s '%s'" % (passwd, user, server_ip, remote_cmd)
+    try:
+        ret = check_call(command, shell=True)
+        return {'success': True, 'return': ret, 'exception': None}
+    except CalledProcessError, cpe:
+        return {'success': False, 'retrun': None, 'exception': cpe}
+
 #############################################################
 #Collect active models that match policy from given input
 #############################################################
@@ -65,6 +73,7 @@ if active_models:
         data = active_models[active]
         chef_name = get_chef_name(data)
         root_password = get_root_pass(data)
+        platform_family = node['platform_family']
 
         with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             node = Node(chef_name)
@@ -74,27 +83,33 @@ if active_models:
                 if display_only:
                     print "!!## -- Role %s found, would remove chef on %s with ip %s -- ##!!" % (results.role, node, ip)
                 else:
-                    to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password})
+                    to_run_list.append({'node': node, 'ip': ip, 'root_password': root_password, 'platform_family': platform_family})
 
     if not display_only:
         failed_runs = 0
         for server in to_run_list:
-            print "!!## -- Trying to remove chef on %s with ip %s -- ##!!" % (server['node'], server['ip'])
-            try:
-                check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'apt-get remove --purge -y chef; rm -rf /etc/chef'" % (server['root_password'], server['ip']), shell=True)
-            except CalledProcessError, cpe:
-                if cpe.returncode == 100:
-                    "!!## -- Chef removal failed...Chef didn't exist on the server -- ##!!"
+            if server['platform_family'] == 'debian':
+                remote_return = run_remote_ssh_cmd(server['ip'], 'root', server['root_password'], 'apt-get remove --purge -y chef; rm -rf /etc/chef')
+            elif server['platform_family'] == 'rhel':
+                remote_return = run_remote_ssh_cmd(server['ip'], 'root', server['root_password'], 'yum remove --purge -y chef; rm -rf /etc/chef /var/chef')
+            else:
+                print "!!## -- Server has a unsupported OS...try again later --##!!"
+                failed_runs += 1
+
+            if remote_return is not None:
+                if remote_return['success']:
+                    print "Successfully removed chef from server with ip: %s" % ip
                 else:
-                    print "!!## -- Chef removal failed -- ##!!"
-                    print "!!## -- Return code: %i -- ##!!" % cpe.returncode
-                    #print "!!## -- Command: %s -- ##!!" % cpe.cmd
-                    print "!!## -- Output: %s -- ##!!" % cpe.output
+                    print "Failed to remove chef from server with ip: %s" % ip
+                     print "!!## -- Return Code: %s -- ##!!" % remote_return['cpe'].returncode
+                    # This print will print the password, use it wisely (jacob).
+                    #print "!!## -- Command: %s -- ##!!" % remote_return['cpe'].cmd
+                    print "!!## -- Output: %s -- ##!!" % remote_return['cpe'].output
                     failed_runs += 1
 
         if failed_runs > 0:
             sys.exit(1)
 else:
     # No active models for the policy present, exit.
-    print "!!## -- Razor Policy %s has no active models -- ##!!"
+    print "!!## -- Razor Policy %s has no active models -- ##!!" % policy
     sys.exit(1)
