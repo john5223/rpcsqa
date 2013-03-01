@@ -271,3 +271,14 @@ class razor_api:
 		r = requests.delete(self.url + '/active_model/%s' % am_uuid, headers=headers)
 		
 		return {'status': r.status_code, 'content': json.loads(r.content)}
+
+	def get_active_model_pass(self, am_uuid):
+		""" This function will get an active models password """
+		headers = {'content-type': 'application/json'}
+		r = requests.get(self.url + '/active_model/%s' % am_uuid, headers=headers)
+
+		passwd = ''
+		if r.status_code == 200:
+			passwd = r.content['response']['@model']['@root_password']
+
+		return {'status_code': r.status_code, 'password': passwd}

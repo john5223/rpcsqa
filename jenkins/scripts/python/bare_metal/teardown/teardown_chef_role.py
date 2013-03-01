@@ -61,10 +61,25 @@ Steps
 5. Find the active model in razor with the node name found
 6. Tear it down ( remove chef node, client, active model, then reboot)
 """
-
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
+    razor = razor_api(results.razor_ip)
     nodes = Search('node').query("chef_environment:%s" % results.chef_environment)
     for node in nodes:
-        print "Node %s" % node['name']
-        for k, v in node:
-            print "%s: %s" % (k, v)
+        # Get the am uuid from chef
+        am_uuid = node['razor_metadata']['razor_active_model_uuid']
+        
+        # Debug Printing
+        print "Name: %s" % node['name']
+        print "IP: %s" % node['ipaddress']
+        print "run_list: %s" % node['run_list']
+        print "Razor AM UUID: %s" % am_uuid
+        
+        # Get the AM password from Razor
+        passwd = razor.get_active_model_pass(am_uuid)
+        if passwd['status_code'] == 200:
+            print "Razor AM Password: %s" % passwd['password']
+        else:
+            print "!!## -- Error getting password for active model, exited with error code: %s -- ##!!" % passwd['status_code']
+            sys.exit(1)
+
+        
