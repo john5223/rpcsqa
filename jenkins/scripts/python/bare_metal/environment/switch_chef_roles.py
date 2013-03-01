@@ -9,30 +9,25 @@ from razor_api import razor_api
 # Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--razor_ip', action="store", dest="razor_ip", 
-                    required=True, help="IP for the Razor server")
+parser.add_argument('--razor_ip', action="store", dest="razor_ip", required=True, help="IP for the Razor server")
 
-parser.add_argument('--policy', action="store", dest="policy", 
-                    required=True, help="Razor policy to set chef roles for.")
+parser.add_argument('--policy', action="store", dest="policy", required=True, help="Razor policy to set chef roles for.")
 
-parser.add_argument('--roles_location', action="store", dest="roles_location", 
-                    required=True, help="Location of the roles list json file for the environment")
+parser.add_argument('--chef_environment', action="store", dest="chef_environment", required=True, help="Environment to switch roles for")
 
-parser.add_argument('--chef_url', action="store", dest="chef_url", 
-                    default="http://198.101.133.4:4000", 
-                    required=False, help="client for chef")
+parser.add_argument('--roles_location', action="store", dest="roles_location", required=True, 
+                    help="Location of the roles list json file for the environment")
 
-parser.add_argument('--chef_client', action="store", dest="chef_client", 
-                    default="jenkins", 
-                    required=False, help="client for chef")
+parser.add_argument('--chef_url', action="store", dest="chef_url", default="http://198.101.133.4:4000", required=False, 
+                    help="client for chef")
 
-parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem", 
-                    default="/var/lib/jenkins/rpcsqa/.chef/jenkins.pem", 
-                    required=False, help="client pem for chef")
+parser.add_argument('--chef_client', action="store", dest="chef_client", default="jenkins", required=False, help="client for chef")
 
-parser.add_argument('--display_only', action="store", dest="display_only", 
-                    default="true", 
-                    required=False, help="Display the node information only (will not reboot or teardown am)")
+parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem", default="/var/lib/jenkins/rpcsqa/.chef/jenkins.pem", 
+                    required=True, help="client pem for chef")
+
+parser.add_argument('--display_only', action="store", dest="display_only", default="true", required=True, 
+                    help="Display the node information only (will not reboot or teardown am)")
 
 # Save the parsed arguments
 results = parser.parse_args()
@@ -107,8 +102,8 @@ if active_models:
                 # set the environment
                 print "!!## -- %s has environment: %s -- ##!!" % (node, environment)
                 
-                if environment != policy:
-                    environment = policy
+                if environment != results.chef_environment:
+                    environment = results.chef_environment
                     try:
                         node.chef_environment = environment
                         node.save()
