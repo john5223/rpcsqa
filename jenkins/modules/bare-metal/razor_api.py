@@ -277,8 +277,6 @@ class razor_api:
 		headers = {'content-type': 'application/json'}
 		r = requests.get(self.url + '/active_model/%s' % am_uuid, headers=headers)
 
-		print json.dumps(r.content, indent=4)
-
 		passwd = ''
 		if r.status_code == 200:
 			passwd = r.content['response'][0]['@model']['@root_password']
