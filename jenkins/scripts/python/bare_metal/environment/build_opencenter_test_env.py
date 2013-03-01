@@ -149,10 +149,10 @@ if active_models:
         # Run the proper steps to install and run opencenter-testerator
         print "!!## -- Running opencenter tests on server with ip %s  -- ##!!" % (opencenter_server_ip)
         commands=["apt-get install git python-pip -y", 
-                  "if [ ! -d 'roush-testerator' ]; then git clone %s; fi" % results.opencenter_test_repo, 
-                  "pip install -r /root/roush-testerator/tools/pip-requires", 
+                  "if [ ! -d 'opencenter-testerator' ]; then git clone %s; fi" % results.opencenter_test_repo, 
+                  "pip install -r /root/opencenter-testerator/tools/pip-requires", 
                   "cat /root/env.sh", 
-                  "source /root/env.sh; nosetests /root/roush-testerator/tests/test_happy_path.py -v"]
+                  "source /root/env.sh; nosetests /root/opencenter-testerator/tests/test_happy_path.py -v"]
         
         for command in commands: 
             try:
