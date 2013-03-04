@@ -91,7 +91,7 @@ if active_models:
             if server['platform_family'] == 'debian':
                 remote_return = run_remote_ssh_cmd(server['ip'], 'root', server['root_password'], 'apt-get remove --purge -y chef; rm -rf /etc/chef')
             elif server['platform_family'] == 'rhel':
-                remote_return = run_remote_ssh_cmd(server['ip'], 'root', server['root_password'], 'yum remove --purge -y chef; rm -rf /etc/chef /var/chef')
+                remote_return = run_remote_ssh_cmd(server['ip'], 'root', server['root_password'], 'yum remove -y chef; rm -rf /etc/chef /var/chef')
             else:
                 print "!!## -- Server has a unsupported OS...try again later --##!!"
                 failed_runs += 1
