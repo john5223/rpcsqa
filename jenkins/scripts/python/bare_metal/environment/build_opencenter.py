@@ -122,8 +122,8 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     #Make sure all networking interfacing is set
     for n in nodes:
         node = Node(n['name'])        
-        if "recipe['network_interfaces']" not in node.run_list:
-            node.run_list.append("recipe['network_interfaces']")
+        if "recipe['network-interfaces']" not in node.run_list:
+            node.run_list.append("recipe['network-interfaces']")
             node.save()
             print "Running network interfaces for %s" % node.name
             #Run chef client twice
