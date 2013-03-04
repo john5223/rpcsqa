@@ -98,9 +98,9 @@ if active_models:
 
             if remote_return is not None:
                 if remote_return['success']:
-                    print "Successfully removed chef from server with ip: %s" % ip
+                    print "Successfully removed chef from server with ip: %s" % server['ip']
                 else:
-                    print "Failed to remove chef from server with ip: %s" % ip
+                    print "Failed to remove chef from server with ip: %s" % server['ip']
                     print "!!## -- Return Code: %s -- ##!!" % remote_return['exception'].returncode
                     # This print will print the password, use it wisely (jacob).
                     #print "!!## -- Command: %s -- ##!!" % remote_return['exception'].cmd
