@@ -91,16 +91,16 @@ if active_models:
             if server['platform_family'] == 'debian':
                 remote_return = run_remote_ssh_cmd(server['ip'], 'root', server['root_password'], 'apt-get remove --purge -y chef; rm -rf /etc/chef')
             elif server['platform_family'] == 'rhel':
-                remote_return = run_remote_ssh_cmd(server['ip'], 'root', server['root_password'], 'yum remove --purge -y chef; rm -rf /etc/chef /var/chef')
+                remote_return = run_remote_ssh_cmd(server['ip'], 'root', server['root_password'], 'yum remove -y chef; rm -rf /etc/chef /var/chef')
             else:
                 print "!!## -- Server has a unsupported OS...try again later --##!!"
                 failed_runs += 1
 
             if remote_return is not None:
                 if remote_return['success']:
-                    print "Successfully removed chef from server with ip: %s" % ip
+                    print "Successfully removed chef from server with ip: %s" % server['ip']
                 else:
-                    print "Failed to remove chef from server with ip: %s" % ip
+                    print "Failed to remove chef from server with ip: %s" % server['ip']
                     print "!!## -- Return Code: %s -- ##!!" % remote_return['exception'].returncode
                     # This print will print the password, use it wisely (jacob).
                     #print "!!## -- Command: %s -- ##!!" % remote_return['exception'].cmd
