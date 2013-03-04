@@ -120,6 +120,18 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     
     nodes = Search('node').query("name:qa-%s-pool*" % results.os)
     #Make sure all networking interfacing is set
+    
+     #Remove THIS
+    for n in nodes:
+        node = Node(n['name'])
+        node.chef_environment = "_default"
+        node.run_list = "role['qa-base']"
+        node['in_use'] = None
+        node.save()
+            
+    
+    
+    
     for n in nodes:
         node = Node(n['name'])        
         if "recipe['network-interfaces']" not in node.run_list:
@@ -153,14 +165,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             
             
             
-    #Remove THIS
-    for n in nodes:
-        node = Node(n['name'])
-        node.chef_environment = "_default"
-        node['in_use'] = None
-        node.save()
-            
-    
+   
     
     ######################################################
     ## Collect environment and install opencenter
