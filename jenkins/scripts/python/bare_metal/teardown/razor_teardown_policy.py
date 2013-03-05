@@ -126,7 +126,9 @@ if active_models:
                         elif platform_family == 'rhel':
                             if 'em2' in interface:
                                 addresses = node['network']['interfaces']['%s' % interface]['addresses'].iteritems()
+                                print "!!## -- %s -- ##!!" % addresses
                                 for k in addresses.keys():
+                                    for 
                                     print "!!## -- Key: %s -- ##!!"
                                     #if 'inet' in addresses[k].items():
                                     #    print "!!## -- Private IP: %s" % addresses[k]
