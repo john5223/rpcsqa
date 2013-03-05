@@ -14,6 +14,7 @@ This script will tear down razor server based on their chef roles and environmen
 
 def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
     command = "sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l %s %s '%s'" % (passwd, user, server_ip, remote_cmd)
+    print command
     try:
         ret = check_call(command, shell=True)
         return {'success': True, 'return': ret, 'exception': None}
@@ -41,8 +42,6 @@ def remove_chef(name):
             command = 'yum remove --purge -y chef; rm -rf /etc/chef /var/chef'  
         print command          
         run = run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, command)
-        print run
-        print "done"
     except:
         "Error removing chef"
         sys.exit(1)
@@ -160,9 +159,10 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 #Remove active model          
                 razor.remove_active_model(am_uuid)                            
                 #Reboot box
-                run_remote_ssh_cmd(ip, 'root', root_pass, "reboot")
+                run = run_remote_ssh_cmd(ip, 'root', root_pass, "reboot 0")
+                print run
         #Sleep so all servers can be given time to delete       
-        time.sleep(10)   
+        time.sleep(15)   
    
     
     ######################################################
