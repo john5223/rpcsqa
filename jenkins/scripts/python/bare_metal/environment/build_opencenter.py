@@ -27,7 +27,7 @@ def remove_broker_fail(policy):
         data = active_models[active]
         if 'broker_fail' in data['current_state']:
             print "!!## -- Removing active model  (broker_fail) -- ##!!"
-            root_pass = razor.get_active_model_pass(data['am_uuid'])
+            root_pass = razor.get_active_model_pass(data['am_uuid'])['password']
             ip = data['eth1_ip']
             run = run_remote_ssh_cmd(ip, 'root', root_pass, 'chef-client')
             if run['success']:
