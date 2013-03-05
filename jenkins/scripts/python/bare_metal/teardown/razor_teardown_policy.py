@@ -82,7 +82,7 @@ def get_private_ip(chef_node_addresses):
         print "!!## -- Key: %s -- Value: %s -- ##!!" % (k,v)
         for k2, v2 in v.iteritems():
             print "!!## -- Key2: %s type(%s) -- Value2: %s type(%s) -- ##!!" % (k2, type(k2), v2, type(v2))
-            if str(v2) is 'inet':
+            if 'inet' in str(v2):
                 print "!!## -- Private IP: %s -- ##!!" % k
                 return k
 
