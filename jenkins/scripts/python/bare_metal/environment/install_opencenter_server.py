@@ -16,6 +16,8 @@ parser.add_argument('--policy', action="store", dest="policy", default="qa-openc
 
 parser.add_argument('--role', action="store", dest="role", required=True, help="Chef role to install opencenter server on.")
 
+parser.add_argument('--oc_pass', action="store", dest='oc_pass', required=True, help="The pass for the OC dashboard.")
+
 parser.add_argument('--chef_url', action="store", dest="chef_url", default="http://198.101.133.4:4000", required=False, help="Url for chef server.")
 
 parser.add_argument('--chef_client', action="store", dest="chef_client", default="jenkins", required=False, help="client for chef.")
@@ -89,7 +91,7 @@ if active_models:
             print "!!## -- Attempting to install OpenCenter server on %s with ip %s --##!!" % (server['node'], server['ip'])
             try:
                 # run the command to install opencenter server.
-                check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'curl -L \"%s\" | bash -s server'" % (server['root_password'], server['ip'], results.oc_install_url), shell=True)
+                check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'curl -L \"%s\" | bash -s server %s'" % (server['root_password'], server['ip'], results.oc_install_url, results.oc_pass), shell=True)
                 print "!!## -- Sucessfully installed OpenCenter server on server with ip: %s --##!!" % server['ip']
             except CalledProcessError, cpe:
                 print "!!## -- Failed to install OpenCenter server on server with ip: %s --##!!" % server['ip']
