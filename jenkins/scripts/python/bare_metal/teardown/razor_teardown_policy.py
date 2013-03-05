@@ -113,6 +113,7 @@ if active_models:
                     node = Node(chef_name)
                     ip = node['ipaddress']
                     platform_family = node['platform_family']
+                    print "Node %s has platform_family: %s" % (chef_name, platform_family)
                     print "Node %s network interfaces: " % chef_name
                     for interface in node['network']['interfaces']:
                         if platform_family == 'debian':
