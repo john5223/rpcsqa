@@ -155,10 +155,6 @@ if active_models:
                     node = Node(chef_name)
                     if node is not None:
                         ip = node['ipaddress']
-                        print "Node %s network interfaces: " % chef_name
-                        for interface in node['network']['interfaces']:
-                            if interface
-                            print json.dumps(node['network']['interfaces']['%s' % interface]['addresses'].keys(), indent=4)
                         node.delete()
                     else:
                         pass
