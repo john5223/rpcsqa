@@ -203,7 +203,7 @@ case node['platform']
       device 'em1'
     end
 
-    route  "Removing eth1 default gateway" do
+    route  "Removing em2 default gateway" do
       target '0.0.0.0'
       netmask '0.0.0.0'
       gateway '10.0.0.1'
