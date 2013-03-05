@@ -106,7 +106,7 @@ case node['platform']
       target '0.0.0.0'
       netmask '0.0.0.0'
       gateway '10.0.0.1'
-      device 'eth0'
+      device 'eth1'
       action :delete
     end
 
