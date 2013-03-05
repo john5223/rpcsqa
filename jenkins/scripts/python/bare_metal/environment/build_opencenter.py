@@ -123,14 +123,6 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     nodes = Search('node').query("name:qa-%s-pool*" % results.os)
     #Make sure all networking interfacing is set
     
-    #Remove THIS
-    for n in nodes:
-        node = Node(n['name'])
-        node.chef_environment = "_default"
-        node['in_use'] = None
-        node.save()
-            
-    
     for n in nodes:
         node = Node(n['name'])        
         if "recipe[network-interfaces]" not in node.run_list:
@@ -159,21 +151,16 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 node = Node(name)  
                 am_uuid = node['razor_metadata'].to_dict()['razor_active_model_uuid']
                 ip = node['ipaddress']
-                root_pass = razor.get_active_model_pass(am_uuid)
-                
+                root_pass = razor.get_active_model_pass(am_uuid)                
                 #Knife node remove; knife client remove
                 Client(name).delete()
-                Node(name).delete()
-                
+                Node(name).delete()                
                 #Remove active model          
-                razor.remove_active_model(am_uuid)
-               
-                
+                razor.remove_active_model(am_uuid)                            
                 #Reboot box
                 run_remote_ssh_cmd(ip, 'root', root_pass, "reboot 0")
                 
             
-    sys.exit()       
    
     
     ######################################################
