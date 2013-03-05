@@ -77,13 +77,13 @@ def getip_from_data_bag(uuid):
         raise Exception(ee)
 
 def get_private_ip(chef_node_addresses):
-    print "!!## -- Addresses: %s -- ##!!" % chef_node_addresses
+    #print "!!## -- Addresses: %s -- ##!!" % chef_node_addresses
     for k, v in chef_node_addresses:
-        print "!!## -- Key: %s -- Value: %s -- ##!!" % (k,v)
+        #print "!!## -- Key: %s -- Value: %s -- ##!!" % (k,v)
         for k2, v2 in v.iteritems():
-            print "!!## -- Key2: %s type(%s) -- Value2: %s type(%s) -- ##!!" % (k2, type(k2), v2, type(v2))
+            #print "!!## -- Key2: %s type(%s) -- Value2: %s type(%s) -- ##!!" % (k2, type(k2), v2, type(v2))
             if str(v2) == 'inet':
-                print "!!## -- Private IP: %s -- ##!!" % k
+                #print "!!## -- Private IP: %s -- ##!!" % k
                 return k
 
 #############################################################
@@ -121,7 +121,7 @@ if active_models:
                     ip = node['ipaddress']
                     platform_family = node['platform_family']
                     print "!!## -- Node %s has platform_family: %s -- ##!!" % (chef_name, platform_family)
-                    print "!!## -- Node %s network interfaces: -- ##!!" % chef_name
+                    #print "!!## -- Node %s network interfaces: -- ##!!" % chef_name
                     for interface in node['network']['interfaces']:
                         if platform_family == 'debian':
                             if 'eth1' in interface:
@@ -164,6 +164,20 @@ if active_models:
                     node = Node(chef_name)
                     if node is not None:
                         ip = node['ipaddress']
+                        platform_family = node['platform_family']
+                        print "!!## -- Node %s has platform_family: %s -- ##!!" % (chef_name, platform_family)
+                        #print "!!## -- Node %s network interfaces: -- ##!!" % chef_name
+                        for interface in node['network']['interfaces']:
+                            if platform_family == 'debian':
+                                if 'eth1' in interface:
+                                    addresses = node['network']['interfaces']['%s' % interface]['addresses'].iteritems()
+                                    private_ip = get_private_ip(addresses)
+                            elif platform_family == 'rhel':
+                                if 'em2' in interface:
+                                    addresses = node['network']['interfaces']['%s' % interface]['addresses'].iteritems()
+                                    private_ip = get_private_ip(addresses)
+                            else:
+                                print "Platform not supported..."
                         node.delete()
                     else:
                         pass
