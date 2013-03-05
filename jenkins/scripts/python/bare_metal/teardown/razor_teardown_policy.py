@@ -77,15 +77,14 @@ def getip_from_data_bag(uuid):
         raise Exception(ee)
 
 def get_private_ip(chef_node_addresses):
-    print "!!## -- Addresses: %s -- ##!!" % chef_node_addresses
+    #print "!!## -- Addresses: %s -- ##!!" % chef_node_addresses
     for k, v in chef_node_addresses:
-        print "!!## -- Key: %s -- Value: %s -- ##!!" % (k,v)
+        #print "!!## -- Key: %s -- Value: %s -- ##!!" % (k,v)
         for k2, v2 in v.iteritems():
-            print "!!## -- Key2: %s -- Value2: %s -- ##!!" % (k2, v2)
-            if v2 is 'inet':
-                print "Private IP: %s" % k
+            #print "!!## -- Key2: %s type(%s) -- Value2: %s type(%s) -- ##!!" % (k2, type(k2), v2, type(v2))
+            if str(v2) == 'inet':
+                #print "!!## -- Private IP: %s -- ##!!" % k
                 return k
-                break
 
 #############################################################
 #Collect active models that match policy from given input
@@ -122,7 +121,7 @@ if active_models:
                     ip = node['ipaddress']
                     platform_family = node['platform_family']
                     print "!!## -- Node %s has platform_family: %s -- ##!!" % (chef_name, platform_family)
-                    print "!!## -- Node %s network interfaces: -- ##!!" % chef_name
+                    #print "!!## -- Node %s network interfaces: -- ##!!" % chef_name
                     for interface in node['network']['interfaces']:
                         if platform_family == 'debian':
                             if 'eth1' in interface:
@@ -134,7 +133,6 @@ if active_models:
                                 private_ip = get_private_ip(addresses)
                         else:
                             print "Platform not supported..."
-                    print "!!## -- Node found %s, has ip %s -- ##!!" % (chef_name, ip)
             except Exception, e:
                 print "!!## -- Error finding chef node %s -- ##!!" % chef_name
                 print "!!## -- Exit with exception %s -- ##!!" % e
@@ -166,6 +164,20 @@ if active_models:
                     node = Node(chef_name)
                     if node is not None:
                         ip = node['ipaddress']
+                        platform_family = node['platform_family']
+                        print "!!## -- Node %s has platform_family: %s -- ##!!" % (chef_name, platform_family)
+                        #print "!!## -- Node %s network interfaces: -- ##!!" % chef_name
+                        for interface in node['network']['interfaces']:
+                            if platform_family == 'debian':
+                                if 'eth1' in interface:
+                                    addresses = node['network']['interfaces']['%s' % interface]['addresses'].iteritems()
+                                    private_ip = get_private_ip(addresses)
+                            elif platform_family == 'rhel':
+                                if 'em2' in interface:
+                                    addresses = node['network']['interfaces']['%s' % interface]['addresses'].iteritems()
+                                    private_ip = get_private_ip(addresses)
+                            else:
+                                print "Platform not supported..."
                         node.delete()
                     else:
                         pass
@@ -190,12 +202,17 @@ if active_models:
                 check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
                 print "!!## -- Restart of server with ip: %s was a success -- ##!!" % ip
             except CalledProcessError, cpe:
-                print "!!## -- Failed to restart server -- ##!!"
-                print "!!## -- Private IP: %s, Public IP: %s -- ##!!" % (private_ip, ip)
-                print "!!## -- Exited with following error status: -- ##!!"
-                print "!!## -- Return code: %i -- ##!!" % cpe.returncode
-                #print "!!## -- Command: %s -- ##!!" % cpe.cmd
-                print "!!## -- Output: %s -- ##!!" % cpe.output
+                print "!!## -- Failed to restart server, trying private IP: %s -- ##!!" % private_ip
+                try:
+                    check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, private_ip), shell=True)
+                    print "!!## -- Restart of server with ip: %s was a success -- ##!!" % private_ip
+                except CalledProcessError, cpe:
+                    print "!!## -- Failed to restart server, tried both public IP %s and private IP: %s -- ##!!" % (ip, private_ip)
+                    print "!!## -- Private IP: %s, Public IP: %s -- ##!!" % (private_ip, ip)
+                    print "!!## -- Exited with following error status: -- ##!!"
+                    print "!!## -- Return code: %i -- ##!!" % cpe.returncode
+                    #print "!!## -- Command: %s -- ##!!" % cpe.cmd
+                    print "!!## -- Output: %s -- ##!!" % cpe.output
             
             print "!!## -- Sleeping for 30 seconds -- ##!!"
             time.sleep(30)

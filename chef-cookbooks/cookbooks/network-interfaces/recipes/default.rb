@@ -102,6 +102,14 @@ case node['platform']
       device 'eth0'
     end
 
+    route  "Removing eth1 default gateway" do
+      target '0.0.0.0'
+      netmask '0.0.0.0'
+      gateway '10.0.0.1'
+      device 'eth0'
+      action :delete
+    end
+
 # RHEL DISTROS
   when "redhat", "centos", "fedora"
     
@@ -193,6 +201,14 @@ case node['platform']
       netmask '0.0.0.0'
       gateway '198.101.133.1'
       device 'em1'
+    end
+
+    route  "Removing em2 default route" do
+      target '0.0.0.0'
+      netmask '0.0.0.0'
+      gateway '10.0.0.1'
+      device 'em2'
+      action :delete
     end
 
 # UNSUPPORTED DISTROS
