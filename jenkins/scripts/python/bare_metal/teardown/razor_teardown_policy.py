@@ -105,7 +105,6 @@ if active_models:
             print "!!## -- Active Model ID: %s -- ##!!" % active
             print "!!## -- Data Bag UUID: %s -- ##!!" % dbag_uuid
             print "!!## -- Public address: %s -- ##!!" % ip
-            print "!!## -- Private address: %s -- ##!!" % private_ip
             print "!!## -- Chef Name: %s -- ##!!" % chef_name
 
             print "!!## -- Searching chef nodes -- ##!!"
@@ -114,7 +113,7 @@ if active_models:
                     node = Node(chef_name)
                     ip = node['ipaddress']
                     private_ip=node['eth1_ipaddress']
-                    print "!!## -- Node found %s, has ip %s -- ##!!" % (chef_name, ip)
+                    print "!!## -- Node found %s, has ip %s, and private ip: %s-- ##!!" % (chef_name, ip, private_ip)
             except Exception, e:
                 print "!!## -- Error findng chef node %s -- ##!!" % chef_name
                 print "!!## -- Exit with exception %s -- ##!!" % e
