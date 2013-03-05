@@ -21,7 +21,20 @@ def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
     except CalledProcessError, cpe:
         return {'success': False, 'retrun': None, 'exception': cpe}
 
-
+def remove_broker_fail(policy):
+    active_models = razor.simple_active_models(policy)    
+    for active in active_models:
+        data = active_models[active]
+        if 'broker_fail' in data['current_state']:
+            print "!!## -- Removing active model  (broker_fail) -- ##!!"
+            root_pass = razor.get_active_model_pass(data['am_uuid'])
+            ip = data['eth1_ip']
+            run = run_remote_ssh_cmd(ip, 'root', root_pass, 'chef-client')
+            if run['success']:
+               delete = razor.remove_active_model(data['am_uuid'])
+               time.sleep(30)
+               
+               
 def run_chef_client(name):
     node = Node(name)    
     ip = node['ipaddress']
@@ -53,9 +66,9 @@ def install_opencenter(server, install_script, type, server_ip=""):
     root_pass = razor.get_active_model_pass(node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
     print "Installing %s..." % type
     if type == "server":
-        command = "sudo apt-get update -y; curl %s | bash -s %s 0.0.0.0 secrete" % (install_script, type)
+        command = "sudo apt-get update -y -qq; curl %s | bash -s %s 0.0.0.0 secrete" % (install_script, type)
     else:
-        command = "sudo apt-get update -y; curl %s | bash -s %s %s secrete" % (install_script, type, server_ip)
+        command = "sudo apt-get update -y -qq; curl %s | bash -s %s %s secrete" % (install_script, type, server_ip)
     print "Running: %s " % command
     ret = run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, command)
     if not ret['success']:
@@ -113,6 +126,11 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     razor = razor_api(results.razor_ip)
     
     
+    #Remove broker fails from qa-ubuntu-pool
+    remove_broker_fail("qa-ubuntu-pool")
+    remove_broker_fail("qa-centos-pool")
+        
+    
     env = "%s-%s-opencenter" % (results.name, results.os)
     if not Search("environment").query("name:%s"%env):
         print "Making environment: %s " % env
@@ -155,8 +173,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 node = Node(name)  
                 am_uuid = node['razor_metadata'].to_dict()['razor_active_model_uuid']
                 ip = node['ipaddress']
-                root_pass = razor.get_active_model_pass(am_uuid)['password']               
-                
+                root_pass = razor.get_active_model_pass(am_uuid)['password']
                 
                 #Reboot box
                 run = run_remote_ssh_cmd(ip, 'root', root_pass, "reboot 0")
@@ -182,7 +199,9 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     #Collect the amount of servers we need for the opencenter install   
     nodes = Search('node').query("name:qa-%s-pool*" % results.os)          
     if len(nodes) < cluster_size:
+        print "*****************************************************"
         print "Not enough nodes for the cluster_size given: %s " % cluster_size
+        print "*****************************************************"
         sys.exit(1)
     count = 0    
     opencenter_list = []
