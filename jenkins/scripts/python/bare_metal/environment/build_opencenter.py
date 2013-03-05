@@ -33,7 +33,9 @@ def remove_broker_fail(policy):
             if run['success']:
                delete = razor.remove_active_model(data['am_uuid'])
                time.sleep(10)
-               
+            else:
+                print "Trouble removing broker fail"
+                sys.exit(1)
                
 def run_chef_client(name):
     node = Node(name)    
@@ -53,7 +55,7 @@ def remove_chef(name):
             command = "apt-get remove --purge -y chef; rm -rf /etc/chef"
         elif node['platform_family'] == "rhel":
             command = 'yum remove --purge -y chef; rm -rf /etc/chef /var/chef'  
-        print command          
+        #print command          
         run = run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, command)
     except:
         "Error removing chef"
@@ -69,7 +71,7 @@ def install_opencenter(server, install_script, type, server_ip=""):
         command = "sudo apt-get update -y -qq; curl %s | bash -s %s 0.0.0.0 secrete" % (install_script, type)
     else:
         command = "sudo apt-get update -y -qq; curl %s | bash -s %s %s secrete" % (install_script, type, server_ip)
-    print "Running: %s " % command
+    #print "Running: %s " % command
     ret = run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, command)
     if not ret['success']:
         print "Failed to install opencenter %s" % type
@@ -178,7 +180,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 
                 #Reboot box
                 run = run_remote_ssh_cmd(ip, 'root', root_pass, "reboot 0")
-                print run
+                #print run
                 if not run['success']:
                     print "Error rebooting server"
                     sys.exit(1)
@@ -247,10 +249,10 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         install_opencenter(client, results.repo, 'agent', server_ip)
 
 
-    print "Server: %s ( %s )  " % (server, server_ip)
-    print "Dashboard: %s (%s) " % (dashboard, Node(dashboard)['ipaddress'])
+    print "Server: %s - %s  " % (server, server_ip)
+    print "Dashboard: %s - %s " % (dashboard, Node(dashboard)['ipaddress'])
     for a in clients:
         node = Node(a)
-        print "Agent: %s " % (a, node['ipaddress'])
+        print "Agent: %s - %s " % (a, node['ipaddress'])
 
      
