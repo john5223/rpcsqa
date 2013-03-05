@@ -206,13 +206,13 @@ if active_models:
                 try:
                     check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, private_ip), shell=True)
                     print "!!## -- Restart of server with ip: %s was a success -- ##!!" % private_ip
-                except CalledProcessError, cpe:
+                except CalledProcessError, cpe2:
                     print "!!## -- Failed to restart server, tried both public IP %s and private IP: %s -- ##!!" % (ip, private_ip)
                     print "!!## -- Private IP: %s, Public IP: %s -- ##!!" % (private_ip, ip)
                     print "!!## -- Exited with following error status: -- ##!!"
-                    print "!!## -- Return code: %i -- ##!!" % cpe.returncode
-                    #print "!!## -- Command: %s -- ##!!" % cpe.cmd
-                    print "!!## -- Output: %s -- ##!!" % cpe.output
+                    print "!!## -- Return code: %i -- ##!!" % cpe2.returncode
+                    #print "!!## -- Command: %s -- ##!!" % cpe2.cmd
+                    print "!!## -- Output: %s -- ##!!" % cpe2.output
             
             print "!!## -- Sleeping for 30 seconds -- ##!!"
             time.sleep(30)
