@@ -113,19 +113,17 @@ if active_models:
                     node = Node(chef_name)
                     ip = node['ipaddress']
                     platform_family = node['platform_family']
-                    print "Node %s has platform_family: %s" % (chef_name, platform_family)
-                    print "Node %s network interfaces: " % chef_name
+                    print "!!## -- Node %s has platform_family: %s -- ##!!" % (chef_name, platform_family)
+                    print "!!## -- Node %s network interfaces: -- ##!!" % chef_name
                     for interface in node['network']['interfaces']:
                         if platform_family == 'debian':
                             if 'eth1' in interface:
-                                for address in node['network']['interfaces']['%s' % interface]['addresses'].iteritems():
-                                    if 'inet' in address[0]['family']:
-                                        print json.dumps(address[0], indent=4)
+                                for k, v in node['network']['interfaces']['%s' % interface]['addresses'].iteritems():
+                                    print "%s: %s" % (k , v)
                         elif platform_family == 'rhel':
                             if 'em2' in interface:
-                                for address in node['network']['interfaces']['%s' % interface]['addresses'].iteritems():
-                                    if 'inet' in address[0]['family']:
-                                        print json.dumps(address[0], indent=4)
+                                for k, v in node['network']['interfaces']['%s' % interface]['addresses'].iteritems():
+                                    print "%s: %s" % (k , v)
                         else:
                             print "Platform not supported..."
                     print "!!## -- Node found %s, has ip %s -- ##!!" % (chef_name, ip)
