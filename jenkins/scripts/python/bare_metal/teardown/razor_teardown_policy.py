@@ -120,7 +120,7 @@ if active_models:
                             if 'eth1' in interface:
                                 for address in node['network']['interfaces']['%s' % interface]['addresses'].iteritems():
                                     print json.dumps(address, indent=4)
-                        elif platform_family == 'redhat':
+                        elif platform_family == 'rhel':
                             if 'em2' in interface:
                                 for address in node['network']['interfaces']['%s' % interface]['addresses'].iteritems():
                                     print json.dumps(address, indent=4)
