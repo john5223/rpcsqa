@@ -77,7 +77,7 @@ def getip_from_data_bag(uuid):
         raise Exception(ee)
 
 def get_private_ip(chef_node_addresses):
-    print "!!## -- %s -- ##!!" % chef_node_addresses
+    print "!!## -- Addresses: %s -- ##!!" % chef_node_addresses
         for k, v in chef_node_addresses:
             print "!!## -- Key: %s -- Value: %s -- ##!!" % (k,v)
             for k2, v2 in v.iteritems():
