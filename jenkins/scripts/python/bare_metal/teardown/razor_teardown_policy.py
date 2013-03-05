@@ -118,11 +118,11 @@ if active_models:
                     for interface in node['network']['interfaces']:
                         if platform_family == 'debian':
                             if 'eth1' in interface:
-                                addresses = node['network']['interfaces']['%s' % interface]['addresses']
+                                addresses = node['network']['interfaces']['%s' % interface]['addresses'].keys()
                                 print "!!## -- %s -- ##!!" % addresses
                         elif platform_family == 'rhel':
                             if 'em2' in interface:
-                                addresses = node['network']['interfaces']['%s' % interface]['addresses']
+                                addresses = node['network']['interfaces']['%s' % interface]['addresses'].keys()
                                 print "!!## -- %s -- ##!!" % addresses
                         else:
                             print "Platform not supported..."
