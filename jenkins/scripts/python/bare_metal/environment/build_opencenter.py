@@ -152,7 +152,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 node = Node(name)  
                 am_uuid = node['razor_metadata'].to_dict()['razor_active_model_uuid']
                 ip = node['ipaddress']
-                root_pass = razor.get_active_model_pass(am_uuid)                
+                root_pass = razor.get_active_model_pass(am_uuid)['password']               
                 
                 
                 #Reboot box
