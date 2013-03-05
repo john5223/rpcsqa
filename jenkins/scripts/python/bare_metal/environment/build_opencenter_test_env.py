@@ -14,6 +14,10 @@ parser.add_argument('--razor_ip', action="store", dest="razor_ip", required=True
 
 parser.add_argument('--policy', action="store", dest="policy", required=True, help="Razor policy to use.")
 
+parser.add_argument('--opencenter_user', action="store", dest="opencenter_user", required=True, help="OpenCenter user to use with authentication.", default="admin")
+
+parser.add_argument('--opencenter_password', action="store", dest="opencenter_password", required=True, help="OpenCenter password to use with authentication.")
+
 parser.add_argument('--chef_url', action="store", dest="chef_url", default="http://198.101.133.4:4000", required=True, help="client for chef")
 
 parser.add_argument('--chef_client', action="store", dest="chef_client", default="jenkins", required=True, help="client for chef")
@@ -55,6 +59,8 @@ def get_root_pass(data):
 razor = razor_api(results.razor_ip)
 policy = results.policy
 active_models = razor.simple_active_models(policy)
+opencenter_password = results.opencenter_user
+opencenter_password = results.opencenter_password
 servers = []
 
 if active_models:
@@ -77,7 +83,7 @@ if active_models:
 
     if not display_only and servers:
         # create test env dictionary for env.sh.
-        opencenter_test_env = {'OPENCENTER_ENDPOINT': 'http://127.0.0.1:8080'}
+        opencenter_test_env = {'OPENCENTER_ENDPOINT': 'http://127.0.0.1:8080', 'OPENCENTER_USER': opencenter_user, 'OPENCENTER_PASSWORD': opencenter_password}
         
         # temporary list of servers that are clients.
         client_temp = []
