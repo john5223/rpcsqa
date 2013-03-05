@@ -76,6 +76,16 @@ def getip_from_data_bag(uuid):
         print ee
         raise Exception(ee)
 
+def get_private_ip(chef_node_addresses):
+    print "!!## -- Addresses: %s -- ##!!" % chef_node_addresses
+    for k, v in chef_node_addresses:
+        print "!!## -- Key: %s -- Value: %s -- ##!!" % (k,v)
+        for k2, v2 in v.iteritems():
+            print "!!## -- Key2: %s -- Value2: %s -- ##!!" % (k2, v2)
+            if v2 is 'inet':
+                print "Private IP: %s" % k
+                return k
+                break
 
 #############################################################
 #Collect active models that match policy from given input
@@ -104,8 +114,6 @@ if active_models:
         if display_only:
             print "!!## -- Active Model ID: %s -- ##!!" % active
             print "!!## -- Data Bag UUID: %s -- ##!!" % dbag_uuid
-            print "!!## -- Public address: %s -- ##!!" % ip
-            print "!!## -- Chef Name: %s -- ##!!" % chef_name
 
             print "!!## -- Searching chef nodes -- ##!!"
             try:
@@ -119,18 +127,11 @@ if active_models:
                         if platform_family == 'debian':
                             if 'eth1' in interface:
                                 addresses = node['network']['interfaces']['%s' % interface]['addresses'].iteritems()
-                                print "!!## -- %s -- ##!!" % addresses
+                                private_ip = get_private_ip(addresses)
                         elif platform_family == 'rhel':
                             if 'em2' in interface:
                                 addresses = node['network']['interfaces']['%s' % interface]['addresses'].iteritems()
-                                print "!!## -- %s -- ##!!" % addresses
-                                for k, v in addresses:
-                                    print "!!## -- Key: %s -- Value: %s -- ##!!" % (k,v)
-                                    for k2, v2 in v.iteritems():
-                                        print "!!## -- Key2: %s -- Value2: %s -- ##!!" % (k2, v2)
-                                        if v2 is 'inet':
-                                            print "Private IP: %s" % k
-                                            break
+                                private_ip = get_private_ip(addresses)
                         else:
                             print "Platform not supported..."
                     print "!!## -- Node found %s, has ip %s -- ##!!" % (chef_name, ip)
@@ -146,7 +147,9 @@ if active_models:
                 print "Client: \n %s" % json.dumps(client, indent=4)
             except Exception, e:
                 print "!!## -- Error printing chef clients: %s -- ##!!" % e
-                pass 
+                pass
+
+            print "!!## -- Node %s: Private IP: %s, Public IP: %s -- ##!!" % (chef_name, private_ip, ip)
         else: 
             print "!!## -- Removing active model -- ##!!"
             try:
