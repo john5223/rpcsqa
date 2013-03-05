@@ -59,7 +59,7 @@ def get_root_pass(data):
 razor = razor_api(results.razor_ip)
 policy = results.policy
 active_models = razor.simple_active_models(policy)
-opencenter_password = results.opencenter_user
+opencenter_user = results.opencenter_user
 opencenter_password = results.opencenter_password
 servers = []
 
