@@ -85,7 +85,6 @@ def get_private_ip(chef_node_addresses):
             if v2 is 'inet':
                 print "!!## -- Private IP: %s -- ##!!" % k
                 return k
-                break
 
 #############################################################
 #Collect active models that match policy from given input
