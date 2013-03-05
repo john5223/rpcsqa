@@ -114,8 +114,6 @@ if active_models:
         if display_only:
             print "!!## -- Active Model ID: %s -- ##!!" % active
             print "!!## -- Data Bag UUID: %s -- ##!!" % dbag_uuid
-            print "!!## -- Public address: %s -- ##!!" % ip
-            print "!!## -- Chef Name: %s -- ##!!" % chef_name
 
             print "!!## -- Searching chef nodes -- ##!!"
             try:
@@ -149,7 +147,9 @@ if active_models:
                 print "Client: \n %s" % json.dumps(client, indent=4)
             except Exception, e:
                 print "!!## -- Error printing chef clients: %s -- ##!!" % e
-                pass 
+                pass
+
+            print "!!## -- Node %s: Private IP: %s, Public IP: %s -- ##!!" % (chef_name, private_ip, ip)
         else: 
             print "!!## -- Removing active model -- ##!!"
             try:
