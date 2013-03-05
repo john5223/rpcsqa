@@ -124,8 +124,8 @@ if active_models:
                             if 'em2' in interface:
                                 addresses = node['network']['interfaces']['%s' % interface]['addresses'].iteritems()
                                 print "!!## -- %s -- ##!!" % addresses
-                                for address in addresses:
-                                    print address
+                                for k, v in addresses:
+                                    print "!!## -- Key: %s -- Value: %s -- ##!!" % (k,v)
                         else:
                             print "Platform not supported..."
                     print "!!## -- Node found %s, has ip %s -- ##!!" % (chef_name, ip)
