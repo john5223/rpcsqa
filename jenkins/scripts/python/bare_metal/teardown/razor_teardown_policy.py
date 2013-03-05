@@ -128,8 +128,9 @@ if active_models:
                                     print "!!## -- Key: %s -- Value: %s -- ##!!" % (k,v)
                                     for k2, v2 in v.iteritems():
                                         print "!!## -- Key2: %s -- Value2: %s -- ##!!" % (k2, v2)
-                                        if 'inet' in v2:
-                                            print "Private IP: %s" % addresses['%s' % k]
+                                        if v2 is 'inet':
+                                            print "Private IP: %s" % k
+                                            break
                         else:
                             print "Platform not supported..."
                     print "!!## -- Node found %s, has ip %s -- ##!!" % (chef_name, ip)
