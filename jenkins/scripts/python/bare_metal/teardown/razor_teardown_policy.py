@@ -120,12 +120,14 @@ if active_models:
                             if 'eth1' in interface:
                                 addresses = node['network']['interfaces']['%s' % interface]['addresses'].iteritems()
                                 for k, v in addresses:
-                                    print "Key: %s -- Value: %s" % (k , v)
+                                    if 'inet' in addresses[k].items():
+                                        print "!!## -- Private IP: %s" % addresses[k]
+                                        break
                         elif platform_family == 'rhel':
                             if 'em2' in interface:
                                 addresses = node['network']['interfaces']['%s' % interface]['addresses'].iteritems()
                                 for k, v in addresses:
-                                    if 'inet' in addresses[k].items()
+                                    if 'inet' in addresses[k].items():
                                         print "!!## -- Private IP: %s" % addresses[k]
                                         break
                         else:
