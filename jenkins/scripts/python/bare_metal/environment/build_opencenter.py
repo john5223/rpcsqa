@@ -153,14 +153,21 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 am_uuid = node['razor_metadata'].to_dict()['razor_active_model_uuid']
                 ip = node['ipaddress']
                 root_pass = razor.get_active_model_pass(am_uuid)                
+                
+                
+                #Reboot box
+                run = run_remote_ssh_cmd(ip, 'root', root_pass, "reboot 0")
+                print run
+                if not run['success']:
+                    print "Error rebooting server"
+                    sys.exit(1)
+                
                 #Knife node remove; knife client remove
                 Client(name).delete()
                 Node(name).delete()                
                 #Remove active model          
                 razor.remove_active_model(am_uuid)                            
-                #Reboot box
-                run = run_remote_ssh_cmd(ip, 'root', root_pass, "reboot 0")
-                print run
+                
         #Sleep so all servers can be given time to delete       
         time.sleep(15)   
    
