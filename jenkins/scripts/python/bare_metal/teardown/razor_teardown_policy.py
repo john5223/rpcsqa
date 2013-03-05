@@ -78,14 +78,14 @@ def getip_from_data_bag(uuid):
 
 def get_private_ip(chef_node_addresses):
     print "!!## -- Addresses: %s -- ##!!" % chef_node_addresses
-        for k, v in chef_node_addresses:
-            print "!!## -- Key: %s -- Value: %s -- ##!!" % (k,v)
-            for k2, v2 in v.iteritems():
-                print "!!## -- Key2: %s -- Value2: %s -- ##!!" % (k2, v2)
-                if v2 is 'inet':
-                    print "Private IP: %s" % k
-                    return k
-                    break
+    for k, v in chef_node_addresses:
+        print "!!## -- Key: %s -- Value: %s -- ##!!" % (k,v)
+        for k2, v2 in v.iteritems():
+            print "!!## -- Key2: %s -- Value2: %s -- ##!!" % (k2, v2)
+            if v2 is 'inet':
+                print "Private IP: %s" % k
+                return k
+                break
 
 #############################################################
 #Collect active models that match policy from given input
