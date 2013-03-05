@@ -32,7 +32,7 @@ def remove_broker_fail(policy):
             run = run_remote_ssh_cmd(ip, 'root', root_pass, 'reboot 0')
             if run['success']:
                delete = razor.remove_active_model(data['am_uuid'])
-               time.sleep(30)
+               time.sleep(10)
                
                
 def run_chef_client(name):
@@ -249,6 +249,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     print "Server: %s ( %s )  " % (server, server_ip)
     print "Dashboard: %s (%s) " % (dashboard, Node(dashboard)['ipaddress'])
     for a in clients:
-        print "Agent: %s " % (a, Node(a)['ipaddress'])
+        node = Node(a)
+        print "Agent: %s " % (a, node['ipaddress'])
 
      
