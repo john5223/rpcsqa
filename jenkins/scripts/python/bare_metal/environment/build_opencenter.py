@@ -52,7 +52,10 @@ def install_opencenter(server, install_script, type, server_ip=""):
     node = Node(server)
     root_pass = razor.get_active_model_pass(node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
     print "Installing %s..." % type
-    command = "sudo apt-get update -y; curl %s | bash -s %s %s secrete" % (install_script, type, server_ip)
+    if type == "server":
+        command = "sudo apt-get update -y; curl %s | bash -s %s secrete" % (install_script, type)
+    else:
+        command = "sudo apt-get update -y; curl %s | bash -s %s %s secrete" % (install_script, type, server_ip)
     print "Running: %s " % command
     ret = run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, command)
     if not ret['success']:
@@ -224,5 +227,9 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         install_opencenter(client, results.repo, 'agent', server_ip)
 
 
+    print "Server: %s ( %s )  " % (server, server_ip)
+    print "Dashboard: %s (%s) " % (dashboard, Node(dashboard)['ipaddress'])
+    for a in clients:
+        print "Agent: %s " % (a, Node(a)['ipaddress'])
 
      
