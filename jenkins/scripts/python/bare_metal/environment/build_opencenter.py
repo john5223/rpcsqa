@@ -40,7 +40,8 @@ def remove_chef(name):
         elif node['platform_family'] == "rhel":
             command = 'yum remove --purge -y chef; rm -rf /etc/chef /var/chef'  
         print command          
-        run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, command)
+        run = run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, command)
+        print run
         print "done"
     except:
         "Error removing chef"
@@ -52,7 +53,7 @@ def install_opencenter(server, install_script, type, server_ip=""):
     node = Node(server)
     root_pass = razor.get_active_model_pass(node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
     print "Installing %s..." % type
-    command = "sudo apt-get update -y; curl %s | bash -s %s %s" % (install_script, type, server_ip)
+    command = "sudo apt-get update -y; curl %s | bash -s %s %s secrete" % (install_script, type, server_ip)
     print "Running: %s " % command
     ret = run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, command)
     if not ret['success']:
