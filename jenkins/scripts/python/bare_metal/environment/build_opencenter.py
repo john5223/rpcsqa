@@ -190,9 +190,9 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 Node(name).delete()                
                 #Remove active model          
                 razor.remove_active_model(am_uuid)                            
-                
+                time.sleep(15)   
         #Sleep so all servers can be given time to delete       
-        time.sleep(15)   
+        
    
     
     ######################################################
