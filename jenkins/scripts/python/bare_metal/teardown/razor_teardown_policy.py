@@ -83,7 +83,7 @@ def get_private_ip(chef_node_addresses):
         for k2, v2 in v.iteritems():
             print "!!## -- Key2: %s -- Value2: %s -- ##!!" % (k2, v2)
             if v2 is 'inet':
-                print "Private IP: %s" % k
+                print "!!## -- Private IP: %s -- ##!!" % k
                 return k
                 break
 
@@ -134,7 +134,6 @@ if active_models:
                                 private_ip = get_private_ip(addresses)
                         else:
                             print "Platform not supported..."
-                    print "!!## -- Node found %s, has ip %s -- ##!!" % (chef_name, ip)
             except Exception, e:
                 print "!!## -- Error finding chef node %s -- ##!!" % chef_name
                 print "!!## -- Exit with exception %s -- ##!!" % e
