@@ -150,23 +150,30 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         
     if results.clear_pool:        
         for n in nodes:
+            
             name = n['name']
-            print "Deleting: %s" % (name)
-            node = Node(name)  
-            am_uuid = node['razor_metadata'].to_dict()['razor_active_model_uuid']
-            ip = node['ipaddress']
-            root_pass = razor.get_active_model_pass(am_uuid)
-            #Remove active model          
-            razor.remove_active_model(am_uuid)
-            #Knife node remove; knife client remove
-            Client(name).delete()
-            Node(name).delete()
+            node = Node(name)
             
-            #Reboot box
-            run_remote_ssh_cmd(ip, 'root', root_pass, "reboot 0")
+            if node.chef_environment == env:                    
+                print "Deleting: %s" % (name)
+                node = Node(name)  
+                am_uuid = node['razor_metadata'].to_dict()['razor_active_model_uuid']
+                ip = node['ipaddress']
+                root_pass = razor.get_active_model_pass(am_uuid)
+                
+                #Knife node remove; knife client remove
+                Client(name).delete()
+                Node(name).delete()
+                
+                #Remove active model          
+                razor.remove_active_model(am_uuid)
+               
+                
+                #Reboot box
+                run_remote_ssh_cmd(ip, 'root', root_pass, "reboot 0")
+                
             
-            
-            
+    sys.exit()       
    
     
     ######################################################
