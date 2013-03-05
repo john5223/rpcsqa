@@ -159,7 +159,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 #Remove active model          
                 razor.remove_active_model(am_uuid)                            
                 #Reboot box
-                run_remote_ssh_cmd(ip, 'root', root_pass, "reboot 0")
+                run_remote_ssh_cmd(ip, 'root', root_pass, "reboot")
         #Sleep so all servers can be given time to delete       
         time.sleep(10)   
    
@@ -192,7 +192,8 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     
     #Pick an opencenter server, and rest for agents
     server = opencenter_list[0]
-    dashboard = clients = []
+    dashboard = []
+    clients = []
     if len(opencenter_list) > 1:
         dashboard = opencenter_list[1]
     if len(opencenter_list) > 2:
