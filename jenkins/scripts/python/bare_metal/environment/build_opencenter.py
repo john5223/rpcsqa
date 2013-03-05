@@ -64,7 +64,7 @@ def install_opencenter(server, install_script, type, server_ip=""):
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', action="store", dest="name", required=False, default="test", 
                     help="This will be the name for the opencenter chef environment")
-parser.add_argument('--cluster_size', action="store", dest="cluster_size", required=False, default=2, 
+parser.add_argument('--cluster_size', action="store", dest="cluster_size", required=False, default=1, 
                     help="Amount of boxes to pull from active_models")
 parser.add_argument('--os', action="store", dest="os", required=False, default='ubuntu', 
                     help="Operating System to use for opencenter")
@@ -160,7 +160,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 razor.remove_active_model(am_uuid)                            
                 #Reboot box
                 run_remote_ssh_cmd(ip, 'root', root_pass, "reboot 0")
-                
+        #Sleep so all servers can be given time to delete       
         time.sleep(10)   
    
     
@@ -201,7 +201,8 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     remove_chef(server)
     install_opencenter(server, results.repo, 'server')
     
-    install_opencenter(dashboard, results.repo, 'dashboard', server_ip)    
+    if dashboard:
+        install_opencenter(dashboard, results.repo, 'dashboard', server_ip)    
     
     for client in clients:
         remove_chef(client)
