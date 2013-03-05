@@ -17,6 +17,8 @@ parser.add_argument('--policy', action="store", dest="policy", default="qa-openc
 
 parser.add_argument('--role', action="store", dest="role", required=True, default="qa-opencenter-dashboard", help="Chef Role to install against")
 
+parser.add_argument('--oc_pass', action="store", dest='oc_pass', required=True, help="The pass for the OC dashboard.")
+
 parser.add_argument('--chef_url', action="store", dest="chef_url", default="http://198.101.133.4:4000", required=False, 
                     help="URL of the chef server.")
 
@@ -104,7 +106,7 @@ if active_models:
         for server in to_run_list:
             print "!!## -- Attempting to install opencenter dashboard on %s with ip %s -- ##!!" % (server['node'], server['ip'])
             try:
-                check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'curl -L \"%s\" | bash -s dashboard %s'" % (server['root_password'], server['ip'], results.oc_install_url, opencenter_server_ip), shell=True)
+                check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'curl -L \"%s\" | bash -s dashboard %s %s'" % (server['root_password'], server['ip'], results.oc_install_url, opencenter_server_ip, results.oc_pass), shell=True)
                 print "!!## -- OpenCenter dashboard installed sucessfully on server with ip %s -- ##!!" % server['ip']
             except CalledProcessError, cpe:
                 print "!!## -- Failed to install OpenCenter dashboard on server with ip: %s --##!!" % server['ip']
