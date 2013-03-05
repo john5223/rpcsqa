@@ -119,11 +119,11 @@ if active_models:
                         if platform_family == 'debian':
                             if 'eth1' in interface:
                                 for address in node['network']['interfaces']['%s' % interface]['addresses'].iteritems():
-                                    print address
+                                    print address[0]
                         elif platform_family == 'rhel':
                             if 'em2' in interface:
                                 for address in node['network']['interfaces']['%s' % interface]['addresses'].iteritems():
-                                    print address
+                                    print address[0]
                         else:
                             print "Platform not supported..."
                     print "!!## -- Node found %s, has ip %s -- ##!!" % (chef_name, ip)
