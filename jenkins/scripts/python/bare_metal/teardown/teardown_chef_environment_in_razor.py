@@ -46,6 +46,16 @@ if results.display_only == 'true':
 else:
     display_only = False
 
+def get_private_ip(chef_node_addresses):
+    #print "!!## -- Addresses: %s -- ##!!" % chef_node_addresses
+    for k, v in chef_node_addresses:
+        #print "!!## -- Key: %s -- Value: %s -- ##!!" % (k,v)
+        for k2, v2 in v.iteritems():
+            #print "!!## -- Key2: %s type(%s) -- Value2: %s type(%s) -- ##!!" % (k2, type(k2), v2, type(v2))
+            if str(v2) == 'inet':
+                #print "!!## -- Private IP: %s -- ##!!" % k
+                return k
+
 """
 Steps
 1. Gather all the nodes in the given environment
@@ -68,6 +78,21 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         node_ip = node['ipaddress']
         node_am_uuid = node.normal['razor_metadata']['razor_active_model_uuid']
         node_pass = ''
+
+        platform_family = node['platform_family']
+        print "!!## -- Node %s has platform_family: %s -- ##!!" % (node_name, platform_family)
+        #print "!!## -- Node %s network interfaces: -- ##!!" % node_name
+        for interface in node['network']['interfaces']:
+            if platform_family == 'debian':
+                if 'eth1' in interface:
+                    addresses = node['network']['interfaces']['%s' % interface]['addresses'].iteritems()
+                    node_private_ip = get_private_ip(addresses)
+            elif platform_family == 'rhel':
+                if 'em2' in interface:
+                    addresses = node['network']['interfaces']['%s' % interface]['addresses'].iteritems()
+                    node_private_ip = get_private_ip(addresses)
+            else:
+                print "Platform not supported..."
         
         # Get the AM password from Razor
         try:
@@ -121,12 +146,16 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             if remote_return['success']:
                 print "!!## -- Successful restart of server with ip %s -- ##!!" % node_ip
             else:
-                print "!!## -- Failed to restart server with ip: %s -- ##!!" % node_ip
-                print "!!## -- Return Code: %s -- ##!!" % remote_return['cpe'].returncode
-                # This print will print the password, use it wisely (jacob).
-                #print "!!## -- Command: %s -- ##!!" % remote_return['cpe'].cmd
-                print "!!## -- Output: %s -- ##!!" % remote_return['cpe'].output
-                failed_runs = True
+                remote_return = run_remote_ssh_cmd(node_private_ip, 'root', node_pass, 'reboot 0')
+                if remote_return['success']:
+                    print "!!## -- Successful restart of server with ip %s -- ##!!" % node_ip
+                else:
+                    print "!!## -- Failed to restart server with ip: %s -- ##!!" % node_private_ip
+                    print "!!## -- Return Code: %s -- ##!!" % remote_return['cpe'].returncode
+                    # This print will print the password, use it wisely (jacob).
+                    #print "!!## -- Command: %s -- ##!!" % remote_return['cpe'].cmd
+                    print "!!## -- Output: %s -- ##!!" % remote_return['cpe'].output
+                    failed_runs = True
 
             # Sleep for 20 seconds
             print "!!## -- Sleeping for 20 seconds -- ##!!"
