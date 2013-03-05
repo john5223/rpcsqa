@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import os
 import sys
+import time
 import argparse
 import time
 from chef import *
@@ -50,7 +51,7 @@ def remove_chef(name):
 def install_opencenter(server, install_script, type, server_ip=""):
     node = Node(server)
     root_pass = razor.get_active_model_pass(node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
-    print "Installing server..."
+    print "Installing %s..." % type
     command = "sudo apt-get update -y; curl %s | bash -s %s %s" % (install_script, type, server_ip)
     print "Running: %s " % command
     ret = run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, command)
@@ -63,7 +64,7 @@ def install_opencenter(server, install_script, type, server_ip=""):
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', action="store", dest="name", required=False, default="test", 
                     help="This will be the name for the opencenter chef environment")
-parser.add_argument('--cluster_size', action="store", dest="cluster_size", required=False, default=1, 
+parser.add_argument('--cluster_size', action="store", dest="cluster_size", required=False, default=2, 
                     help="Amount of boxes to pull from active_models")
 parser.add_argument('--os', action="store", dest="os", required=False, default='ubuntu', 
                     help="Operating System to use for opencenter")
@@ -160,7 +161,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 #Reboot box
                 run_remote_ssh_cmd(ip, 'root', root_pass, "reboot 0")
                 
-            
+        time.sleep(10)   
    
     
     ######################################################
@@ -191,16 +192,16 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     
     #Pick an opencenter server, and rest for agents
     server = opencenter_list[0]
-    clients = opencenter_list[1:]
+    dashboard = opencenter_list[1]
+    clients = opencenter_list[2:]
     
     #Remove chef client...install opencenter server
     print "Making %s the server node" % server
     server_ip = Node(server)['ipaddress']
-    
     remove_chef(server)
     install_opencenter(server, results.repo, 'server')
-    install_opencenter(server, results.repo, 'dashboard', server_ip)    
     
+    install_opencenter(dashboard, results.repo, 'dashboard', server_ip)    
     
     for client in clients:
         remove_chef(client)
