@@ -118,21 +118,12 @@ if active_models:
                     for interface in node['network']['interfaces']:
                         if platform_family == 'debian':
                             if 'eth1' in interface:
-                                addresses = node['network']['interfaces']['%s' % interface]['addresses'].iteritems()
-                                for k, v in addresses:
-                                    if 'inet' in addresses[k].items():
-                                        print "!!## -- Private IP: %s" % addresses[k]
-                                        break
+                                addresses = node['network']['interfaces']['%s' % interface]['addresses']
+                                print "!!## -- %s -- ##!!" % addresses
                         elif platform_family == 'rhel':
                             if 'em2' in interface:
-                                addresses = node['network']['interfaces']['%s' % interface]['addresses'].iteritems()
+                                addresses = node['network']['interfaces']['%s' % interface]['addresses']
                                 print "!!## -- %s -- ##!!" % addresses
-                                for k in addresses.keys():
-                                    for 
-                                    print "!!## -- Key: %s -- ##!!"
-                                    #if 'inet' in addresses[k].items():
-                                    #    print "!!## -- Private IP: %s" % addresses[k]
-                                    #    break
                         else:
                             print "Platform not supported..."
                     print "!!## -- Node found %s, has ip %s -- ##!!" % (chef_name, ip)
