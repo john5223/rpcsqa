@@ -202,12 +202,17 @@ if active_models:
                 check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, ip), shell=True)
                 print "!!## -- Restart of server with ip: %s was a success -- ##!!" % ip
             except CalledProcessError, cpe:
-                print "!!## -- Failed to restart server -- ##!!"
-                print "!!## -- Private IP: %s, Public IP: %s -- ##!!" % (private_ip, ip)
-                print "!!## -- Exited with following error status: -- ##!!"
-                print "!!## -- Return code: %i -- ##!!" % cpe.returncode
-                #print "!!## -- Command: %s -- ##!!" % cpe.cmd
-                print "!!## -- Output: %s -- ##!!" % cpe.output
+                print "!!## -- Failed to restart server, trying private IP: %s -- ##!!" % private_ip
+                try:
+                    check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'reboot 0'" % (root_pass, private_ip), shell=True)
+                    print "!!## -- Restart of server with ip: %s was a success -- ##!!" % private_ip
+                except CalledProcessError, cpe:
+                    print "!!## -- Failed to restart server, tried both public IP %s and private IP: %s -- ##!!" % (ip, private_ip)
+                    print "!!## -- Private IP: %s, Public IP: %s -- ##!!" % (private_ip, ip)
+                    print "!!## -- Exited with following error status: -- ##!!"
+                    print "!!## -- Return code: %i -- ##!!" % cpe.returncode
+                    #print "!!## -- Command: %s -- ##!!" % cpe.cmd
+                    print "!!## -- Output: %s -- ##!!" % cpe.output
             
             print "!!## -- Sleeping for 30 seconds -- ##!!"
             time.sleep(30)
