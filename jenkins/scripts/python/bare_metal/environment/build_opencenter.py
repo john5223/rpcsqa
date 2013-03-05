@@ -33,11 +33,12 @@ def remove_chef(name):
         am_uuid = node['razor_metadata'].to_dict()['razor_active_model_uuid']
         root_pass = razor.get_active_model_pass(am_uuid)['password']        
         print "removing chef on %s..." % name
-        
+        command = ""
         if node['platform_family'] == "debian":
-            command = "apt-get remove --purge -y chef; rm -rf /etc/chef'"
+            command = "apt-get remove --purge -y chef; rm -rf /etc/chef"
         elif node['platform_family'] == "rhel":
-            command = 'yum remove --purge -y chef; rm -rf /etc/chef /var/chef'            
+            command = 'yum remove --purge -y chef; rm -rf /etc/chef /var/chef'  
+        print command          
         run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, command)
         print "done"
     except:
@@ -46,26 +47,29 @@ def remove_chef(name):
     
     
     
-def install_opencenter_server(server, repo):
-    print "install server..."
-    pass
-
-
-def install_opencenter_server(server, repo):
-    print "install client..."    
-    pass
+def install_opencenter(server, install_script, type, server_ip=""):
+    node = Node(server)
+    root_pass = razor.get_active_model_pass(node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
+    print "Installing server..."
+    command = "sudo apt-get update -y; curl %s | bash -s %s %s" % (install_script, type, server_ip)
+    print "Running: %s " % command
+    ret = run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, command)
+    if not ret['success']:
+        print "Failed to install opencenter %s" % type
+        sys.exit(1)
 
 
 # Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', action="store", dest="name", required=False, default="test", 
                     help="This will be the name for the opencenter chef environment")
-parser.add_argument('--cluster_size', action="store", dest="cluster_size", required=False, default=3, 
+parser.add_argument('--cluster_size', action="store", dest="cluster_size", required=False, default=1, 
                     help="Amount of boxes to pull from active_models")
 parser.add_argument('--os', action="store", dest="os", required=False, default='ubuntu', 
                     help="Operating System to use for opencenter")
 
-parser.add_argument('--repo_branch', action="store", dest="repo", required=False, default="master", 
+parser.add_argument('--repo_url', action="store", dest="repo", required=False, 
+                    default="https://raw.github.com/rcbops/opencenter-install-scripts/master/install.sh", 
                     help="Operating System to use for opencenter")
 
 
@@ -112,8 +116,6 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
    
     cluster_size = int(results.cluster_size)
     
-    
-    
     ############################
     #Prepare environment
     ###########################
@@ -121,28 +123,28 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     nodes = Search('node').query("name:qa-%s-pool*" % results.os)
     #Make sure all networking interfacing is set
     
-     #Remove THIS
+    #Remove THIS
     for n in nodes:
         node = Node(n['name'])
         node.chef_environment = "_default"
-        node.run_list = "role['qa-base']"
         node['in_use'] = None
         node.save()
             
     
-    
-    
     for n in nodes:
         node = Node(n['name'])        
-        if "recipe['network-interfaces']" not in node.run_list:
-            node.run_list.append("recipe['network-interfaces']")
+        if "recipe[network-interfaces]" not in node.run_list:
+            node.run_list = "recipe[network-interfaces]"
             node.save()
             print "Running network interfaces for %s" % node.name
             #Run chef client twice
-            if run_chef_client(node.name)['success']:
-                run_chef_client(node.name)
+            run = run_chef_client(node.name)
+            run = run_chef_client(node.name)            
+            if run['success']:
+                print "Done running chef-client"
             else:
                 print "Error running chef client for network interfaces"
+                print run
                 sys.exit(1)
    
         
@@ -179,7 +181,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         name = n['name']
         node = Node(name)        
         
-        if node.chef_environment == "_default" and "recipe['network-interfaces']" in node.run_list:
+        if node.chef_environment == "_default" and "recipe[network-interfaces]" in node.run_list:
             node['in_use'] = 1
             node.chef_environment = env
             node.save()
@@ -199,11 +201,17 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     
     #Remove chef client...install opencenter server
     print "Making %s the server node" % server
+    server_ip = Node(server)['ipaddress']
+    
     remove_chef(server)
-    install_opencenter_server(server, results.repo)
+    install_opencenter(server, results.repo, 'server')
+    install_opencenter(server, results.repo, 'dashboard', server_ip)    
     
     
     for client in clients:
         remove_chef(client)
-        install_opencenter_agent(agent, results.repo)
-      
+        install_opencenter(client, results.repo, 'agent', server_ip)
+
+
+
+     
