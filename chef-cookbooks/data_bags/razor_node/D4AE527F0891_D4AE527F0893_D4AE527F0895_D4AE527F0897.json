@@ -4,7 +4,7 @@
             {
                 "auto": "true", 
                 "netmask": "255.255.255.0", 
-                "address": "198.101.133.214", 
+                "address": "198.101.133.249", 
                 "device": "eth0", 
                 "type": "static", 
                 "gateway": "198.101.133.1"
@@ -13,7 +13,7 @@
         "redhat": [
             {
                 "userctl": "no", 
-                "ipaddr": "198.101.133.214", 
+                "ipaddr": "198.101.133.249", 
                 "gateway": "198.101.133.1", 
                 "netmask": "255.255.255.0", 
                 "bootproto": "none", 

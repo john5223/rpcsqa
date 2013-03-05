@@ -105,7 +105,6 @@ if active_models:
             print "!!## -- Active Model ID: %s -- ##!!" % active
             print "!!## -- Data Bag UUID: %s -- ##!!" % dbag_uuid
             print "!!## -- Public address: %s -- ##!!" % ip
-            print "!!## -- Private address: %s -- ##!!" % private_ip
             print "!!## -- Chef Name: %s -- ##!!" % chef_name
 
             print "!!## -- Searching chef nodes -- ##!!"
@@ -113,9 +112,30 @@ if active_models:
                 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                     node = Node(chef_name)
                     ip = node['ipaddress']
+                    platform_family = node['platform_family']
+                    print "!!## -- Node %s has platform_family: %s -- ##!!" % (chef_name, platform_family)
+                    print "!!## -- Node %s network interfaces: -- ##!!" % chef_name
+                    for interface in node['network']['interfaces']:
+                        if platform_family == 'debian':
+                            if 'eth1' in interface:
+                                addresses = node['network']['interfaces']['%s' % interface]['addresses'].iteritems()
+                                print "!!## -- %s -- ##!!" % addresses
+                        elif platform_family == 'rhel':
+                            if 'em2' in interface:
+                                addresses = node['network']['interfaces']['%s' % interface]['addresses'].iteritems()
+                                print "!!## -- %s -- ##!!" % addresses
+                                for k, v in addresses:
+                                    print "!!## -- Key: %s -- Value: %s -- ##!!" % (k,v)
+                                    for k2, v2 in v.iteritems():
+                                        print "!!## -- Key2: %s -- Value2: %s -- ##!!" % (k2, v2)
+                                        if v2 is 'inet':
+                                            print "Private IP: %s" % k
+                                            break
+                        else:
+                            print "Platform not supported..."
                     print "!!## -- Node found %s, has ip %s -- ##!!" % (chef_name, ip)
             except Exception, e:
-                print "!!## -- Error findng chef node %s -- ##!!" % chef_name
+                print "!!## -- Error finding chef node %s -- ##!!" % chef_name
                 print "!!## -- Exit with exception %s -- ##!!" % e
                 pass
             
