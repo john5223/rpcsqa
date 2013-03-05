@@ -171,6 +171,9 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     
     #Collect the amount of servers we need for the opencenter install   
     nodes = Search('node').query("name:qa-%s-pool*" % results.os)          
+    if len(nodes) < cluster_size:
+        print "Not enough nodes for the cluster_size given: %s " % cluster_size
+        sys.exit(1)
     count = 0    
     opencenter_list = []
     for n in nodes:
