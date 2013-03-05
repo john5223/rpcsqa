@@ -113,6 +113,7 @@ if active_models:
                 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                     node = Node(chef_name)
                     ip = node['ipaddress']
+                    private_ip=node['eth1_ipaddress']
                     print "!!## -- Node found %s, has ip %s -- ##!!" % (chef_name, ip)
             except Exception, e:
                 print "!!## -- Error findng chef node %s -- ##!!" % chef_name
