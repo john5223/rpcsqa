@@ -119,12 +119,12 @@ if active_models:
                         if platform_family == 'debian':
                             if 'eth1' in interface:
                                 for address in node['network']['interfaces']['%s' % interface]['addresses'].iteritems():
-                                    if 'inet' in address['family']:
+                                    if 'inet' in address[0]['family']:
                                         print json.dumps(address[0], indent=4)
                         elif platform_family == 'rhel':
                             if 'em2' in interface:
                                 for address in node['network']['interfaces']['%s' % interface]['addresses'].iteritems():
-                                    if 'inet' in address['family']:
+                                    if 'inet' in address[0]['family']:
                                         print json.dumps(address[0], indent=4)
                         else:
                             print "Platform not supported..."
