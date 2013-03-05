@@ -192,8 +192,11 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     
     #Pick an opencenter server, and rest for agents
     server = opencenter_list[0]
-    dashboard = opencenter_list[1]
-    clients = opencenter_list[2:]
+    dashboard = clients = []
+    if len(opencenter_list) > 1:
+        dashboard = opencenter_list[1]
+    if len(opencenter_list) > 2:
+        clients = opencenter_list[2:]
     
     #Remove chef client...install opencenter server
     print "Making %s the server node" % server
