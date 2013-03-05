@@ -91,7 +91,7 @@ if active_models:
             print "!!## -- Attempting to install OpenCenter server on %s with ip %s --##!!" % (server['node'], server['ip'])
             try:
                 # run the command to install opencenter server.
-                check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'curl -L \"%s\" | bash -s server %s'" % (server['root_password'], server['ip'], results.oc_install_url, results.oc_pass), shell=True)
+                check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s 'curl -L \"%s\" | bash -s server %s %s'" % (server['root_password'], server['ip'], results.oc_install_url, server['ip'],results.oc_pass), shell=True)
                 print "!!## -- Sucessfully installed OpenCenter server on server with ip: %s --##!!" % server['ip']
             except CalledProcessError, cpe:
                 print "!!## -- Failed to install OpenCenter server on server with ip: %s --##!!" % server['ip']
