@@ -112,9 +112,19 @@ if active_models:
                 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                     node = Node(chef_name)
                     ip = node['ipaddress']
+                    platform_family = node['platform_family']
                     print "Node %s network interfaces: " % chef_name
                     for interface in node['network']['interfaces']:
-                        print json.dumps(node['network']['interfaces']['%s' % interface]['addresses'].keys(), indent=4)
+                        if platform_family == 'debian':
+                            if 'eth1' in interface:
+                                for address in node['network']['interfaces']['%s' % interface]['addresses'].iteritems():
+                                    print json.dumps(address, indent=4)
+                        elif platform_family == 'redhat':
+                            if 'em2' in interface:
+                                for address in node['network']['interfaces']['%s' % interface]['addresses'].iteritems():
+                                    print json.dumps(address, indent=4)
+                        else:
+                            print "Platform not supported..."
                     print "!!## -- Node found %s, has ip %s -- ##!!" % (chef_name, ip)
             except Exception, e:
                 print "!!## -- Error findng chef node %s -- ##!!" % chef_name
@@ -147,6 +157,7 @@ if active_models:
                         ip = node['ipaddress']
                         print "Node %s network interfaces: " % chef_name
                         for interface in node['network']['interfaces']:
+                            if interface
                             print json.dumps(node['network']['interfaces']['%s' % interface]['addresses'].keys(), indent=4)
                         node.delete()
                     else:
