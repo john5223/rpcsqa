@@ -53,7 +53,7 @@ def install_opencenter(server, install_script, type, server_ip=""):
     root_pass = razor.get_active_model_pass(node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
     print "Installing %s..." % type
     if type == "server":
-        command = "sudo apt-get update -y; curl %s | bash -s %s secrete" % (install_script, type)
+        command = "sudo apt-get update -y; curl %s | bash -s %s 0.0.0.0 secrete" % (install_script, type)
     else:
         command = "sudo apt-get update -y; curl %s | bash -s %s %s secrete" % (install_script, type, server_ip)
     print "Running: %s " % command
