@@ -113,7 +113,7 @@ if active_models:
                     node = Node(chef_name)
                     ip = node['ipaddress']
                     for interface in node['network']['interfaces']:
-                        print json.dumps(node['network']['interface'][interface]['addresses'], indent=4)
+                        print json.dumps(node['network']['interface']['%s' % interface]['addresses'], indent=4)
                     print "!!## -- Node found %s, has ip %s -- ##!!" % (chef_name, ip)
             except Exception, e:
                 print "!!## -- Error findng chef node %s -- ##!!" % chef_name
