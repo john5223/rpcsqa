@@ -1,0 +1,26 @@
+{
+    "network_interfaces": {
+        "debian": [
+            {
+                "auto": "true", 
+                "netmask": "255.255.255.0", 
+                "address": "198.101.133.228", 
+                "device": "eth0", 
+                "type": "static", 
+                "gateway": "198.101.133.1"
+            }
+        ], 
+        "redhat": [
+            {
+                "userctl": "no", 
+                "ipaddr": "198.101.133.228", 
+                "gateway": "198.101.133.1", 
+                "netmask": "255.255.255.0", 
+                "bootproto": "none", 
+                "device": "em1", 
+                "onboot": "yes"
+            }
+        ]
+    }, 
+    "id": "848F69D9B7E8_848F69D9B7EA_848F69D9B7EC_848F69D9B7EE"
+}
