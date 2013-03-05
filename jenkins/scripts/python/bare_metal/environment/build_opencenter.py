@@ -153,6 +153,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             print "Running network interfaces for %s" % node.name
             #Run chef client twice
             run = run_chef_client(node.name)
+            run = run_chef_client(node.name)
             run = run_chef_client(node.name)            
             if run['success']:
                 print "Done running chef-client"
