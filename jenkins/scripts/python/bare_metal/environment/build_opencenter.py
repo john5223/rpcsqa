@@ -117,7 +117,15 @@ def erase_node(name):
 def install_opencenter(server, install_script, type, server_ip=""):
     node = Node(server)
     root_pass = razor.get_active_model_pass(node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
+    print ""
+    print ""
+    print "*****************************************************"
+    print "*****************************************************"
     print "Installing %s..." % type
+    print "*****************************************************"
+    print "*****************************************************"
+    print ""
+    print ""
     if type == "server":
         command = "sudo apt-get update -y -qq; curl %s | bash -s %s 0.0.0.0 secrete" % (install_script, type)
     else:
