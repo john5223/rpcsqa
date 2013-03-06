@@ -73,11 +73,11 @@ def remove_broker_fail(policy):
                 print "Trouble removing broker fail"
                 sys.exit(1)
                
-def run_chef_client(name):
+def run_chef_client(name,logfile="STDOUT"):
     node = Node(name)    
     ip = node['ipaddress']
     root_pass = razor.get_active_model_pass(node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
-    return run_remote_ssh_cmd(ip, 'root', root_pass, 'chef-client --logfile /dev/null')
+    return run_remote_ssh_cmd(ip, 'root', root_pass, 'chef-client --logfile %s' % logfile)
        
 
 def remove_chef(name):
@@ -170,9 +170,9 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             node.save()
             print "Running network interfaces for %s" % node.name
             #Run chef client twice
-            run = run_chef_client(node.name)
-            run = run_chef_client(node.name)
-            run = run_chef_client(node.name)            
+            run = run_chef_client(node.name, logfile="/dev/null")
+            run = run_chef_client(node.name, logfile="/dev/null")
+            run = run_chef_client(node.name, logfile="/dev/null")            
             if run['success']:
                 print "Done running chef-client"
             else:
