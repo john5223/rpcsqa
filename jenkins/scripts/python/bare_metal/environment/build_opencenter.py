@@ -224,6 +224,10 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             print "No nodes"
             sys.exit(1)
         
+        #Remove chef on all nodes
+        for n in opencenter_list:
+            remove_chef(n)
+        
         #Pick an opencenter server, and rest for agents
         server = opencenter_list[0]
         dashboard = []
@@ -235,15 +239,17 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         
         #Remove chef client...install opencenter server
         print "Making %s the server node" % server
-        server_ip = Node(server)['ipaddress']
-        remove_chef(server)
+        server_node = Node(server)
+        server_ip = server_node['ipaddress']
+        server_node['in_use'] = "server"
         install_opencenter(server, results.repo, 'server')
         
         if dashboard:
+            Node(dashboard)['in_use'] = "dashboard"
             install_opencenter(dashboard, results.repo, 'dashboard', server_ip)    
         
         for client in clients:
-            remove_chef(client)
+            Node(client)['in_use'] = "agent"
             install_opencenter(client, results.repo, 'agent', server_ip)
     
     
