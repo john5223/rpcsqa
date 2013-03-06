@@ -26,7 +26,12 @@ parser.add_argument('--repo_url', action="store", dest="repo", required=False,
                     default="https://raw.github.com/rcbops/opencenter-install-scripts/master/install.sh", 
                     help="Operating System to use for opencenter")
 
+parser.add_argument('--action', action="store", dest="action", required=False, 
+                    default="build", 
+                    help="Action to do for opencenter (build/destroy)")
 
+
+#Defaulted arguments
 
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", default="198.101.133.3",
                     help="IP for the Razor server")
@@ -37,20 +42,10 @@ parser.add_argument('--chef_client', action="store", dest="chef_client", default
 parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem", default="~/.chef/jenkins.pem", required=False, 
                     help="client pem for chef")
 
-parser.add_argument('--display_only', action="store", dest="display_only", default="true", required=False, 
-                    help="Display the node information only (will not reboot or teardown am)")
-
 parser.add_argument('--clear_pool', action="store", dest="clear_pool", default=True, required=False)
 # Save the parsed arguments
 results = parser.parse_args()
 results.chef_client_pem = results.chef_client_pem.replace('~',os.getenv("HOME"))
-
-# converting string display only into boolean
-if results.display_only == 'true':
-    display_only = True
-else:
-    display_only = False
-
 
 
 
@@ -102,8 +97,23 @@ def remove_chef(name):
         "Error removing chef"
         sys.exit(1)
     
-    
-    
+def erase_node(name):
+    print "Deleting: %s" % (name)
+    node = Node(name)  
+    am_uuid = node['razor_metadata'].to_dict()['razor_active_model_uuid']
+    run = run_remote_ssh_cmd(node['ipaddress'], 'root', razor.get_active_model_pass(am_uuid)['password'], "reboot 0")
+    if not run['success']:
+        print "Error rebooting server"
+        sys.exit(1)        
+    #Knife node remove; knife client remove
+    Client(name).delete()
+    Node(name).delete()                
+    #Remove active model          
+    razor.remove_active_model(am_uuid)                            
+    time.sleep(15)      
+
+
+
 def install_opencenter(server, install_script, type, server_ip=""):
     node = Node(server)
     root_pass = razor.get_active_model_pass(node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
@@ -138,8 +148,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     #Remove broker fails from qa-ubuntu-pool
     remove_broker_fail("qa-ubuntu-pool")
     remove_broker_fail("qa-centos-pool")
-        
-    
+            
     env = "%s-%s-opencenter" % (results.name, results.os)
     if not Search("environment").query("name:%s"%env):
         print "Making environment: %s " % env
@@ -171,95 +180,89 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 print run
                 sys.exit(1)
    
-        
     if results.clear_pool:        
-        for n in nodes:
+        for n in nodes:    
+            name = n['name']        
+            if (results.action == "destroy" and results.name == "all"):
+                erase_node(name)
+            else:
+                node = Node(name)            
+                if node.chef_environment == env:                                    
+                    erase_node(name)
             
-            name = n['name']
-            node = Node(name)
             
-            if node.chef_environment == env:                    
-                print "Deleting: %s" % (name)
-                node = Node(name)  
-                am_uuid = node['razor_metadata'].to_dict()['razor_active_model_uuid']
-                ip = node['ipaddress']
-                root_pass = razor.get_active_model_pass(am_uuid)['password']
-                
-                #Reboot box
-                run = run_remote_ssh_cmd(ip, 'root', root_pass, "reboot 0")
-                #print run
-                if not run['success']:
-                    print "Error rebooting server"
-                    sys.exit(1)
-                
-                #Knife node remove; knife client remove
-                Client(name).delete()
-                Node(name).delete()                
-                #Remove active model          
-                razor.remove_active_model(am_uuid)                            
-                time.sleep(15)   
-        #Sleep so all servers can be given time to delete       
-        
-   
-    
     ######################################################
     ## Collect environment and install opencenter
     ######################################################
     
-    #Collect the amount of servers we need for the opencenter install   
-    nodes = Search('node').query("name:qa-%s-pool*" % results.os)          
-    if len(nodes) < cluster_size:
-        print "*****************************************************"
-        print "Not enough nodes for the cluster_size given: %s " % cluster_size
-        print "*****************************************************"
-        sys.exit(1)
-    count = 0    
-    opencenter_list = []
-    for n in nodes:
-        name = n['name']
-        node = Node(name)        
+    if results.action == "build":
+        #Collect the amount of servers we need for the opencenter install   
+        nodes = Search('node').query("name:qa-%s-pool*" % results.os)          
+        if len(nodes) < cluster_size:
+            print "*****************************************************"
+            print "Not enough nodes for the cluster_size given: %s " % cluster_size
+            print "*****************************************************"
+            sys.exit(1)
+        count = 0    
+        opencenter_list = []
+        for n in nodes:
+            name = n['name']
+            node = Node(name)        
+            
+            if node.chef_environment == "_default" and "recipe[network-interfaces]" in node.run_list:
+                node['in_use'] = 1
+                node.chef_environment = env
+                node.save()
+                opencenter_list.append(name)
+                print "Taking node: %s" % name    
+                count += 1
+                if count >= cluster_size:
+                    break      
+                    
+        if not opencenter_list:
+            print "No nodes"
+            sys.exit(1)
         
-        if node.chef_environment == "_default" and "recipe[network-interfaces]" in node.run_list:
-            node['in_use'] = 1
-            node.chef_environment = env
-            node.save()
-            opencenter_list.append(name)
-            print "Taking node: %s" % name    
-            count += 1
-            if count >= cluster_size:
-                break      
-                
-    if not opencenter_list:
-        print "No nodes"
-        sys.exit(1)
+        #Pick an opencenter server, and rest for agents
+        server = opencenter_list[0]
+        dashboard = []
+        clients = []
+        if len(opencenter_list) > 1:
+            dashboard = opencenter_list[1]
+        if len(opencenter_list) > 2:
+            clients = opencenter_list[2:]
+        
+        #Remove chef client...install opencenter server
+        print "Making %s the server node" % server
+        server_ip = Node(server)['ipaddress']
+        remove_chef(server)
+        install_opencenter(server, results.repo, 'server')
+        
+        if dashboard:
+            install_opencenter(dashboard, results.repo, 'dashboard', server_ip)    
+        
+        for client in clients:
+            remove_chef(client)
+            install_opencenter(client, results.repo, 'agent', server_ip)
     
-    #Pick an opencenter server, and rest for agents
-    server = opencenter_list[0]
-    dashboard = []
-    clients = []
-    if len(opencenter_list) > 1:
-        dashboard = opencenter_list[1]
-    if len(opencenter_list) > 2:
-        clients = opencenter_list[2:]
     
-    #Remove chef client...install opencenter server
-    print "Making %s the server node" % server
-    server_ip = Node(server)['ipaddress']
-    remove_chef(server)
-    install_opencenter(server, results.repo, 'server')
-    
-    if dashboard:
-        install_opencenter(dashboard, results.repo, 'dashboard', server_ip)    
-    
-    for client in clients:
-        remove_chef(client)
-        install_opencenter(client, results.repo, 'agent', server_ip)
-
-
-    print "Server: %s - %s  " % (server, server_ip)
-    print "Dashboard: %s - %s " % (dashboard, Node(dashboard)['ipaddress'])
-    for a in clients:
-        node = Node(a)
-        print "Agent: %s - %s " % (a, node['ipaddress'])
-
-     
+        print ""
+        print ""
+        print ""
+        print ""
+        
+        print "********************************************************************"
+        print "Server: %s - %s  " % (server, server_ip)
+        print "Dashboard: %s - https://%s " % (dashboard, Node(dashboard)['ipaddress'])
+        for a in clients:
+            node = Node(a)
+            print "Agent: %s - %s " % (a, node['ipaddress'])
+        print "********************************************************************"
+         
+        print ""
+        print ""
+        print ""
+        print ""
+         
+         
+        
