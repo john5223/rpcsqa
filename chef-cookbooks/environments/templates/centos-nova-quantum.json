@@ -63,7 +63,7 @@
           "label": "public",
           "dns1": "8.8.8.8",
           "dns2": "8.8.4.4",
-          "bridge_dev": "eth0",
+          "bridge_dev": "em1",
           "network_size": "254",
           "ipv4_cidr": "172.31.0.0/24"
         }
