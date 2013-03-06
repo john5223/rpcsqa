@@ -182,14 +182,15 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
    
     if results.clear_pool:        
         for n in nodes:    
-            name = n['name']        
-            if (results.action == "destroy" and results.name == "all"):
-                erase_node(name)
-            else:
-                node = Node(name)            
-                if node.chef_environment == env:                                    
+            name = n['name']  
+            node = Node(name)      
+            if node.chef_environment != "_default":                     
+                if (results.action == "destroy" and results.name == "all"):
                     erase_node(name)
-            
+                else:                              
+                    if node.chef_environment == env:                                    
+                        erase_node(name)
+                
             
     ######################################################
     ## Collect environment and install opencenter
