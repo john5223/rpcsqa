@@ -12,6 +12,48 @@ from subprocess import check_call, CalledProcessError
 This script will tear down razor server based on their chef roles and environments
 """
 
+
+# Parse arguments from the cmd line
+parser = argparse.ArgumentParser()
+parser.add_argument('--name', action="store", dest="name", required=False, default="test", 
+                    help="This will be the name for the opencenter chef environment")
+parser.add_argument('--cluster_size', action="store", dest="cluster_size", required=False, default=1, 
+                    help="Amount of boxes to pull from active_models")
+parser.add_argument('--os', action="store", dest="os", required=False, default='ubuntu', 
+                    help="Operating System to use for opencenter")
+
+parser.add_argument('--repo_url', action="store", dest="repo", required=False, 
+                    default="https://raw.github.com/rcbops/opencenter-install-scripts/master/install.sh", 
+                    help="Operating System to use for opencenter")
+
+
+
+parser.add_argument('--razor_ip', action="store", dest="razor_ip", default="198.101.133.3",
+                    help="IP for the Razor server")
+parser.add_argument('--chef_url', action="store", dest="chef_url", default="http://198.101.133.3:4000", required=False, 
+                    help="client for chef")
+parser.add_argument('--chef_client', action="store", dest="chef_client", default="jenkins", required=False, 
+                    help="client for chef")
+parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem", default="~/.chef/jenkins.pem", required=False, 
+                    help="client pem for chef")
+
+parser.add_argument('--display_only', action="store", dest="display_only", default="true", required=False, 
+                    help="Display the node information only (will not reboot or teardown am)")
+
+parser.add_argument('--clear_pool', action="store", dest="clear_pool", default=True, required=False)
+# Save the parsed arguments
+results = parser.parse_args()
+results.chef_client_pem = results.chef_client_pem.replace('~',os.getenv("HOME"))
+
+# converting string display only into boolean
+if results.display_only == 'true':
+    display_only = True
+else:
+    display_only = False
+
+
+
+
 def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
     command = "sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l %s %s '%s'" % (passwd, user, server_ip, remote_cmd)
     try:
@@ -77,43 +119,9 @@ def install_opencenter(server, install_script, type, server_ip=""):
         sys.exit(1)
 
 
-# Parse arguments from the cmd line
-parser = argparse.ArgumentParser()
-parser.add_argument('--name', action="store", dest="name", required=False, default="test", 
-                    help="This will be the name for the opencenter chef environment")
-parser.add_argument('--cluster_size', action="store", dest="cluster_size", required=False, default=1, 
-                    help="Amount of boxes to pull from active_models")
-parser.add_argument('--os', action="store", dest="os", required=False, default='ubuntu', 
-                    help="Operating System to use for opencenter")
-
-parser.add_argument('--repo_url', action="store", dest="repo", required=False, 
-                    default="https://raw.github.com/rcbops/opencenter-install-scripts/master/install.sh", 
-                    help="Operating System to use for opencenter")
 
 
 
-parser.add_argument('--razor_ip', action="store", dest="razor_ip", default="198.101.133.3",
-                    help="IP for the Razor server")
-parser.add_argument('--chef_url', action="store", dest="chef_url", default="http://198.101.133.3:4000", required=False, 
-                    help="client for chef")
-parser.add_argument('--chef_client', action="store", dest="chef_client", default="jenkins", required=False, 
-                    help="client for chef")
-parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem", default="~/.chef/jenkins.pem", required=False, 
-                    help="client pem for chef")
-
-parser.add_argument('--display_only', action="store", dest="display_only", default="true", required=False, 
-                    help="Display the node information only (will not reboot or teardown am)")
-
-parser.add_argument('--clear_pool', action="store", dest="clear_pool", default=False, required=False)
-# Save the parsed arguments
-results = parser.parse_args()
-results.chef_client_pem = results.chef_client_pem.replace('~',os.getenv("HOME"))
-
-# converting string display only into boolean
-if results.display_only == 'true':
-    display_only = True
-else:
-    display_only = False
 
 """
 Steps
