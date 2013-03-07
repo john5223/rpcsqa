@@ -70,7 +70,8 @@ def remove_broker_fail(policy):
                delete = razor.remove_active_model(data['am_uuid'])
                time.sleep(15)
             else:
-                print "Trouble removing broker fail"
+                print "Trouble removing broker fail"  
+                print run              
                 sys.exit(1)
                
 def run_chef_client(name,logfile="STDOUT"):
