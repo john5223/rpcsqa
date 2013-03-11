@@ -12,8 +12,6 @@ from subprocess import check_call, CalledProcessError
 This script will tear down razor server based on their chef roles and environments
 """
 
-import sys
-sys.stdout.flush()
 
 # Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
@@ -163,13 +161,15 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     remove_broker_fail("qa-ubuntu-pool")
     time.sleep(3)
     remove_broker_fail("qa-centos-pool")
-            
+    
+         
     env = "%s-%s-opencenter" % (results.name, results.os)
     if not Search("environment").query("name:%s"%env):
         print "Making environment: %s " % env
         Environment.create(env)
    
     cluster_size = int(results.cluster_size)
+    
     
     ############################
     #Prepare environment
@@ -205,8 +205,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 else:                              
                     if node.chef_environment == env:                                    
                         erase_node(name)
-                
-            
+                     
     ######################################################
     ## Collect environment and install opencenter
     ######################################################
@@ -275,7 +274,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         
         print "********************************************************************"
         print "Server: %s - %s  " % (server, server_ip)
-        print "Dashboard: %s - https://%s " % (dashboard, Node(dashboard)['ipaddress'])
+        print "Dashboard: %s - http://%s:3000 " % (dashboard, Node(dashboard)['ipaddress'])
         for a in clients:
             node = Node(a)
             print "Agent: %s - %s " % (a, node['ipaddress'])
