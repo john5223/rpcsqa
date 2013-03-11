@@ -176,22 +176,20 @@ class razor_api:
 							}
 			try:
 				active_model['nic_count'] = int(item['@model']['@node']['@attributes_hash']['mk_hw_nic_count'])
+				# Get the active network interface ips
+				for i in range(0, int(item['@model']['@node']['@attributes_hash']['mk_hw_nic_count'])):
+					try:
+						active_model['eth%d_mac' % i] = item['@model']['@node']['@attributes_hash']['macaddress_eth%d' % i]
+					except KeyError:
+						pass
+	
+					try:
+						active_model['eth%d_ip' % i] = item['@model']['@node']['@attributes_hash']['ipaddress_eth%d' % i]
+					except KeyError:
+						pass
 			except:
 				print "Error getting nic count"
 				print "Model: %s " %  item['@model']
-				
-			# Get the active network interface ips
-			for i in range(0, int(item['@model']['@node']['@attributes_hash']['mk_hw_nic_count'])):
-				try:
-					active_model['eth%d_mac' % i] = item['@model']['@node']['@attributes_hash']['macaddress_eth%d' % i]
-				except KeyError:
-					pass
-
-				try:
-					active_model['eth%d_ip' % i] = item['@model']['@node']['@attributes_hash']['ipaddress_eth%d' % i]
-				except KeyError:
-					pass
-
 		return active_model
 
 	def active_ready(self, razor_json):
