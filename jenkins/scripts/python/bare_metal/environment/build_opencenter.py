@@ -12,6 +12,8 @@ from subprocess import check_call, CalledProcessError
 This script will tear down razor server based on their chef roles and environments
 """
 
+import sys
+sys.stdout.flush()
 
 # Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
@@ -23,7 +25,7 @@ parser.add_argument('--os', action="store", dest="os", required=False, default='
                     help="Operating System to use for opencenter")
 
 parser.add_argument('--repo_url', action="store", dest="repo", required=False, 
-                    default="https://raw.github.com/rcbops/opencenter-install-scripts/master/install.sh", 
+                    default="https://raw.github.com/rcbops/opencenter-install-scripts/sprint/install-dev.sh", 
                     help="Operating System to use for opencenter")
 
 parser.add_argument('--action', action="store", dest="action", required=False, 
@@ -115,22 +117,25 @@ def erase_node(name):
 
 
 
-def install_opencenter(server, install_script, type, server_ip=""):
+def install_opencenter(server, install_script, role, server_ip=""):
     node = Node(server)
     root_pass = razor.get_active_model_pass(node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
     print ""
     print ""
     print "*****************************************************"
     print "*****************************************************"
-    print "Installing %s..." % type
+    print "Installing %s..." % role
     print "*****************************************************"
     print "*****************************************************"
     print ""
     print ""
-    if type == "server":
-        command = "sudo apt-get update -y -qq; curl %s | bash -s %s 0.0.0.0 secrete" % (install_script, type)
+    if role == "server":
+        command = "sudo apt-get update -y -qq; curl %s | bash -s %s 0.0.0.0 secrete" % (install_script, role)
     else:
-        command = "sudo apt-get update -y -qq; curl %s | bash -s %s %s secrete" % (install_script, type, server_ip)
+        command = "sudo apt-get update -y -qq; curl %s | bash -s %s %s secrete" % (install_script, role, server_ip)
+    
+    command = "bash <(curl %s) --role=%s" % (install_script, role)
+    
     #print "Running: %s " % command
     ret = run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, command)
     if not ret['success']:

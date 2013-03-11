@@ -169,13 +169,17 @@ class razor_api:
 							'root_password': item['@model']['@root_password'],
 							'current_state': item['@model']['@current_state'],
 							'final_state': item['@model']['@final_state'],
-							'nic_count': int(item['@model']['@node']['@attributes_hash']['mk_hw_nic_count']),
 							'broker': broker,
 							'bind_number': item['@model']['@counter'],
 							'hostname_prefix': item['@model']['@hostname_prefix'],
 							'domain': item['@model']['@domainname']
 							}
-
+			try:
+				active_model['nic_count'] = int(item['@model']['@node']['@attributes_hash']['mk_hw_nic_count'])
+			except:
+				print "Error getting nic count"
+				print "Model: %s " %  item['@model']
+				
 			# Get the active network interface ips
 			for i in range(0, int(item['@model']['@node']['@attributes_hash']['mk_hw_nic_count'])):
 				try:
