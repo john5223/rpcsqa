@@ -117,7 +117,7 @@ def erase_node(name):
 
 
 
-def install_opencenter(server, install_script, role, server_ip=""):
+def install_opencenter(server, install_script, role, server_ip="0.0.0.0"):
     node = Node(server)
     root_pass = razor.get_active_model_pass(node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
     print ""
@@ -129,12 +129,12 @@ def install_opencenter(server, install_script, role, server_ip=""):
     print "*****************************************************"
     print ""
     print ""
-    if role == "server":
-        command = "sudo apt-get update -y -qq; curl %s | bash -s %s 0.0.0.0 secrete" % (install_script, role)
-    else:
-        command = "sudo apt-get update -y -qq; curl %s | bash -s %s %s secrete" % (install_script, role, server_ip)
+    #if role == "server":
+    #    command = "sudo apt-get update -y -qq; curl %s | bash -s %s 0.0.0.0 secrete" % (install_script, role)
+    #else:
+    #    command = "sudo apt-get update -y -qq; curl %s | bash -s %s %s secrete" % (install_script, role, server_ip)
     
-    command = "bash <(curl %s) --role=%s" % (install_script, role)
+    command = "bash <(curl %s) --role=%s --ip=%s" % (install_script, role, server_ip)
     
     #print "Running: %s " % command
     ret = run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, command)
@@ -161,6 +161,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     
     #Remove broker fails from qa-ubuntu-pool
     remove_broker_fail("qa-ubuntu-pool")
+    time.sleep(3)
     remove_broker_fail("qa-centos-pool")
             
     env = "%s-%s-opencenter" % (results.name, results.os)
