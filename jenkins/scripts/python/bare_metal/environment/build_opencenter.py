@@ -58,7 +58,7 @@ def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
         return {'success': False, 'retrun': None, 'exception': cpe, 'command': command}
 
 def remove_broker_fail(policy):
-    active_models = razor.active_models(policy)    
+    active_models = razor.simple_active_models(policy)    
     for active in active_models:
         data = active_models[active]
         if 'broker_fail' in data['current_state']:
