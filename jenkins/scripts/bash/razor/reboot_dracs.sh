@@ -34,7 +34,7 @@ if [ ! -e $file ]; then
 fi
 
 # Support OS X
-cmd="ipmipower -c -U $user -P $password -h"
+cmd="ipmipower -c -u $user -p $password -h"
 if [[ `uname` == "Darwin" ]]; then
     cmd="ipmiutil power -c -U $user -P $password -N"
 fi
