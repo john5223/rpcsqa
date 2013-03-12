@@ -104,7 +104,7 @@ def erase_node(name):
     am_uuid = node['razor_metadata'].to_dict()['razor_active_model_uuid']
     run = run_remote_ssh_cmd(node['ipaddress'], 'root', razor.get_active_model_pass(am_uuid)['password'], "reboot 0")
     if not run['success']:
-        print "Error rebooting server"
+        print "Error rebooting server %s " % node['ipaddress']
         sys.exit(1)        
     #Knife node remove; knife client remove
     Client(name).delete()
