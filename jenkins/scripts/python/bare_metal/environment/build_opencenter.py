@@ -256,14 +256,20 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         server_node = Node(server)
         server_ip = server_node['ipaddress']
         server_node['in_use'] = "server"
+        server_node.save()
+        
         install_opencenter(server, results.repo, 'server')
         
         if dashboard:
-            Node(dashboard)['in_use'] = "dashboard"
+            dashboard_node = Node(dashboard) 
+            dashboard_node['in_use'] = "dashboard"
+            dashboard_node.save()            
             install_opencenter(dashboard, results.repo, 'dashboard', server_ip)    
         
         for client in clients:
-            Node(client)['in_use'] = "agent"
+            agent_node = Node(client)
+            agent_node['in_use'] = "agent"
+            agent_node.save()
             install_opencenter(client, results.repo, 'agent', server_ip)
     
     
