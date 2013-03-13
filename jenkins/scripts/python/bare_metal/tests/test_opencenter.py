@@ -91,7 +91,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     
    
     opencenter_config = """[opencenter]
-endpoint_url = 127.0.0.1:8080
+endpoint_url = http://127.0.0.1:8080
 instance_server_hostname = %s
 instance_chef_hostname = %s
 instance_controller_hostname = %s
@@ -102,6 +102,7 @@ password=
 
 
 [cluster_data]
+libvirt_type = kvm
 osops_public = 198.101.133.0/24
 osops_mgmt = 198.101.133.0/24
 osops_nova = 198.101.133.0/24
