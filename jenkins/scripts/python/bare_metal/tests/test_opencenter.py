@@ -177,13 +177,6 @@ nova_vm_fixed_range = 192.168.200.0/24
                 sys.exit(1)
     
         
-        
-        
-        
-        
-                
-        sys.exit(1)
-        
     
     
     
