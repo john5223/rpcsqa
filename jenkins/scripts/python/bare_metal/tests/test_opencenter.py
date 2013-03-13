@@ -87,7 +87,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     if len(agents) > 0:
         controller = agents[0]
     if len(agents) > 1:
-        compute = ",".join(agents[1:])
+        compute = ",".join(agents[1])
     
    
     opencenter_config = """[opencenter]
