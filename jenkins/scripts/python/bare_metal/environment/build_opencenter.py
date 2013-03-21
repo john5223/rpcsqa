@@ -3,50 +3,47 @@ import os
 import sys
 import time
 import argparse
-import time
 from chef import *
 from razor_api import razor_api
 from subprocess import check_call, CalledProcessError
 
 """
-This script will tear down razor server based on their chef roles and environments
+# TODO: JOHN DOCUMENT EXACTLY WHAT THIS MONSTER DOES!!
 """
-
 
 # Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', action="store", dest="name", required=False, default="test", 
                     help="This will be the name for the opencenter chef environment")
+
 parser.add_argument('--cluster_size', action="store", dest="cluster_size", required=False, default=1, 
-                    help="Amount of boxes to pull from active_models")
+                    help="Size of the OpenCenter cluster to build")
+
 parser.add_argument('--os', action="store", dest="os", required=False, default='ubuntu', 
                     help="Operating System to use for opencenter")
 
 parser.add_argument('--repo_url', action="store", dest="repo", required=False, 
                     default="https://raw.github.com/rcbops/opencenter-install-scripts/sprint/install-dev.sh", 
-                    help="Operating System to use for opencenter")
+                    help="URL of the OpenCenter install scripts")
 
-parser.add_argument('--action', action="store", dest="action", required=False, 
-                    default="build", 
+parser.add_argument('--action', action="store", dest="action", required=False, default="build", 
                     help="Action to do for opencenter (build/destroy)")
 
-
 #Defaulted arguments
-
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", default="198.101.133.3",
                     help="IP for the Razor server")
 parser.add_argument('--chef_url', action="store", dest="chef_url", default="http://198.101.133.3:4000", required=False, 
-                    help="client for chef")
+                    help="URL of the chef server")
 parser.add_argument('--chef_client', action="store", dest="chef_client", default="jenkins", required=False, 
                     help="client for chef")
 parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem", default="~/.chef/jenkins.pem", required=False, 
                     help="client pem for chef")
 
 parser.add_argument('--clear_pool', action="store", dest="clear_pool", default=True, required=False)
+
 # Save the parsed arguments
 results = parser.parse_args()
 results.chef_client_pem = results.chef_client_pem.replace('~',os.getenv("HOME"))
-
 
 
 def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
@@ -74,13 +71,12 @@ def remove_broker_fail(policy):
                 print run              
                 sys.exit(1)
                
-def run_chef_client(name,logfile="STDOUT"):
+def run_chef_client(name, logfile="STDOUT"):
     node = Node(name)    
     ip = node['ipaddress']
     root_pass = razor.get_active_model_pass(node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
     return run_remote_ssh_cmd(ip, 'root', root_pass, 'chef-client --logfile %s' % logfile)
        
-
 def remove_chef(name):
     try:
         node = Node(name)
@@ -113,8 +109,6 @@ def erase_node(name):
     razor.remove_active_model(am_uuid)                            
     time.sleep(15)      
 
-
-
 def install_opencenter(server, install_script, role, server_ip="0.0.0.0"):
     node = Node(server)
     root_pass = razor.get_active_model_pass(node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
@@ -140,11 +134,6 @@ def install_opencenter(server, install_script, role, server_ip="0.0.0.0"):
         print "Failed to install opencenter %s" % type
         sys.exit(1)
 
-
-
-
-
-
 """
 Steps
 1. Make an environment for {{name}}-{{os}}-opencenter
@@ -155,46 +144,45 @@ Steps
 """
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     razor = razor_api(results.razor_ip)
-    
-    
-    #Remove broker fails from qa-ubuntu-pool
+
+    # Remove broker fails from qa-ubuntu-pool.
     remove_broker_fail("qa-ubuntu-pool")
     time.sleep(3)
     remove_broker_fail("qa-centos-pool")
-    
-         
+
+    # If the environment doesnt exist in chef, make it.
     env = "%s-%s-opencenter" % (results.name, results.os)
     if not Search("environment").query("name:%s"%env):
         print "Making environment: %s " % env
         Environment.create(env)
-   
+
+    # Set the cluster size   
     cluster_size = int(results.cluster_size)
     
-    
-    ############################
     #Prepare environment
-    ###########################
-    
     nodes = Search('node').query("name:qa-%s-pool*" % results.os)
-    #Make sure all networking interfacing is set
     
+    #Make sure all networking interfacing is set
     for n in nodes:
         node = Node(n['name'])        
         if "recipe[network-interfaces]" not in node.run_list:
             node.run_list = "recipe[network-interfaces]"
             node.save()
             print "Running network interfaces for %s" % node.name
-            #Run chef client twice
+            
+            #Run chef client thrice
             run = run_chef_client(node.name, logfile="/dev/null")
             run = run_chef_client(node.name, logfile="/dev/null")
-            run = run_chef_client(node.name, logfile="/dev/null")            
+            run = run_chef_client(node.name, logfile="/dev/null")
+
             if run['success']:
                 print "Done running chef-client"
             else:
                 print "Error running chef client for network interfaces"
                 print run
                 sys.exit(1)
-   
+
+    # If we want to clear the pool
     if results.clear_pool:        
         for n in nodes:    
             name = n['name']  
@@ -206,10 +194,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                     if node.chef_environment == env:                                    
                         erase_node(name)
                      
-    ######################################################
-    ## Collect environment and install opencenter
-    ######################################################
-    
+    # Collect environment and install opencenter.
     if results.action == "build":
         #Collect the amount of servers we need for the opencenter install   
         nodes = Search('node').query("name:qa-%s-pool*" % results.os)          
