@@ -87,7 +87,7 @@ def remove_chef(name):
         if node['platform_family'] == "debian":
             command = "apt-get remove --purge -y chef; rm -rf /etc/chef"
         elif node['platform_family'] == "rhel":
-            command = 'yum remove --purge -y chef; rm -rf /etc/chef /var/chef'  
+            command = 'yum remove -y chef; rm -rf /etc/chef /var/chef'  
         #print command          
         run = run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, command)
     except:
@@ -218,7 +218,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 count += 1
                 if count >= cluster_size:
                     break      
-                    
+
         if not opencenter_list:
             print "No nodes"
             sys.exit(1)
@@ -256,7 +256,6 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             agent_node['in_use'] = "agent"
             agent_node.save()
             install_opencenter(client, results.repo, 'agent', server_ip)
-    
     
         print ""
         print ""
