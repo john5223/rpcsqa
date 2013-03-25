@@ -80,26 +80,32 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     print "Dashboard: %s " % dashboard
     print "Agents: %s " % agents
     
-    if not dashboard:
-        print "No dashboard found"
+    if not dashboard or not server:
+        print "No dashboard/server found"
+        print "Dashboard: %s" % dashboard
+        print "Server: %s " % server
         sys.exit(1)
         
         
     dashboard_ip = Node(dashboard[0])['ipaddress']
+    server_ip = Node(server[0])['ipaddress']
+    
     print dashboard_ip
     dashboard_url = ""
     user = ""
     password = ""
     try:
         r = requests.get("https://%s" % dashboard_ip, auth=('admin','password'),verify=False)
-        dashboard_url = "https://%s" % dashboard_ip
+        dashboard_url = "https://%s" % dashboard_ip        
+        server_url = "https://%s:8443" % server_ip
         user = "admin"
-        password = "password"
+        password = "password"        
     except Exception, e:
         dashboard_url = "http://%s:3000" % dashboard_ip
+        server_url = "http://%s:8080" % server_ip
         pass
                 
-    print dashboard_url
+    
     
     chef_server = server[0]
     controller = ""
@@ -111,7 +117,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     
    
     opencenter_config = """[opencenter]
-endpoint_url = http://127.0.0.1:8080
+endpoint_url = %s
 instance_server_hostname = %s
 instance_chef_hostname = %s
 instance_controller_hostname = %s
@@ -134,7 +140,7 @@ keystone_admin_pw = secrete
 nova_vm_fixed_if = eth1
 nova_vm_fixed_range = 192.168.200.0/24
 
-""" % (server[0], chef_server, controller, compute, user, password)
+""" % (server_url, server[0], chef_server, controller, compute, user, password)
     
     
     
