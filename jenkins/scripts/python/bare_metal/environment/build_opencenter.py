@@ -110,7 +110,7 @@ def erase_node(name):
     razor.remove_active_model(am_uuid)                            
     time.sleep(15)      
 
-def install_opencenter(server, platform, install_script, role, server_ip="0.0.0.0"):
+def install_opencenter(server, install_script, role, server_ip="0.0.0.0"):
     node = Node(server)
     root_pass = razor.get_active_model_pass(node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
     print ""
@@ -126,9 +126,9 @@ def install_opencenter(server, platform, install_script, role, server_ip="0.0.0.
     #    command = "sudo apt-get update -y -qq; curl %s | bash -s %s 0.0.0.0 secrete" % (install_script, role)
     #else:
     #    command = "sudo apt-get update -y -qq; curl %s | bash -s %s %s secrete" % (install_script, role, server_ip)
-    if platform is 'ubuntu':
+    if node['platform_family'] == "debian":
         run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, 'apt-get update -y -qq')
-    else:
+    elif node['platform_family'] == "rhel":
         run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, 'yum update -y -q')
     command = "bash <(curl %s) --role=%s --ip=%s" % (install_script, role, server_ip)
     print command
@@ -247,19 +247,19 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         server_node['in_use'] = "server"
         server_node.save()
         
-        install_opencenter(server, results.os, results.repo, 'server')
+        install_opencenter(server, results.repo, 'server')
         
         if dashboard:
             dashboard_node = Node(dashboard) 
             dashboard_node['in_use'] = "dashboard"
             dashboard_node.save()            
-            install_opencenter(dashboard, results.os, results.repo, 'dashboard', server_ip)    
+            install_opencenter(dashboard, results.repo, 'dashboard', server_ip)    
         
         for client in clients:
             agent_node = Node(client)
             agent_node['in_use'] = "agent"
             agent_node.save()
-            install_opencenter(client, results.os, results.repo, 'agent', server_ip)
+            install_opencenter(client, results.repo, 'agent', server_ip)
     
         print ""
         print ""
