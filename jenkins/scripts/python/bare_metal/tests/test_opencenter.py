@@ -79,8 +79,24 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     print "Dashboard: %s " % dashboard
     print "Agents: %s " % agents
     
-    
-    
+    if not dashboard:
+        print "No dashboard found"
+        sys.exit(1)
+        
+        
+    dashboard_ip = Node(dashboard[0])['ipaddress']
+    dashboard_url = ""
+    user = ""
+    password = ""
+    try:
+        r = requests.get("https://%s" % dashboard_ip, auth=('admin','password'),verify=False)
+        dashboard_url = "https://%s" % dashboard_ip
+        user = "admin"
+        password = "password"
+    except:
+        dashboard_url = "http://%s:3000" % dashboard_ip
+        pass
+                
     chef_server = server[0]
     controller = ""
     compute = ""
@@ -97,8 +113,8 @@ instance_chef_hostname = %s
 instance_controller_hostname = %s
 instance_compute_hostname = %s
 
-user=
-password=
+user=%s
+password=%s
 
 
 [cluster_data]
@@ -114,7 +130,7 @@ keystone_admin_pw = secrete
 nova_vm_fixed_if = eth1
 nova_vm_fixed_range = 192.168.200.0/24
 
-""" % (server[0], chef_server, controller, compute)
+""" % (server[0], chef_server, controller, compute, user, password)
     
     
     
