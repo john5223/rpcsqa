@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import os
 import sys
+import requests
 import time
 import argparse
 import time
@@ -85,6 +86,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         
         
     dashboard_ip = Node(dashboard[0])['ipaddress']
+    print dashboard_ip
     dashboard_url = ""
     user = ""
     password = ""
@@ -93,7 +95,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         dashboard_url = "https://%s" % dashboard_ip
         user = "admin"
         password = "password"
-    except:
+    except Exception, e:
         dashboard_url = "http://%s:3000" % dashboard_ip
         pass
                 
