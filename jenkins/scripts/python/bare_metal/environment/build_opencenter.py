@@ -263,18 +263,18 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         print ""
         print ""
         
-        server_ip = Node(dashboard)['ipaddress']
-        server_url = ""
+        dashboard_ip = Node(dashboard)['ipaddress']
+        dashboard_url = ""
         try:
-            r = requests.get("https://198.101.133.243", auth=('admin','password'),verify=False)
-            server_url = "https://%s" % server_ip
+            r = requests.get("https://%s" % dashboard_ip, auth=('admin','password'),verify=False)
+            dashboard_url = "https://%s" % dashboard_ip
         except:
-            server_url = "http://%s:3000" % server_ip
+            dashboard_url = "http://%s:3000" % dashboard_ip
             pass
                 
         print "********************************************************************"
         print "Server: %s - %s  " % (server, server_ip)
-        print "Dashboard: %s - %s " % (dashboard, server_url)
+        print "Dashboard: %s - %s " % (dashboard, dashboard_url)
         for a in clients:
             node = Node(a)
             print "Agent: %s - %s " % (a, node['ipaddress'])
