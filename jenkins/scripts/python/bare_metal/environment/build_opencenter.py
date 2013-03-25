@@ -127,9 +127,9 @@ def install_opencenter(server, install_script, role, server_ip="0.0.0.0"):
     #else:
     #    command = "sudo apt-get update -y -qq; curl %s | bash -s %s %s secrete" % (install_script, role, server_ip)
     if node['platform_family'] == "debian":
-        run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, 'apt-get update -y -qq')
+        run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, 'apt-get update -y -qq; /etc/init.d/iptables stop')
     elif node['platform_family'] == "rhel":
-        run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, 'yum update -y -q')
+        run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, 'yum update -y -q; /etc/init.d/iptables stop')
     command = "bash <(curl %s) --role=%s --ip=%s" % (install_script, role, server_ip)
     print command
     #print "Running: %s " % command
