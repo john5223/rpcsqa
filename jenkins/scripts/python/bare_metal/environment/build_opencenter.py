@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import os
+import requests
 import sys
 import time
 import argparse
@@ -126,7 +127,7 @@ def install_opencenter(server, install_script, role, server_ip="0.0.0.0"):
     #else:
     #    command = "sudo apt-get update -y -qq; curl %s | bash -s %s %s secrete" % (install_script, role, server_ip)
     
-    command = "bash <(curl %s) --role=%s --ip=%s" % (install_script, role, server_ip)
+    command = "sudo apt-get update -y -qq; bash <(curl %s) --role=%s --ip=%s" % (install_script, role, server_ip)
     print command
     #print "Running: %s " % command
     ret = run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, command)
@@ -262,9 +263,18 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         print ""
         print ""
         
+        server_ip = Node(dashboard)['ipaddress']
+        server_url = ""
+        try:
+            r = requests.get("https://198.101.133.243", auth=('admin','password'),verify=False)
+            server_url = "https://%s" % server_ip
+        except:
+            server_url = "http://%s:3000" % server_ip
+            pass
+                
         print "********************************************************************"
         print "Server: %s - %s  " % (server, server_ip)
-        print "Dashboard: %s - http://%s:3000 " % (dashboard, Node(dashboard)['ipaddress'])
+        print "Dashboard: %s - %s " % (dashboard, server_url)
         for a in clients:
             node = Node(a)
             print "Agent: %s - %s " % (a, node['ipaddress'])
