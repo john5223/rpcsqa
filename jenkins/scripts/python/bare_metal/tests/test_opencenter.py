@@ -97,6 +97,8 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         dashboard_url = "http://%s:3000" % dashboard_ip
         pass
                 
+    print dashboard_url
+    
     chef_server = server[0]
     controller = ""
     compute = ""
