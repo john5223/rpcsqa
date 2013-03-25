@@ -126,9 +126,9 @@ def install_opencenter(server, platform, install_script, role, server_ip="0.0.0.
     #    command = "sudo apt-get update -y -qq; curl %s | bash -s %s 0.0.0.0 secrete" % (install_script, role)
     #else:
     #    command = "sudo apt-get update -y -qq; curl %s | bash -s %s %s secrete" % (install_script, role, server_ip)
-    if 'ubuntu' in platform:
+    if platform is 'ubuntu':
         run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, 'apt-get update -y -qq')
-    else
+    else:
         run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, 'yum update -y -qq')
     command = "bash <(curl %s) --role=%s --ip=%s" % (install_script, role, server_ip)
     print command
