@@ -155,6 +155,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                print "*****************************************************"
                sys.exit(1)
           
+          count = 0
           openstack_list = []
           for n in nodes:
                name = n['name']
