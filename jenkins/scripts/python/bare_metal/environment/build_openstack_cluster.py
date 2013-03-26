@@ -121,15 +121,17 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                print "Running network interfaces for %s" % node.name
           
                #Run chef client thrice
-               run = run_chef_client(node.name, logfile="/dev/null")
-               run = run_chef_client(node.name, logfile="/dev/null")
-               run = run_chef_client(node.name, logfile="/dev/null")
+               run1 = run_chef_client(node.name, logfile="/dev/null")
+               run2 = run_chef_client(node.name, logfile="/dev/null")
+               run3 = run_chef_client(node.name, logfile="/dev/null")
 
-               if run['success']:
+               if run1['success'] and run2['success'] and run3['success']:
                     print "Done running chef-client"
                else:
                     print "Error running chef client for network interfaces"
-                    print run
+                    print "First run: %s" % run1
+                    print "Second run: %s" % run2
+                    print "Final run: %s" % run3
                     sys.exit(1)
 
      # If we want to clear the pool
@@ -214,10 +216,10 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
 
                # Run chef client twice
                print "Running chef-client on compute node: %s, this may take some time..." % compute
-               run1 = run_chef_client(controller)
+               run1 = run_chef_client(compute)
                if run1['success']:
                     print "First chef-client run successful...starting second run..."
-                    run2 = run_chef_client(controller)
+                    run2 = run_chef_client(compute)
                     if run2['success']:
                          print "Second chef-client run successful..."
                     else:
