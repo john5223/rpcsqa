@@ -150,9 +150,11 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     razor = razor_api(results.razor_ip)
 
     # Remove broker fails from qa-ubuntu-pool.
-    remove_broker_fail("qa-ubuntu-pool")
+    if results.os == "ubuntu":
+        remove_broker_fail("qa-ubuntu-pool")
+    else:
+        remove_broker_fail("qa-centos-pool")
     time.sleep(3)
-    remove_broker_fail("qa-centos-pool")
 
     # If the environment doesnt exist in chef, make it.
     env = "%s-%s-opencenter" % (results.name, results.os)
