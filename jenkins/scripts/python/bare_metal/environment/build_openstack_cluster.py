@@ -188,8 +188,21 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
           controller_node.save()
 
           # Run chef-client twice
-          run_chef_client(controller)
-          run_chef_client(controller)
+          print "Running chef-client for controller node...this may take some time..."
+          run1 = run_chef_client(controller)
+          if run1['success']:
+               print "First chef-client run successful...starting second run..."
+               run2 = run_chef_client(controller)
+               if run2['success']:
+                    print "Second chef-client run successful..."
+               else:
+                    print "Error running chef-client for controller %s" % controller
+                    print run
+                    sys.exit(1)
+          else:
+               print "Error running chef-client for controller %s" % controller
+               print run
+               sys.exit(1)
 
           # Run computes
           print "Making the compute nodes..."
@@ -200,8 +213,21 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                compute_node.save()
 
                # Run chef client twice
-               run_chef_client(compute)
-               run_chef_client(compute)
+               print "Running chef-client on compute node: %s, this may take some time..." % compute
+               run1 = run_chef_client(controller)
+               if run1['success']:
+                    print "First chef-client run successful...starting second run..."
+                    run2 = run_chef_client(controller)
+                    if run2['success']:
+                         print "Second chef-client run successful..."
+                    else:
+                         print "Error running chef-client for compute %s" % compute
+                         print run
+                         sys.exit(1)
+               else:
+                    print "Error running chef-client for compute %s" % compute
+                    print run
+                    sys.exit(1)
 
           print "***********************************************************"
           print "Controller: %s - %s" % (controller, controller_ip)
