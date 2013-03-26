@@ -140,7 +140,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                if node.chef_environment != "_default":
                     if (results.action == "destroy" and results.name == "all"):
                          erase_node(name)
-                    else 
+                    else:
                          if node.chef_environment == env:
                               erase_node(name)
 
