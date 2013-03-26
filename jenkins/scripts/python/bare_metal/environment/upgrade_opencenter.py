@@ -6,8 +6,6 @@ from chef import *
 from razor_api import razor_api
 from subprocess import check_call, CalledProcessError
 
-default_repo_centos = "http://build.monkeypuppetlabs.com/repo-testing/RedHat/6/$basearch/"
-
 # Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', action="store", dest="name", required=False, default="test", 
@@ -19,10 +17,6 @@ parser.add_argument('--os', action="store", dest="os", required=False, default='
 parser.add_argument('--repo_url', action="store", dest="repo", required=False, 
                     default="http://build.monkeypuppetlabs.com/proposed-packages/rcb-utils", 
                     help="URL of the OpenCenter package repo")
-
-parser.add_argument('--key', action="store", dest="key", required=False, 
-                    default="http://build.monkeypuppetlabs.com/repo-testing/RPM-GPG-RCB.key", 
-                    help="URL of the OpenCenter package repo gpgkey")
 
 #Defaulted arguments
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", default="198.101.133.3",
@@ -62,16 +56,19 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         commands = ["sed -i 's/\(.*\)/#\1/g' /etc/apt/sources.list.d/rcb-utils.list",
                     "echo '%s' >> /etc/apt/sources.list.d/rcb-utils.list" % package ]
     else:                       
-        commands = ["""echo "[rcb-utils]
+        commands = ["if [ -e /etc/yum.repos.d/rcb-utils.repo ]; then mv /etc/yum.repos.d/rcb-utils.repo /etc/yum.repos.d/rcb-utils.repo.old; fi",
+"""echo '[rcb-utils-test]
 name=RCB Utility packages for OpenCenter CentOS
-baseurl=%s
+baseurl=http://build.monkeypuppetlabs.com/repo-testing/RedHat/6/\$basearch/
 enabled=1
 gpgcheck=1
-gpgkey=%s" > /etc/yum.repos.d/rcb-utils.repo""" % (default_repo_centos, results.key)]
+gpgkey=http://build.monkeypuppetlabs.com/repo-testing/RPM-GPG-RCB.key' > /etc/yum.repos.d/rcb-utils-test.repo""",
+                    "rpm --import http://build.monkeypuppetlabs.com/repo-testing/RPM-GPG-RCB.key"]
     
+    # Run the commands to change packages on each node
     for n in nodes:
         node = Node(n['name'])
         password = razor.get_active_model_pass(node.attributes['razor_metadata']['razor_active_model_uuid'])['password']
         for command in commands: 
-            print "Running command: %s\n On server: %s for environment: %s" % (command, node['ipaddress'], env)
+            print "!!## -- Running command: %s\n On server: %s for environment: %s -- ##!!" % (command, node['ipaddress'], env)
             run_remote_ssh_cmd(node['ipaddress'], 'root', password, command)
