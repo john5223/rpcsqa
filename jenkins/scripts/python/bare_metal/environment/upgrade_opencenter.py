@@ -16,7 +16,7 @@ parser.add_argument('--os', action="store", dest="os", required=False, default='
 
 parser.add_argument('--repo_url', action="store", dest="repo", required=False, 
                     default="http://build.monkeypuppetlabs.com/proposed-packages/rcb-utils", 
-                    help="URL of the OpenCenter install scripts")
+                    help="URL of the OpenCenter package repo")
 
 #Defaulted arguments
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", default="198.101.133.3",
@@ -41,25 +41,34 @@ def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
         return {'success': False, 'return': None, 'exception': cpe, 'command': command}
 
 """
-Find opencenter agents and upload their packages
+Find opencenter agents and update their repos
 """
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     razor = razor_api(results.razor_ip)
     servers = []
     env = "%s-%s-opencenter" % (results.name, results.os)
     nodes = Search('node').query("name:qa-%s-pool* AND chef_environment:%s" % (results.os, env))
-    package = "deb %s precise rcb-utils" % results.repo
-    command = \
-"""
-sed -i 's/(.*)/#\1/g' /etc/apt/sources.list.d/rcb-utils.list
-echo '%s' >> /etc/apt/sources.list.d/rcb-utils.list
-apt-get update
-apt-get upgrade -y
-""" % package
     
-    print "Running command: %s\n On servers for environment: %s" % (command, env)
+
+    # Use the correct command to upgrade packages
+    if results.os == "ubuntu":  # Ubuntu upgrade
+        package = "deb %s precise rcb-utils" % results.repo
+        commands = ["sed -i 's/\(.*\)/#\1/g' /etc/apt/sources.list.d/rcb-utils.list",
+                    "echo '%s' >> /etc/apt/sources.list.d/rcb-utils.list" % package ]
+    else:                       
+        commands = ["if [ -e /etc/yum.repos.d/rcb-utils.repo ]; then mv /etc/yum.repos.d/rcb-utils.repo /etc/yum.repos.d/rcb-utils.repo.old; fi",
+"""echo '[rcb-utils-test]
+name=RCB Utility packages for OpenCenter CentOS
+baseurl=http://build.monkeypuppetlabs.com/repo-testing/RedHat/6/\$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=http://build.monkeypuppetlabs.com/repo-testing/RPM-GPG-RCB.key' > /etc/yum.repos.d/rcb-utils-test.repo""",
+                    "rpm --import http://build.monkeypuppetlabs.com/repo-testing/RPM-GPG-RCB.key"]
     
+    # Run the commands to change packages on each node
     for n in nodes:
         node = Node(n['name'])
         password = razor.get_active_model_pass(node.attributes['razor_metadata']['razor_active_model_uuid'])['password']
-        run_remote_ssh_cmd(node['ipaddress'], 'root', password, command)
+        for command in commands: 
+            print "!!## -- Running command: %s\n On server: %s for environment: %s -- ##!!" % (command, node['ipaddress'], env)
+            run_remote_ssh_cmd(node['ipaddress'], 'root', password, command)
