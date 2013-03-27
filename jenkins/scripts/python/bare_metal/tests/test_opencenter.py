@@ -168,8 +168,7 @@ nova_vm_fixed_range = 192.168.200.0/24
               "git clone %s" % results.opencenter_test_repo, 
               "pip install -q -r /root/opencenter-testerator/tools/pip-requires",
               "mv /root/%s /root/opencenter-testerator/etc/" % (config_file),
-              "export OPENCENTER_CONFIG='%s';  nosetests opencenter-testerator/opencenter/tests -v" % config_file]
-    
+              "export OPENCENTER_CONFIG='%s';  nosetests opencenter-testerator/opencenter/tests/test_happy_path.py -v" % config_file]
     
     
     if not server:
