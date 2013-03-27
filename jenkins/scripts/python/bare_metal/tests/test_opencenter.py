@@ -28,6 +28,13 @@ parser.add_argument('--tests', action="store", dest="opencenter_tests", required
                     default="test_happy_path.py", 
                     help="Tests to run")
 
+parser.add_argument('--HA', action="store", dest="HA", required=False, 
+                    default="True", 
+                    help="Do HA for openstack controller")
+
+
+
+
 
 #Defaulted arguments
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", default="198.101.133.3",
@@ -118,7 +125,12 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     if len(agents) > 0:
         controller = agents[0]
     if len(agents) > 1:
-        compute = ",".join(agents[1:])
+        if results.HA=="False":
+            controller = ",".join(controller, agents[1])
+            if len(agents) > 2:
+                compute = ",".join(agents[2:])
+        else:
+            compute = ",".join(agents[1:])
     
    
     opencenter_config = """[opencenter]
@@ -147,16 +159,12 @@ nova_vm_fixed_range = 192.168.200.0/24
 
 """ % (server_url, server[0], chef_server, controller, compute, user, password)
     
-    
-    
-    
     print "\n*******************"
     print "***    CONFIG   ***"
     print "*******************"
     print opencenter_config
     print ""
     print "****** *************"
-    
     
     config_file = "opencenter-%s.conf" % results.name
     try:
@@ -174,10 +182,9 @@ nova_vm_fixed_range = 192.168.200.0/24
               "pip install -q -r /root/opencenter-testerator/tools/pip-requires",
               "mv /root/%s /root/opencenter-testerator/etc/" % (config_file),
               "export OPENCENTER_CONFIG='%s';  "]
-    
-    
-    for test in results.tests:
+    for test in results.opencenter_tests:
         commands.append("nosetests opencenter-testerator/opencenter/tests/%s -v" % test)
+    
     
     
     if not server:
@@ -186,18 +193,14 @@ nova_vm_fixed_range = 192.168.200.0/24
     else: 
         server_node = Node(server[0])
         opencenter_server_ip = server_node['ipaddress']
-        
         am_uuid = server_node.attributes['razor_metadata']['razor_active_model_uuid']
         opencenter_server_password = razor.get_active_model_pass(am_uuid)['password']
-        
-        
         try:
             print "!!## -- Transfering the config file to the server: %s -- ##!!" % opencenter_server_ip
             check_call_return = check_call("sshpass -p %s scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet %s root@%s:/root/%s" % (opencenter_server_password, '/tmp/%s' % config_file, opencenter_server_ip, config_file), shell=True)
         except CalledProcessError, cpe:
             print "!!## -- Failed to transfer environment file  -- ##!!"
             sys.exit(1)   
-       
        
         for command in commands: 
             try:
