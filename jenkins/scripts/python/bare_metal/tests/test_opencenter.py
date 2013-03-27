@@ -126,7 +126,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         controller = agents[0]
     if len(agents) > 1:
         if results.HA==True:
-            controller = ",".join(controller, agents[1])
+            controller = ",".join([controller, agents[1]])
             if len(agents) > 2:
                 compute = ",".join(agents[2:])
         else:
@@ -165,6 +165,8 @@ nova_vm_fixed_range = 192.168.200.0/24
     print opencenter_config
     print ""
     print "****** *************"
+    
+    sys.exit(1)
     
     config_file = "opencenter-%s.conf" % results.name
     try:
