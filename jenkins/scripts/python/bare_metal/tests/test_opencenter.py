@@ -166,8 +166,6 @@ nova_vm_fixed_range = 192.168.200.0/24
     print ""
     print "****** *************"
     
-    sys.exit(1)
-    
     config_file = "opencenter-%s.conf" % results.name
     try:
         with open('/tmp/%s' % config_file, 'w') as fo:
