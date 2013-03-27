@@ -29,7 +29,7 @@ parser.add_argument('--tests', action="store", dest="opencenter_tests", required
                     help="Tests to run")
 
 parser.add_argument('--HA', action="store", dest="HA", required=False, 
-                    default="True", 
+                    default=True, 
                     help="Do HA for openstack controller")
 
 
@@ -125,7 +125,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     if len(agents) > 0:
         controller = agents[0]
     if len(agents) > 1:
-        if results.HA=="False":
+        if results.HA==True:
             controller = ",".join(controller, agents[1])
             if len(agents) > 2:
                 compute = ",".join(agents[2:])
