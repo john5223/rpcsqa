@@ -24,6 +24,11 @@ parser.add_argument('--repo_url', action="store", dest="opencenter_test_repo", r
                     default="https://github.com/john5223/opencenter-testerator.git", 
                     help="Testing repo for opencenter")
 
+parser.add_argument('--tests', action="store", dest="opencenter_tests", required=False, 
+                    default="test_happy_path.py", 
+                    help="Tests to run")
+
+
 #Defaulted arguments
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", default="198.101.133.3",
                     help="IP for the Razor server")
@@ -168,7 +173,11 @@ nova_vm_fixed_range = 192.168.200.0/24
               "git clone %s" % results.opencenter_test_repo, 
               "pip install -q -r /root/opencenter-testerator/tools/pip-requires",
               "mv /root/%s /root/opencenter-testerator/etc/" % (config_file),
-              "export OPENCENTER_CONFIG='%s';  nosetests opencenter-testerator/opencenter/tests/test_happy_path.py -v" % config_file]
+              "export OPENCENTER_CONFIG='%s';  "]
+    
+    
+    for test in results.tests:
+        commands.append("nosetests opencenter-testerator/opencenter/tests/%s -v" % test)
     
     
     if not server:
