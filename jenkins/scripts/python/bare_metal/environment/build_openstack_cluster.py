@@ -47,6 +47,15 @@ parser.add_argument('--clear_pool', action="store", dest="clear_pool", default=T
 results = parser.parse_args()
 results.chef_client_pem = results.chef_client_pem.replace('~',os.getenv("HOME"))
 
+# Convert parameter string to boolean
+ha_enabled = False
+if results.ha_enabled == 'true':
+    ha_enabled = True
+
+dir_service = False
+if results.dir_service == 'true':
+    dir_service = True
+
 def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
     command = "sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l %s %s '%s'" % (passwd, user, server_ip, remote_cmd)
     try:
@@ -219,14 +228,14 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     cluster_size = int(results.cluster_size)
 
     # Check the cluster size, if <5 and dir_service is enabled, set to 4
-    if cluster_size < 4 and results.dir_service:
-        if results.ha_enabled:
+    if cluster_size < 4 and dir_service:
+        if ha_enabled:
             cluster_size = 5
             print "HA and Directory Services are requested, re-setting cluster size to %i." % cluster_size
         else:
             cluster_size = 4
             print "Directory Services are requested, re-setting cluster size to %i." % cluster_size
-    elif cluster_size < 4 and results.ha_enabled:
+    elif cluster_size < 4 and ha_enabled:
         cluster_size = 4
         print "HA is enabled, re-setting cluster size to %i." % cluster_size
     else:
@@ -300,7 +309,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             sys.exit(1)
 
         # Build cluster accordingly
-        if results.dir_service and results.ha_enabled:
+        if dir_service and ha_enabled:
             # Set each servers roles
             dir_service = openstack_list[0]
             ha_controller_1 = openstack_list[1]
@@ -329,7 +338,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             print_computes_info(computes)
             print "********************************************************************"
 
-        elif results.dir_service:
+        elif dir_service:
             # Set each servers roles
             dir_service = openstack_list[0]
             controller = openstack_list[1]
@@ -351,7 +360,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             print_computes_info(computes)
             print "********************************************************************"
 
-        elif results.ha_enabled:
+        elif ha_enabled:
             # Set each servers roles
             ha_controller_1 = openstack_list[0]
             ha_controller_2 = openstack_list[1]
