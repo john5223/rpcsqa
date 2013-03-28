@@ -97,7 +97,9 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             sys.exit(1)
         elif len(agents) < 2:
             "!!## -- Not enough agents for openstack deployment -- ##!!"
-            
+    
+    print "TESTING"
+        
     dashboard_ip = Node(dashboard[0])['ipaddress']
     server_ip = Node(server[0])['ipaddress']
     
