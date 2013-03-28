@@ -99,7 +99,7 @@ def erase_node(name):
     razor.remove_active_model(am_uuid)                            
     time.sleep(15)
 
-def make_dir_server(dir_server):
+def build_dir_server(dir_server):
     with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         dir_node = Node(dir_server)
         dir_node['in_use'] = 'directory-server'
@@ -123,7 +123,7 @@ def make_dir_server(dir_server):
             print run1
             sys.exit(1)        
 
-def make_controller(controller, ha=False, ha_num=0):
+def build_controller(controller, ha=False, ha_num=0):
     with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         controller_node = Node(controller)
 
@@ -156,7 +156,7 @@ def make_controller(controller, ha=False, ha_num=0):
             print run1
             sys.exit(1)
 
-def make_computes(computes):
+def build_computes(computes):
     with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         # Run computes
         print "Making the compute nodes..."
@@ -306,12 +306,19 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             ha_controller_2 = openstack_list[2]
             computes = openstack_list[3:]
 
-            # make each server
-            make_dir_server(dir_service)
-            make_controller(ha_controller_1, True, 1)
-            make_controller(ha_controller_2, True, 2)
-            run_chef_client(ha_controller_1)
-            make_computes(computes)
+            # Build directory service server
+            build_dir_server(dir_service)
+
+            # Build HA Controllers
+            build_controller(ha_controller_1, True, 1)
+            build_controller(ha_controller_2, True, 2)
+
+            # Have to run chef client on controller 1 again
+            ha_controller_1_node = Node(ha_controller_1)
+            run_chef_client(ha_controller_1_node)
+
+            # Build computes
+            build_computes(computes)
 
             # print all servers info
             print "********************************************************************"
@@ -327,10 +334,14 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             controller = openstack_list[1]
             computes = openstack_list[2:]
 
-            #make the servers
-            make_dir_server(dir_service)
-            make_controller(controller)
-            make_computes(computes)
+            # Build the dir server
+            build_dir_server(dir_service)
+
+            # Build controller
+            build_controller(controller)
+
+            # Build computes
+            build_computes(computes)
 
             # print all servers info
             print "********************************************************************"
@@ -345,10 +356,16 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             ha_controller_2 = openstack_list[1]
             computes = openstack_list[2:]
 
-            # Make the servers
-            make_controller(ha_controller_1, True, 1)
-            make_controller(ha_controller_2, True, 2)
-            make_computes(computes)
+            # Make the controllers
+            build_controller(ha_controller_1, True, 1)
+            build_controller(ha_controller_2, True, 2)
+
+            # Have to run chef client on controller 1 again
+            ha_controller_1_node = Node(ha_controller_1)
+            run_chef_client(ha_controller_1_node)
+
+            # build computes
+            build_computes(computes)
 
             # print all servers info
             print "********************************************************************"
@@ -362,8 +379,8 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             computes = openstack_list[1:]
 
             # Make servers
-            make_controller(controller)
-            make_computes(computes)
+            build_controller(controller)
+            build_computes(computes)
 
             # print all servers info
             print "********************************************************************"
