@@ -44,7 +44,10 @@ parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem",
 # Save the parsed arguments
 results = parser.parse_args()
 results.chef_client_pem = results.chef_client_pem.replace('~',os.getenv("HOME"))
-
+if results.HA == "True":
+    results.HA = True
+else:
+    results.HA = False
 
 def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
     """Runs a command over an ssh connection"""
@@ -85,8 +88,6 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     print "Dashboard: %s " % dashboard
     print "Agents: %s " % agents
 
-    print "TESTING BEFORE"
-    
     # Make sure we have the servers we need
     if not dashboard or not server:
         print "No dashboard/server found"
@@ -101,8 +102,6 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         print "!!## -- Not enough agents for openstack deployment -- ##!!"
         sys.exit(1)
     
-    print "TESTING"
-        
     dashboard_ip = Node(dashboard[0])['ipaddress']
     server_ip = Node(server[0])['ipaddress']
     
