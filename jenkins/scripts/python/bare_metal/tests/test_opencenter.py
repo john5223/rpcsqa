@@ -46,7 +46,7 @@ results = parser.parse_args()
 results.chef_client_pem = results.chef_client_pem.replace('~',os.getenv("HOME"))
 if results.HA == "True":
     results.HA = True
-else:
+elif results.HA == "False"::
     results.HA = False
 
 def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
