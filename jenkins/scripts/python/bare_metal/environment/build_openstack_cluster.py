@@ -192,6 +192,7 @@ def print_computes_info(computes):
     with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         for compute in computes:
             print "Compute: %s" % print_server_info(compute)
+
 """
 Steps
 1. Make an environment for {{name}}-{{os}}-openstack
