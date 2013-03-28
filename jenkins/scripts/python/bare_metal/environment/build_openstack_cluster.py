@@ -346,7 +346,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
 
             # print all servers info
             print "********************************************************************"
-            print "Directory Service Server: " print_server_info(dir_service)
+            print "Directory Service Server: %s" % print_server_info(dir_service)
             print "Controller: %s" % print_server_info(controller)
             print_computes_info(computes)
             print "********************************************************************"
