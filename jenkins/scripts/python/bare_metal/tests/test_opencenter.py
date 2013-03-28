@@ -95,10 +95,10 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         sys.exit(1)
     if results.HA:
         if len(agents) < 3:
-            "!!## -- Not enough agents for openstack HA deployment -- ##!!"
+            print "!!## -- Not enough agents for openstack HA deployment -- ##!!"
             sys.exit(1)
     elif len(agents) < 2:
-        "!!## -- Not enough agents for openstack deployment -- ##!!"
+        print "!!## -- Not enough agents for openstack deployment -- ##!!"
         sys.exit(1)
     
     print "TESTING"
