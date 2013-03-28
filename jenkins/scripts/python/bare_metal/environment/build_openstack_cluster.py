@@ -221,14 +221,14 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     # Check the cluster size, if <5 and dir_service is enabled, set to 4
     if cluster_size < 4 and results.dir_service:
         if results.ha_enabled:
-            print "HA and Directory Services are requested, re-setting cluster size to 5."
             cluster_size = 5
+            print "HA and Directory Services are requested, re-setting cluster size to %i." % cluster_size
         else:
-            print "Directory Services are requested, re-setting cluster size to 4."
             cluster_size = 4
+            print "Directory Services are requested, re-setting cluster size to %i." % cluster_size
     elif cluster_size < 4 and results.ha_enabled:
-        print "HA is enabled, re-setting cluster size to 4."
         cluster_size = 4
+        print "HA is enabled, re-setting cluster size to %i." % cluster_size
     else:
         print "Cluster size is %i." % cluster_size
 
