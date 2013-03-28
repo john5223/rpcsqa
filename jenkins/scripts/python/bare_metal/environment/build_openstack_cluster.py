@@ -244,9 +244,9 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             print "Running network interfaces for %s" % node.name
           
             #Run chef client thrice
-            run1 = run_chef_client(node.name, logfile="/dev/null")
-            run2 = run_chef_client(node.name, logfile="/dev/null")
-            run3 = run_chef_client(node.name, logfile="/dev/null")
+            run1 = run_chef_client(node, logfile="/dev/null")
+            run2 = run_chef_client(node, logfile="/dev/null")
+            run3 = run_chef_client(node, logfile="/dev/null")
 
             if run1['success'] and run2['success'] and run3['success']:
                 print "Done running chef-client"
