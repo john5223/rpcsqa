@@ -275,11 +275,12 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 if results.action == "destroy" and results.name == "all":
                     erase_node(name)
                 else:
-                    if node.chef_environment == env and "recipe[network-interfaces]" not in node.run_list:
-                        erase_node(name)
-                    else:
-                        node.chef_environment = "_default"
-                        node.save()
+                    if node.chef_environment == env
+                        if "recipe[network-interfaces]" not in node.run_list:
+                            erase_node(name)
+                        else:
+                            node.chef_environment = "_default"
+                            node.save()
 
     # Collect environment and install Open Stack.
     if results.action == "build":          
