@@ -180,10 +180,9 @@ nova_vm_fixed_range = 192.168.200.0/24
               "rm -rf /root/opencenter-testerator",
               "git clone %s" % results.opencenter_test_repo, 
               "pip install -q -r /root/opencenter-testerator/tools/pip-requires",
-              "mv /root/%s /root/opencenter-testerator/etc/" % (config_file),
-              "export OPENCENTER_CONFIG='%s';  "]
+              "mv /root/%s /root/opencenter-testerator/etc/" % (config_file)]
     for test in results.opencenter_tests.split(","):
-        commands.append("nosetests opencenter-testerator/opencenter/tests/%s -v" % test)
+        commands.append("export OPENCENTER_CONFIG='%s'; nosetests opencenter-testerator/opencenter/tests/%s -v" % test)
     
     
     
