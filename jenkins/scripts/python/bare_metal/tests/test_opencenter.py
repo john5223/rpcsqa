@@ -84,6 +84,8 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     print "Server: %s " % server
     print "Dashboard: %s " % dashboard
     print "Agents: %s " % agents
+
+    print "TESTING BEFORE"
     
     # Make sure we have the servers we need
     if not dashboard or not server:
