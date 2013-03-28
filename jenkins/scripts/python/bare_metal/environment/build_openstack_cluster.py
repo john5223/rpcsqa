@@ -267,7 +267,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                     erase_node(name)
                 else:
                     if node.chef_environment == env:
-                    erase_node(name)
+                        erase_node(name)
 
     # Collect environment and install Open Stack.
     if results.action == "build":          
