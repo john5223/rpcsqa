@@ -323,7 +323,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
 
             # print all servers info
             print "********************************************************************"
-            print "Directory Service Server: %s" print_server_info(dir_service)
+            print "Directory Service Server: %s" % print_server_info(dir_service)
             print "HA-Controller 1: %s" % print_server_info(ha_controller_1)
             print "HA-Controller 2: %s" % print_server_info(ha_controller_2)
             print_computes_info(computes)
