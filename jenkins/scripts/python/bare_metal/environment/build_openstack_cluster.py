@@ -255,7 +255,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 else:
                     if node.chef_environment == env:
                     erase_node(name)
-    
+
     # Collect environment and install Open Stack.
     if results.action == "build":          
         #Collect the amount of servers we need for the openstack install
@@ -265,8 +265,10 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             print "Not enough nodes for the cluster_size given: %s " % cluster_size
             print "*****************************************************"
             sys.exit(1)          
+        
         count = 0
         openstack_list = []
+        
         for n in nodes:
             name = n['name']
             node = Node(name)
@@ -279,6 +281,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 count += 1
                 if count >= cluster_size:
                     break
+
         if not openstack_list:
             print "No nodes"
             sys.exit(1)
