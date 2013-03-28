@@ -182,6 +182,16 @@ def make_computes(computes):
                 print "Error running chef-client for compute %s" % compute
                 print run1
                 sys.exit(1)
+
+def print_server_info(name):
+    with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
+        node = Node(name)
+        return "%s - %s" % (name, node['ipaddress'])
+
+def print_computes_info(computes):
+    with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
+        for compute in computes:
+            print "Compute: %s" % print_server_info(compute)
 """
 Steps
 1. Make an environment for {{name}}-{{os}}-openstack
@@ -303,6 +313,14 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             run_chef_client(ha_controller_1)
             make_computes(computes)
 
+            # print all servers info
+            print "********************************************************************"
+            print "Directory Service Server: " print_server_info(dir_service)
+            print "HA-Controller 1: %s" % print_server_info(ha_controller_1)
+            print "HA-Controller 2: %s" % print_server_info(ha_controller_2)
+            print_computes_info(computes)
+            print "********************************************************************"
+
         elif results.dir_service:
             # Set each servers roles
             dir_service = openstack_list[0]
@@ -314,6 +332,13 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             make_controller(controller)
             make_computes(computes)
 
+            # print all servers info
+            print "********************************************************************"
+            print "Directory Service Server: " print_server_info(dir_service)
+            print "Controller: %s" % print_server_info(controller)
+            print_computes_info(computes)
+            print "********************************************************************"
+
         elif results.ha_enabled:
             # Set each servers roles
             ha_controller_1 = openstack_list[0]
@@ -324,6 +349,13 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             make_controller(ha_controller_1, True, 1)
             make_controller(ha_controller_2, True, 2)
             make_computes(computes)
+
+            # print all servers info
+            print "********************************************************************"
+            print "HA-Controller 1: %s" % print_server_info(ha_controller_1)
+            print "HA-Controller 2: %s" % print_server_info(ha_controller_2)
+            print_computes_info(computes)
+            print "********************************************************************"
         else:
             # Set each servers roles
             controller = openstack_list[0]
@@ -332,3 +364,9 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             # Make servers
             make_controller(controller)
             make_computes(computes)
+
+            # print all servers info
+            print "********************************************************************"
+            print "Controller: %s" % print_server_info(controller)
+            print_computes_info(computes)
+            print "********************************************************************"
