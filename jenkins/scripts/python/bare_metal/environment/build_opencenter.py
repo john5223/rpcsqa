@@ -33,7 +33,7 @@ parser.add_argument('--action', action="store", dest="action", required=False, d
 #Defaulted arguments
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", default="198.101.133.3",
                     help="IP for the Razor server")
-parser.add_argument('--chef_url', action="store", dest="chef_url", default="http://198.101.133.3:4000", required=False, 
+parser.add_argument('--chef_url', action="store", dest="chef_url", default="https://198.101.133.3:443", required=False, 
                     help="URL of the chef server")
 parser.add_argument('--chef_client', action="store", dest="chef_client", default="jenkins", required=False, 
                     help="client for chef")
