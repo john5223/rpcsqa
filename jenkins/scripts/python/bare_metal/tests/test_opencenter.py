@@ -9,10 +9,6 @@ from chef import *
 from razor_api import razor_api
 from subprocess import check_call, CalledProcessError
 
-"""
-This script will tear down razor server based on their chef roles and environments
-"""
-
 # Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', action="store", dest="name", required=False, default="test", 
