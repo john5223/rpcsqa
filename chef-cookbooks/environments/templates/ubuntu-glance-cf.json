@@ -85,6 +85,20 @@
         "cirros",
         "precise"
       ]
+    },
+    "vips": {
+      "mysql-db": "198.101.133.151",
+      "rabbitmq-queue": "198.101.133.152",
+      "glance-registry": "198.101.133.153",
+      "keystone-service-api": "198.101.133.153",
+      "nova-novnc-proxy": "198.101.133.153",
+      "nova-api": "198.101.133.153",
+      "keystone-admin-api": "198.101.133.153",
+      "glance-api": "198.101.133.153",
+      "nova-ec2-public": "198.101.133.153",
+      "cinder-api": "198.101.133.153",
+      "horizon-dash": "198.101.133.153",
+      "horizon-dash_ssl": "198.101.133.153"
     }
   }
 }

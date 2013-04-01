@@ -117,7 +117,7 @@ EOF
        cat <<EOF | /opt/chef-server/bin/knife configure -i
 ${HOMEDIR}/.chef/knife.rb
 ${CHEF_URL}
-admin
+root
 chef-webui
 ${HOMEDIR}/.chef/chef-webui.pem
 chef-validator
