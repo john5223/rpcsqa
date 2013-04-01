@@ -33,7 +33,7 @@ parser.add_argument('--action', action="store", dest="action", required=False, d
 #Defaulted arguments
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", default="198.101.133.3",
                     help="IP for the Razor server")
-parser.add_argument('--chef_url', action="store", dest="chef_url", default="http://198.101.133.3:4000", required=False, 
+parser.add_argument('--chef_url', action="store", dest="chef_url", default="https://198.101.133.3:443", required=False, 
                     help="URL of the chef server")
 parser.add_argument('--chef_client', action="store", dest="chef_client", default="jenkins", required=False, 
                     help="client for chef")
@@ -74,8 +74,8 @@ def remove_broker_fail(policy):
                
 def run_chef_client(name, logfile="STDOUT"):
     node = Node(name)    
-    ip = node['ipaddress']
-    root_pass = razor.get_active_model_pass(node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
+    ip = node.attributes['ipaddress']
+    root_pass = razor.get_active_model_pass(node.attributes['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
     return run_remote_ssh_cmd(ip, 'root', root_pass, 'chef-client --logfile %s' % logfile)
        
 def remove_chef(name):
@@ -172,7 +172,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     for n in nodes:
         node = Node(n['name'])        
         if "recipe[network-interfaces]" not in node.run_list:
-            node.run_list = "recipe[network-interfaces]"
+            node.run_list = ["recipe[network-interfaces]"]
             node.save()
             print "Running network interfaces for %s" % node.name
             
