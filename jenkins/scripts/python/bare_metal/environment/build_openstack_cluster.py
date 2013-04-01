@@ -140,7 +140,7 @@ def build_controller(controller, ha=False, ha_num=0):
         if ha:
             print "Making %s the ha-controller%s node" % (controller, ha_num)
             controller_node['in_use'] = "ha-controller%s" % ha_num
-            controller_node.run_list = "role[qa-ha-controller%s]" % ha_num
+            controller_node.run_list = ["role[qa-ha-controller%s]" % ha_num]
         else:
             print "Making %s the controller node" % controller
             controller_node['in_use'] = "controller"
