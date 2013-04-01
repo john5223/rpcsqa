@@ -108,12 +108,22 @@ def erase_node(name):
     razor.remove_active_model(am_uuid)                            
     time.sleep(15)
 
+def disable_iptables(chef_node, logfile="STDOUT"):
+    ip = chef_node['ipaddress']
+    root_pass = razor.get_active_model_pass(chef_node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
+    return run_remote_ssh_cmd(ip, 'root', root_pass, '/etc/init.d/iptables save; /etc/init.d/iptables stop; /etc/init.d/iptables save')
+
 def build_dir_server(dir_server):
     with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         dir_node = Node(dir_server)
         dir_node['in_use'] = 'directory-server'
         dir_node.run_list = ["role[qa-%s-%s]" % (results.dir_version, results.os)]
         dir_node.save()
+
+        # if redhat platform, disable iptables
+        if dir_node['platform_family'] == 'rhel':
+            print "Platform is RHEL family, disabling iptables"
+            disable_iptables(dir_node)
 
         # Run chef-client twice
         print "Running chef-client for directory service node...this may take some time..."
@@ -148,6 +158,10 @@ def build_controller(controller, ha=False, ha_num=0):
         # save node
         controller_node.save()
 
+        if controller_node['platform_family'] == 'rhel':
+            print "Platform is RHEL family, disabling iptables"
+            disable_iptables(controller_node)
+
         # Run chef-client twice
         print "Running chef-client for controller node...this may take some time..."
         run1 = run_chef_client(controller_node)
@@ -174,6 +188,10 @@ def build_computes(computes):
             compute_node['in_use'] = "compute"
             compute_node.run_list = ["role[qa-single-compute]"]
             compute_node.save()
+
+            if compute_node['platform_family'] == 'rhel':
+                print "Platform is RHEL family, disabling iptables"
+                disable_iptables(controller_node)
 
             # Run chef client twice
             print "Running chef-client on compute node: %s, this may take some time..." % compute
