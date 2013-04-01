@@ -108,17 +108,17 @@ def erase_node(name):
     razor.remove_active_model(am_uuid)                            
     time.sleep(15)
 
-def update_server(server):
-    node = Node(server)
+def update_node(chef_node):
+    ip = chef_node['ipaddress']
     root_pass = razor.get_active_model_pass(node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
     if node['platform_family'] == "debian":
-        run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, 'apt-get update -y -qq')
+        run_remote_ssh_cmd(ip, 'root', root_pass, 'apt-get update -y -qq')
     elif node['platform_family'] == "rhel":
-        run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, 'yum update -y -q')
+        run_remote_ssh_cmd(ip, 'root', root_pass, 'yum update -y -q')
     else:
         print "Platform Family %s is not supported." % node['platform_family']
         sys.exit(1)
-    
+
 def disable_iptables(chef_node, logfile="STDOUT"):
     ip = chef_node['ipaddress']
     root_pass = razor.get_active_model_pass(chef_node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
@@ -129,6 +129,9 @@ def build_dir_server(dir_server):
     dir_node['in_use'] = 'directory-server'
     dir_node.run_list = ["role[qa-%s-%s]" % (results.dir_version, results.os)]
     dir_node.save()
+
+    print "Updating server...this may take some time"
+    update_node(dir_node)
 
     # if redhat platform, disable iptables
     if dir_node['platform_family'] == 'rhel':
@@ -144,11 +147,11 @@ def build_dir_server(dir_server):
         if run2['success']:
             print "Second chef-client run successful..."
         else:
-            print "Error running chef-client for controller %s" % controller
+            print "Error running chef-client for directory node %s" % dir_node
             print run2
             sys.exit(1)
     else:
-        print "Error running chef-client for controller %s" % controller
+        print "Error running chef-client for directory node %s" % dir_node
         print run1
         sys.exit(1)
 
@@ -166,6 +169,9 @@ def build_controller(controller, ha=False, ha_num=0):
         controller_node.run_list = ["role[qa-single-controller]"]
     # save node
     controller_node.save()
+
+    print "Updating server...this may take some time"
+    update_node(controller_node)
 
     if controller_node['platform_family'] == 'rhel':
         print "Platform is RHEL family, disabling iptables"
@@ -197,9 +203,12 @@ def build_computes(computes):
         compute_node.run_list = ["role[qa-single-compute]"]
         compute_node.save()
 
+        print "Updating server...this may take some time"
+        update_node(compute_node)
+
         if compute_node['platform_family'] == 'rhel':
             print "Platform is RHEL family, disabling iptables"
-            disable_iptables(controller_node)
+            disable_iptables(compute_node)
 
         # Run chef client twice
         print "Running chef-client on compute node: %s, this may take some time..." % compute
