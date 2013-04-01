@@ -125,13 +125,13 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     # Assign rolls for opencenter-testerator
     chef_server = server[0]
     controller = agents[0]
-    vip_data = {'nova_api_vip': '', 'rabbitmq_vip':'', 'mysql_vip':''} 
+    vip_data = {'nova_api_vip': '', 'nova_rabbitmq_vip':'', 'nova_mysql_vip':''} 
     if results.HA:
         controller = ",".join([controller, agents[1]])
         compute = ",".join(agents[2:])
         vip_data = {'nova_api_vip': '198.101.133.160', 
-                'rabbitmq_vip':'198.101.133.161', 
-                'mysql_vip':'198.101.133.162'}         
+                'nova_rabbitmq_vip':'198.101.133.161', 
+                'nova_mysql_vip':'198.101.133.162'}         
     else:
         compute = ",".join(agents[1:])
 
