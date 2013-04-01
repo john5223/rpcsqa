@@ -92,6 +92,7 @@
       "glance-registry": "198.101.133.153",
       "keystone-service-api": "198.101.133.153",
       "nova-novnc-proxy": "198.101.133.153",
+      "nova-xvpvnc-proxy": "198.101.133.153",
       "nova-api": "198.101.133.153",
       "keystone-admin-api": "198.101.133.153",
       "glance-api": "198.101.133.153",
