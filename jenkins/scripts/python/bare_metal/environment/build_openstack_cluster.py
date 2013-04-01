@@ -108,117 +108,123 @@ def erase_node(name):
     razor.remove_active_model(am_uuid)                            
     time.sleep(15)
 
+def update_server(server):
+    node = Node(server)
+    root_pass = razor.get_active_model_pass(node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
+    if node['platform_family'] == "debian":
+        run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, 'apt-get update -y -qq')
+    elif node['platform_family'] == "rhel":
+        run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, 'yum update -y -q')
+    else:
+        print "Platform Family %s is not supported." % node['platform_family']
+        sys.exit(1)
+    
 def disable_iptables(chef_node, logfile="STDOUT"):
     ip = chef_node['ipaddress']
     root_pass = razor.get_active_model_pass(chef_node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
     return run_remote_ssh_cmd(ip, 'root', root_pass, '/etc/init.d/iptables save; /etc/init.d/iptables stop; /etc/init.d/iptables save')
 
 def build_dir_server(dir_server):
-    with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
-        dir_node = Node(dir_server)
-        dir_node['in_use'] = 'directory-server'
-        dir_node.run_list = ["role[qa-%s-%s]" % (results.dir_version, results.os)]
-        dir_node.save()
+    dir_node = Node(dir_server)
+    dir_node['in_use'] = 'directory-server'
+    dir_node.run_list = ["role[qa-%s-%s]" % (results.dir_version, results.os)]
+    dir_node.save()
 
-        # if redhat platform, disable iptables
-        if dir_node['platform_family'] == 'rhel':
-            print "Platform is RHEL family, disabling iptables"
-            disable_iptables(dir_node)
+    # if redhat platform, disable iptables
+    if dir_node['platform_family'] == 'rhel':
+        print "Platform is RHEL family, disabling iptables"
+        disable_iptables(dir_node)
 
-        # Run chef-client twice
-        print "Running chef-client for directory service node...this may take some time..."
-        run1 = run_chef_client(dir_node)
-        if run1['success']:
-            print "First chef-client run successful...starting second run..."
-            run2 = run_chef_client(dir_node)
-            if run2['success']:
-                print "Second chef-client run successful..."
-            else:
-                print "Error running chef-client for controller %s" % controller
-                print run2
-                sys.exit(1)
+    # Run chef-client twice
+    print "Running chef-client for directory service node...this may take some time..."
+    run1 = run_chef_client(dir_node)
+    if run1['success']:
+        print "First chef-client run successful...starting second run..."
+        run2 = run_chef_client(dir_node)
+        if run2['success']:
+            print "Second chef-client run successful..."
         else:
             print "Error running chef-client for controller %s" % controller
-            print run1
-            sys.exit(1)        
+            print run2
+            sys.exit(1)
+    else:
+        print "Error running chef-client for controller %s" % controller
+        print run1
+        sys.exit(1)
 
 def build_controller(controller, ha=False, ha_num=0):
-    with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
-        controller_node = Node(controller)
+    controller_node = Node(controller)
 
-        # Check for ha
-        if ha:
-            print "Making %s the ha-controller%s node" % (controller, ha_num)
-            controller_node['in_use'] = "ha-controller%s" % ha_num
-            controller_node.run_list = ["role[qa-ha-controller%s]" % ha_num]
+    # Check for ha
+    if ha:
+        print "Making %s the ha-controller%s node" % (controller, ha_num)
+        controller_node['in_use'] = "ha-controller%s" % ha_num
+        controller_node.run_list = ["role[qa-ha-controller%s]" % ha_num]
+    else:
+        print "Making %s the controller node" % controller
+        controller_node['in_use'] = "controller"
+        controller_node.run_list = ["role[qa-single-controller]"]
+    # save node
+    controller_node.save()
+
+    if controller_node['platform_family'] == 'rhel':
+        print "Platform is RHEL family, disabling iptables"
+        disable_iptables(controller_node)
+
+    # Run chef-client twice
+    print "Running chef-client for controller node...this may take some time..."
+    run1 = run_chef_client(controller_node)
+    if run1['success']:
+        print "First chef-client run successful...starting second run..."
+        run2 = run_chef_client(controller_node)
+        if run2['success']:
+            print "Second chef-client run successful..."
         else:
-            print "Making %s the controller node" % controller
-            controller_node['in_use'] = "controller"
-            controller_node.run_list = ["role[qa-single-controller]"]
-        # save node
-        controller_node.save()
+            print "Error running chef-client for controller %s" % controller
+            print run2
+            sys.exit(1)
+    else:
+        print "Error running chef-client for controller %s" % controller
+        print run1
+        sys.exit(1)
 
-        if controller_node['platform_family'] == 'rhel':
+def build_computes(computes):
+    # Run computes
+    print "Making the compute nodes..."
+    for compute in computes:
+        compute_node = Node(compute)
+        compute_node['in_use'] = "compute"
+        compute_node.run_list = ["role[qa-single-compute]"]
+        compute_node.save()
+
+        if compute_node['platform_family'] == 'rhel':
             print "Platform is RHEL family, disabling iptables"
             disable_iptables(controller_node)
 
-        # Run chef-client twice
-        print "Running chef-client for controller node...this may take some time..."
-        run1 = run_chef_client(controller_node)
+        # Run chef client twice
+        print "Running chef-client on compute node: %s, this may take some time..." % compute
+        run1 = run_chef_client(compute_node)
         if run1['success']:
             print "First chef-client run successful...starting second run..."
-            run2 = run_chef_client(controller_node)
+            run2 = run_chef_client(compute_node)
             if run2['success']:
                 print "Second chef-client run successful..."
             else:
-                print "Error running chef-client for controller %s" % controller
+                print "Error running chef-client for compute %s" % compute
                 print run2
                 sys.exit(1)
         else:
-            print "Error running chef-client for controller %s" % controller
+            print "Error running chef-client for compute %s" % compute
             print run1
             sys.exit(1)
 
-def build_computes(computes):
-    with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
-        # Run computes
-        print "Making the compute nodes..."
-        for compute in computes:
-            compute_node = Node(compute)
-            compute_node['in_use'] = "compute"
-            compute_node.run_list = ["role[qa-single-compute]"]
-            compute_node.save()
-
-            if compute_node['platform_family'] == 'rhel':
-                print "Platform is RHEL family, disabling iptables"
-                disable_iptables(controller_node)
-
-            # Run chef client twice
-            print "Running chef-client on compute node: %s, this may take some time..." % compute
-            run1 = run_chef_client(compute_node)
-            if run1['success']:
-                print "First chef-client run successful...starting second run..."
-                run2 = run_chef_client(compute_node)
-                if run2['success']:
-                    print "Second chef-client run successful..."
-                else:
-                    print "Error running chef-client for compute %s" % compute
-                    print run2
-                    sys.exit(1)
-            else:
-                print "Error running chef-client for compute %s" % compute
-                print run1
-                sys.exit(1)
-
 def print_server_info(name):
-    with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
-        node = Node(name)
-        return "%s - %s" % (name, node['ipaddress'])
+    node = Node(name)
+    return "%s - %s" % (name, node['ipaddress'])
 
 def print_computes_info(computes):
-    with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
-        for compute in computes:
-            print "Compute: %s" % print_server_info(compute)
+    for compute in computes:
+        print "Compute: %s" % print_server_info(compute)
 
 """
 Steps
