@@ -199,7 +199,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     # Collect environment and install opencenter.
     if results.action == "build":
         #Collect the amount of servers we need for the opencenter install   
-        nodes = Search('node').query("name:qa-%s-pool*" % results.os)          
+        nodes = Search('node').query("name:qa-%s-pool* AND chef_environment:_default" % results.os)          
         if len(nodes) < cluster_size:
             print "*****************************************************"
             print "Not enough nodes for the cluster_size given: %s " % cluster_size
