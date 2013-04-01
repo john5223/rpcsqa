@@ -248,7 +248,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     for n in nodes:
         node = Node(n['name'])
         if "role[qa-base]" in node.run_list:
-            node.run_list = "recipe[network-interfaces]"
+            node.run_list = ["recipe[network-interfaces]"]
             node.save()
             print "Running network interfaces for %s" % node.name
           
@@ -295,6 +295,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         count = 0
         openstack_list = []
         
+        # Take a node from the default environment that has its network interfaces set.
         for n in nodes:
             name = n['name']
             node = Node(name)
@@ -308,6 +309,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 if count >= cluster_size:
                     break
 
+        # If there were no nodes available, exit
         if not openstack_list:
             print "No nodes"
             sys.exit(1)
