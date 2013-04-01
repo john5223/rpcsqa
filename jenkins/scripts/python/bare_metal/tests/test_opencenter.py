@@ -157,9 +157,9 @@ nova_vm_fixed_if = eth1
 nova_vm_fixed_range = 192.168.200.0/24
 
 [vip_data]
-nova_api_vip=%s
-nova_rabbitmq_vip=%s
-nova_mysql_vip=%s
+nova_api_vip = %s
+nova_rabbitmq_vip = %s
+nova_mysql_vip = %s
 
 """ % (server_url, server[0], chef_server, controller, compute, user, password, 
        vip_data['nova_api_vip'], vip_data['nova_rabbitmq_vip'], vip_data['nova_mysql_vip'])
