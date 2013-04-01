@@ -213,10 +213,8 @@ Steps
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     razor = razor_api(results.razor_ip)
 
-    # Remove broker fails from qa-ubuntu-pool.
-    remove_broker_fail("qa-ubuntu-pool")
-    time.sleep(3)
-    remove_broker_fail("qa-centos-pool")
+    # Remove broker fails for qa-%os-pool
+    remove_broker_fail("qa-%s-pool" % results.os)
 
     # If the environment doesnt exist in chef, make it.
     env = "%s-%s" % (results.os, results.name)
@@ -316,6 +314,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
 
         # Build cluster accordingly
         if dir_service and ha_enabled:
+            
             # Set each servers roles
             dir_service = openstack_list[0]
             ha_controller_1 = openstack_list[1]
@@ -345,6 +344,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             print "********************************************************************"
 
         elif dir_service:
+            
             # Set each servers roles
             dir_service = openstack_list[0]
             controller = openstack_list[1]
@@ -367,6 +367,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             print "********************************************************************"
 
         elif ha_enabled:
+            
             # Set each servers roles
             ha_controller_1 = openstack_list[0]
             ha_controller_2 = openstack_list[1]
@@ -390,6 +391,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             print_computes_info(computes)
             print "********************************************************************"
         else:
+            
             # Set each servers roles
             controller = openstack_list[0]
             computes = openstack_list[1:]
