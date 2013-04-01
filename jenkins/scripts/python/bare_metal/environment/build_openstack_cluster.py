@@ -412,6 +412,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
 
             # Have to run chef client on controller 1 again
             ha_controller_1_node = Node(ha_controller_1)
+            print "HA Setup...have to run chef client on %s again cause it is ha-controller1..." % ha_controller_1
             run_chef_client(ha_controller_1_node)
 
             # build computes
