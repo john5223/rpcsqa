@@ -112,7 +112,7 @@ def build_dir_server(dir_server):
     with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         dir_node = Node(dir_server)
         dir_node['in_use'] = 'directory-server'
-        dir_node.run_list = "role[qa-%s-%s]" % (results.dir_version, results.os)
+        dir_node.run_list = ["role[qa-%s-%s]" % (results.dir_version, results.os)]
         dir_node.save()
 
         # Run chef-client twice
@@ -144,7 +144,7 @@ def build_controller(controller, ha=False, ha_num=0):
         else:
             print "Making %s the controller node" % controller
             controller_node['in_use'] = "controller"
-            controller_node.run_list = "role[qa-single-controller]"
+            controller_node.run_list = ["role[qa-single-controller]"]
         # save node
         controller_node.save()
 
@@ -172,7 +172,7 @@ def build_computes(computes):
         for compute in computes:
             compute_node = Node(compute)
             compute_node['in_use'] = "compute"
-            compute_node.run_list = "role[qa-single-compute]"
+            compute_node.run_list = ["role[qa-single-compute]"]
             compute_node.save()
 
             # Run chef client twice
