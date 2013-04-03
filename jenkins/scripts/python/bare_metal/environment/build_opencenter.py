@@ -167,7 +167,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     #Make sure all networking interfacing is set
     for n in nodes:
         node = Node(n['name'])        
-        if "recipe[network-interfaces]" not in node.run_list:
+        if "role[qa-base]" in node.run_list:
             node.run_list = ["recipe[network-interfaces]"]
             node.save()
             print "Running network interfaces for %s" % node.name
