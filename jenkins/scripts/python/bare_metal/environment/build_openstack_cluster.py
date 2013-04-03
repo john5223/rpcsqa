@@ -188,7 +188,7 @@ def build_dir_server(dir_server):
         sys.exit(1)
 
 def clear_pool(chef_nodes, environment):
-    for n in nodes:
+    for n in chef_nodes:
         name = n['name']
         node = Node(name)
         if node.chef_environment != "_default":
@@ -281,7 +281,7 @@ def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
                 'command': command}
 
 def set_network_interfaces(chef_nodes):
-    for n in nodes:
+    for n in chef_nodes:
         node = Node(n['name'])
         if "role[qa-base]" in node.run_list:
             node.run_list = ["recipe[network-interfaces]"]
