@@ -347,7 +347,7 @@ def set_nodes_environment(chef_node, environment):
 
 def update_node(chef_node):
     ip = chef_node['ipaddress']
-    root_pass = razor.get_active_model_pass(node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
+    root_pass = razor.get_active_model_pass(chef_node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
     if node['platform_family'] == "debian":
         run_remote_ssh_cmd(ip, 'root', root_pass, 'apt-get update -y -qq')
     elif node['platform_family'] == "rhel":
