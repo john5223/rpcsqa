@@ -341,9 +341,9 @@ def set_network_interfaces(chef_nodes):
                 sys.exit(1)
 
 def set_nodes_environment(chef_node, environment):
-    if node.chef_environment != environment:
-        node.chef_environment = environment
-        node.save()
+    if chef_node.chef_environment != environment:
+        chef_node.chef_environment = environment
+        chef_node.save()
 
 def update_node(chef_node):
     ip = chef_node['ipaddress']
