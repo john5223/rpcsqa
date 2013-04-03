@@ -280,6 +280,42 @@ def print_computes_info(computes):
     for compute in computes:
         print "Compute: %s" % print_server_info(compute)
 
+def set_network_interfaces(chef_nodes):
+    for n in nodes:
+        node = Node(n['name'])
+        if "role[qa-base]" in node.run_list:
+            node.run_list = ["recipe[network-interfaces]"]
+            node.save()
+            print "Running network interfaces for %s" % node.name
+          
+            #Run chef client thrice
+            run1 = run_chef_client(node, logfile="/dev/null")
+            run2 = run_chef_client(node, logfile="/dev/null")
+            run3 = run_chef_client(node, logfile="/dev/null")
+
+            if run1['success'] and run2['success'] and run3['success']:
+                print "Done running chef-client"
+            else:
+                print "Error running chef client for network interfaces"
+                print "First run: %s" % run1
+                print "Second run: %s" % run2
+                print "Final run: %s" % run3
+                sys.exit(1)
+
+def clear_pool(chef_nodes, environment):
+    for n in nodes:
+        name = n['name']
+        node = Node(name)
+        if node.chef_environment != "_default":
+            if results.action == "destroy" and results.name == "all":
+                erase_node(name)
+            else:
+                if node.chef_environment == environment:
+                    if "recipe[network-interfaces]" not in node.run_list:
+                        erase_node(name)
+                    else:
+                        node.chef_environment = "_default"
+                        node.save()
 """
 Steps
 1. Make an environment for {{name}}-{{os}}-openstack
@@ -321,42 +357,11 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     nodes = Search('node').query("name:qa-%s-pool*" % results.os)
 
     #Make sure all networking interfacing is set
-    for n in nodes:
-        node = Node(n['name'])
-        if "role[qa-base]" in node.run_list:
-            node.run_list = ["recipe[network-interfaces]"]
-            node.save()
-            print "Running network interfaces for %s" % node.name
-          
-            #Run chef client thrice
-            run1 = run_chef_client(node, logfile="/dev/null")
-            run2 = run_chef_client(node, logfile="/dev/null")
-            run3 = run_chef_client(node, logfile="/dev/null")
-
-            if run1['success'] and run2['success'] and run3['success']:
-                print "Done running chef-client"
-            else:
-                print "Error running chef client for network interfaces"
-                print "First run: %s" % run1
-                print "Second run: %s" % run2
-                print "Final run: %s" % run3
-                sys.exit(1)
+    set_network_interfaces(nodes)
 
     # If we want to clear the pool
     if results.clear_pool:
-        for n in nodes:
-            name = n['name']
-            node = Node(name)
-            if node.chef_environment != "_default":
-                if results.action == "destroy" and results.name == "all":
-                    erase_node(name)
-                else:
-                    if node.chef_environment == env:
-                        if "recipe[network-interfaces]" not in node.run_list:
-                            erase_node(name)
-                        else:
-                            node.chef_environment = "_default"
-                            node.save()
+        clear_pool(nodes, env)
 
     # Collect environment and install Open Stack.
     if results.action == "build":          
