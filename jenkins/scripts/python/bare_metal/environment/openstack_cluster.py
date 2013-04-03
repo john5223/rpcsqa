@@ -227,6 +227,17 @@ def erase_node(name):
     razor.remove_active_model(am_uuid)                            
     time.sleep(15)
 
+def environment_has_controller(environment):
+    # Load Environment
+    nodes = Search('node').query("chef_environment:%s" % environment)
+    roles = ['role[qa-single-controller', 'role[qa-ha-controller1]']
+    for node in nodes:
+        chef_node = Node(node['name'])
+        if any(x in chef_node.run_list for x in roles):
+            return True
+        else:
+            return False
+
 def gather_nodes(chef_nodes, environment, cluster_size):
     ret_nodes = []
     count = 0
@@ -504,20 +515,27 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     # We want to add more nodes to the environment
     elif results.action == 'add':
 
-        # make sure we have enough nodes
-        check_cluster_size(nodes, cluster_size)
+        # make sure there is a controller
+        if environment_has_controller(env):
 
-        # set all nodes to compute in the requested environment
-        computes = gather_nodes(nodes, env, cluster_size)
+            # make sure we have enough nodes
+            check_cluster_size(nodes, cluster_size)
 
-        # If there were no nodes available, exit
-        if not computes:
-            print "No nodes available..."
+            # set all nodes to compute in the requested environment
+            computes = gather_nodes(nodes, env, cluster_size)
+
+            # If there were no nodes available, exit
+            if not computes:
+                print "No nodes available..."
+                sys.exit(1)
+
+            # Build out the computes
+            build_computes(computes)
+            print_computes_info(computes)
+
+        else:
+            print "Chef Environment %s doesnt have a controller, cant take action %s" % (env, results.action)
             sys.exit(1)
-
-        # Build out the computes
-        build_computes(computes)
-        print_computes_info(computes)
 
     elif results.action == 'destroy':
         clear_pool(nodes, env)
