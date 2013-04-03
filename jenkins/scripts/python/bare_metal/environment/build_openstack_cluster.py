@@ -69,6 +69,19 @@ def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
                 'exception': cpe, 
                 'command': command}
 
+def run_remote_scp_cmd(server_ip, user, password, to_copy):
+    command = "sshpass -p %s scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet %s %s@%s:~/" % (password, to_copy, user, server_ip)
+    try:
+        ret = check_call(command, shell=True)
+        return {'success': True, 
+                'return': ret, 
+                'exception': None}
+    except CalledProcessError, cpe:
+        return {'success': False, 
+                'return': None, 
+                'exception': cpe, 
+                'command': command}
+
 def remove_broker_fail(policy):
     active_models = razor.simple_active_models(policy)    
     for active in active_models:
@@ -124,8 +137,13 @@ def disable_iptables(chef_node, logfile="STDOUT"):
     root_pass = razor.get_active_model_pass(chef_node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
     return run_remote_ssh_cmd(ip, 'root', root_pass, '/etc/init.d/iptables save; /etc/init.d/iptables stop; /etc/init.d/iptables save')
 
+def import_ldif(config_file_location):
+    return 1
+
 def build_dir_server(dir_server):
     dir_node = Node(dir_server)
+    ip = dir_node['ipaddress']
+    root_pass = razor.get_active_model_pass(dir_node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
     dir_node['in_use'] = 'directory-server'
     dir_node.run_list = ["role[qa-%s-%s]" % (results.dir_version, results.os)]
     dir_node.save()
@@ -153,6 +171,18 @@ def build_dir_server(dir_server):
     else:
         print "Error running chef-client for directory node %s" % dir_node
         print run1
+        sys.exit(1)
+
+    # Directory service is set up, need to import config
+    if run1['success'] and run2['success']:
+        scp_run = run_remote_scp_cmd(ip, 'root', root_pass, '/var/lib/jenkins/source_files/ldif/*.ldif')
+        if scp_run['success']:
+            ssh_run = run_remote_ssh_cmd(ip, 'root', root_pass, 'ldapadd -x -D \"cn=admin,dc=dev,dc=rcbops,dc=me\" -f base.ldif -w@privatecloud')
+
+    if scp_run['success'] and ssh_run['success']:
+        print "Directory Service: %s successfully set up..." % results.dir_version
+    else:
+        print "Failed to set-up Directory Service: %s..." % results.dir_version
         sys.exit(1)
 
 def build_controller(controller, ha=False, ha_num=0):
