@@ -249,7 +249,7 @@ def gather_nodes(chef_nodes, environment, cluster_size):
         if ((node.chef_environment == "_default" or node.chef_environment == environment) and "recipe[network-interfaces]" in node.run_list):
             node['in_use'] = 1
             set_nodes_environment(node, environment)
-            openstack_list.append(name)          
+            ret_nodes.append(name)          
             print "Taking node: %s" % name
             count += 1
 
