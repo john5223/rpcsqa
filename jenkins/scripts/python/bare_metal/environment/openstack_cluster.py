@@ -29,7 +29,7 @@ parser.add_argument('--os', action="store", dest="os", required=False, default='
                     help="Operating System to use for Open Stack")
 
 parser.add_argument('--action', action="store", dest="action", required=False, default="build", 
-                    help="Action to do for Open Stack (build/destroy)")
+                    help="Action to do for Open Stack (build/destroy/add)")
 
 #Defaulted arguments
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", default="198.101.133.3",
@@ -187,20 +187,23 @@ def build_dir_server(dir_server):
         print "Failed to set-up Directory Service: %s..." % results.dir_version
         sys.exit(1)
 
+def check_cluster_size(chef_nodes, size):
+    if len(chef_nodes) < size:
+        print "*****************************************************"
+        print "Not enough nodes for the cluster_size given: %s " % cluster_size
+        print "*****************************************************"
+        sys.exit(1)
+
 def clear_pool(chef_nodes, environment):
     for n in chef_nodes:
         name = n['name']
         node = Node(name)
-        if node.chef_environment != "_default":
-            if results.action == "destroy" and results.name == "all":
+        if node.chef_environment == environment:
+            if "recipe[network-interfaces]" not in node.run_list:
                 erase_node(name)
             else:
-                if node.chef_environment == environment:
-                    if "recipe[network-interfaces]" not in node.run_list:
-                        erase_node(name)
-                    else:
-                        node.chef_environment = "_default"
-                        node.save()
+                node.chef_environment = "_default"
+                node.save()
 
 def disable_iptables(chef_node, logfile="STDOUT"):
     ip = chef_node['ipaddress']
@@ -223,6 +226,30 @@ def erase_node(name):
     #Remove active model          
     razor.remove_active_model(am_uuid)                            
     time.sleep(15)
+
+def gather_nodes(chef_nodes, environment, cluster_size):
+    ret_nodes = []
+    count = 0
+
+    # Take a node from the default environment that has its network interfaces set.
+    for n in chef_nodes:
+        name = n['name']
+        node = Node(name)
+        if ((node.chef_environment == "_default" or node.chef_environment == environment) and "recipe[network-interfaces]" in node.run_list):
+            node['in_use'] = 1
+            set_nodes_environment(node, environment)
+            openstack_list.append(name)          
+            print "Taking node: %s" % name
+            count += 1
+
+            if count >= cluster_size:
+                break
+
+    if count < cluster_size:
+        print "Not enough available nodes for requested cluster size of %s, try again later..." % cluster_size
+        sys.exit(1)
+
+    return ret_nodes
 
 def print_server_info(name):
     node = Node(name)
@@ -302,6 +329,11 @@ def set_network_interfaces(chef_nodes):
                 print "Final run: %s" % run3
                 sys.exit(1)
 
+def set_nodes_environment(chef_node, environment):
+    if node.chef_environment != environment:
+        node.chef_environment = environment
+        node.save()
+
 def update_node(chef_node):
     ip = chef_node['ipaddress']
     root_pass = razor.get_active_model_pass(node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
@@ -327,6 +359,12 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     # Remove broker fails for qa-%os-pool
     remove_broker_fail("qa-%s-pool" % results.os)
 
+    #Prepare environment
+    nodes = Search('node').query("name:qa-%s-pool*" % results.os)
+
+    #Make sure all networking interfacing is set
+    set_network_interfaces(nodes)
+
     # If the environment doesnt exist in chef, make it.
     env = "%s-%s" % (results.os, results.name)
     if not Search("environment").query("name:%s"%env):
@@ -336,60 +374,36 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     # Set the cluster size   
     cluster_size = int(results.cluster_size)
 
-    # Check the cluster size, if <5 and dir_service is enabled, set to 4
-    if cluster_size < 4 and dir_service:
-        if ha_enabled:
-            cluster_size = 5
-            print "HA and Directory Services are requested, re-setting cluster size to %i." % cluster_size
-        else:
-            cluster_size = 4
-            print "Directory Services are requested, re-setting cluster size to %i." % cluster_size
-    elif cluster_size < 4 and ha_enabled:
-        cluster_size = 4
-        print "HA is enabled, re-setting cluster size to %i." % cluster_size
-    else:
-        print "Cluster size is %i." % cluster_size
-
-    #Prepare environment
-    nodes = Search('node').query("name:qa-%s-pool*" % results.os)
-
-    #Make sure all networking interfacing is set
-    set_network_interfaces(nodes)
-
-    # If we want to clear the pool
-    if results.clear_pool:
-        clear_pool(nodes, env)
-
     # Collect environment and install Open Stack.
-    if results.action == "build":          
+    if results.action == "build":
+
+        # If we want to clear the pool
+        if results.clear_pool:
+            clear_pool(nodes, env)
+
+        # Check the cluster size, if <5 and dir_service is enabled, set to 4
+        if cluster_size < 4 and dir_service:
+            if ha_enabled:
+                cluster_size = 5
+                print "HA and Directory Services are requested, re-setting cluster size to %i." % cluster_size
+            else:
+                cluster_size = 4
+                print "Directory Services are requested, re-setting cluster size to %i." % cluster_size
+        elif cluster_size < 4 and ha_enabled:
+            cluster_size = 4
+            print "HA is enabled, re-setting cluster size to %i." % cluster_size
+        else:
+            print "Cluster size is %i." % cluster_size
+
         #Collect the amount of servers we need for the openstack install
-        nodes = Search('node').query("name:qa-%s-pool*" % results.os)
-        if len(nodes) < cluster_size:
-            print "*****************************************************"
-            print "Not enough nodes for the cluster_size given: %s " % cluster_size
-            print "*****************************************************"
-            sys.exit(1)          
-        
-        count = 0
-        openstack_list = []
-        
-        # Take a node from the default environment that has its network interfaces set.
-        for n in nodes:
-            name = n['name']
-            node = Node(name)
-            if ((node.chef_environment == "_default" or node.chef_environment == env) and "recipe[network-interfaces]" in node.run_list):
-                node['in_use'] = 1
-                node.chef_environment = env
-                node.save()
-                openstack_list.append(name)          
-                print "Taking node: %s" % name
-                count += 1
-                if count >= cluster_size:
-                    break
+        check_cluster_size(nodes, cluster_size)        
+
+        # gather the nodes and set there environment
+        openstack_list = gather_nodes(nodes, env, cluster_size)
 
         # If there were no nodes available, exit
         if not openstack_list:
-            print "No nodes"
+            print "No nodes available..."
             sys.exit(1)
 
         # Build cluster accordingly
@@ -486,3 +500,28 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             print "Controller: %s" % print_server_info(controller)
             print_computes_info(computes)
             print "********************************************************************"
+
+    # We want to add more nodes to the environment
+    elif results.action == 'add':
+
+        # make sure we have enough nodes
+        check_cluster_size(nodes, cluster_size)
+
+        # set all nodes to compute in the requested environment
+        computes = gather_nodes(nodes, env, cluster_size)
+
+        # If there were no nodes available, exit
+        if not computes:
+            print "No nodes available..."
+            sys.exit(1)
+
+        # Build out the computes
+        build_computes(computes)
+        print_computes_info(computes)
+
+    elif results.action == 'destroy':
+        clear_pool(nodes, env)
+
+    else:
+        print "Action %s is not supported..." % results.action
+        sys.exit(1)
