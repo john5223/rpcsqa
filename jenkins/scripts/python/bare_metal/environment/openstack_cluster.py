@@ -353,7 +353,7 @@ def update_node(chef_node):
     elif node['platform_family'] == "rhel":
         run_remote_ssh_cmd(ip, 'root', root_pass, 'yum update -y -q')
     else:
-        print "Platform Family %s is not supported." % node['platform_family']
+        print "Platform Family %s is not supported." % chef_node['platform_family']
         sys.exit(1)
 
 """
