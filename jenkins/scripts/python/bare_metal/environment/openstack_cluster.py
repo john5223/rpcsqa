@@ -230,7 +230,7 @@ def erase_node(name):
 def environment_has_controller(environment):
     # Load Environment
     nodes = Search('node').query("chef_environment:%s" % environment)
-    roles = ['role[qa-single-controller', 'role[qa-ha-controller1]', 'role[qa-ha-controller2]']
+    roles = ['role[qa-single-controller]', 'role[qa-ha-controller1]', 'role[qa-ha-controller2]']
     for node in nodes:
         chef_node = Node(node['name'])
         if any(x in chef_node.run_list for x in roles):
