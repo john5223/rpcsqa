@@ -2,10 +2,9 @@
 import os
 import sys
 import requests
-import time
 import argparse
-import time
-from chef import *
+import json
+from chef import ChefAPI, Search, Node, Environment
 from razor_api import razor_api
 from subprocess import check_call, CalledProcessError
 
@@ -30,8 +29,15 @@ parser.add_argument('--HA', action="store", dest="HA", required=False,
 parser.add_argument('--tempest', action="store", dest="tempest", required=False, 
                     default=False, 
                     help="Run tempest on openstack cluster")
-parser.add_argument('--tempest_dir', action="store", dest="tempest_dir", required=False, default="/var/lib/jenkins/tempest/folsom/tempest", help="")
-parser.add_argument('--tempest_version', action="store", dest="tempest_version", required=False, default="folsom")
+parser.add_argument('--tempest_dir', action="store", dest="tempest_dir",
+                    required=False,
+                    default="/var/lib/jenkins/tempest/folsom/tempest")
+parser.add_argument('--tempest_version', action="store",
+                    dest="tempest_version", required=False,
+                    default="folsom")
+parser.add_argument('--keystone_admin_pass', action="store",
+                    dest="keystone_admin_pass", required=True,
+                    default="secrete")
 
 #Defaulted arguments
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", default="198.101.133.3",
@@ -282,9 +288,21 @@ nova_mysql_vip = %s
             tempest_config = tempest_config.replace('{$IMAGE_ID}', image_id)
             tempest_config = tempest_config.replace('{$IMAGE_ID_ALT}', image_id)
            
-            tempest_config_path = "%s/etc/%s.conf" % (results.tempest_dir, results.policy)
+            tempest_config_path = "%s/etc/%s-%s.conf" % (results.tempest_dir, results.name, results.os)
             with open(tempest_config_path, 'w') as w:
                 w.write(tempest_config)
            
-        except Exception, e:
-            print "Failed to write temptest config, exited with exception: %s" % e
+            except Exception, e:
+                print "Failed to write temptest config, exited with exception: %s" % e
+                sys.exit(1)
+
+        # Run tests
+        try:
+            check_call_return = check_call("nosetests %s/tempest/tests/compute/servers " % (opencenter_server_password, opencenter_server_ip, command), shell=True)
+            print "!!## -- command: %s on %s run successfully  -- ##!!" % (command, opencenter_server_ip)
+        except CalledProcessError, cpe:
+            print "!!## -- Command %s failed to run on server with ip: %s -- ##!!" % (command, opencenter_server_ip)
+            print "!!## -- Return Code: %s -- ##!!" % cpe.returncode
+            #print "!!## -- Command: %s -- ##!!" % cpe.cmd
+            print "!!## -- Output: %s -- ##!!" % cpe.output
+            sys.exit(1)
