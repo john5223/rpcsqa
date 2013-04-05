@@ -36,7 +36,7 @@ parser.add_argument('--tempest_version', action="store",
                     dest="tempest_version", required=False,
                     default="folsom")
 parser.add_argument('--keystone_admin_pass', action="store",
-                    dest="keystone_admin_pass", required=True,
+                    dest="keystone_admin_pass", required=False,
                     default="secrete")
 
 #Defaulted arguments
