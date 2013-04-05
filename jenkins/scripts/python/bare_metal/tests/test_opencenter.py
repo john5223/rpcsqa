@@ -292,9 +292,9 @@ nova_mysql_vip = %s
             with open(tempest_config_path, 'w') as w:
                 w.write(tempest_config)
            
-            except Exception, e:
-                print "Failed to write temptest config, exited with exception: %s" % e
-                sys.exit(1)
+        except Exception as e:
+            print "Failed to write temptest config, exited with exception: %s" % e
+            sys.exit(1)
 
         # Run tests
         try:
