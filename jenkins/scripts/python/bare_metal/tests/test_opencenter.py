@@ -239,7 +239,7 @@ nova_mysql_vip = %s
         if results.HA:
             ip = vip_data['nova_api_vip']
         else:
-            ip = agents[0]
+            ip = Node(agents[0])['ipaddress']
 
         url = "http://%s:5000/v2.0" % ip
         token_url = "%s/tokens" % url
@@ -254,21 +254,19 @@ nova_mysql_vip = %s
                 }
             }
         }
+
+        image_id = None
+        image_alt = None
         try:
             r = requests.post(token_url, data=json.dumps(auth), headers={'Content-type': 'application/json'})
-                        
             ans = json.loads(r.text)
             if 'access' in ans.keys():
                 token = ans['access']['token']['id']
-                #print token
                 images_url = "http://%s:9292/v2/images" % ip
-                #print images_url
                 images = json.loads(requests.get(images_url, headers={'X-Auth-Token': token}).text)
-                
-                for image in images['images']:
-                    if image['name'] == 'cirros-image':
-                        image_id = image['id']
-                        #print "Image ID: %s " % image_id
+                image_ids = (image['id'] for image in images['images'])
+		image_id = next(image_ids)
+		image_alt = next(images_ids) or image_id
         except Exception, e:
             print " Failure to add keystone info to tempest config. Exited with exception: %s" % e
             sys.exit(1)
@@ -286,7 +284,9 @@ nova_mysql_vip = %s
             tempest_config = tempest_config.replace('localhost', ip)
             tempest_config = tempest_config.replace('127.0.0.1', ip)
             tempest_config = tempest_config.replace('{$IMAGE_ID}', image_id)
-            tempest_config = tempest_config.replace('{$IMAGE_ID_ALT}', image_id)
+            tempest_config = tempest_config.replace('{$IMAGE_ID_ALT}', image_alt)
+            tempest_config = tempest_config.replace('ostackdemo', results.keystone_admin_pass)
+            tempest_config = tempest_config.replace('demo', "admin")
            
             tempest_config_path = "%s/etc/%s-%s.conf" % (results.tempest_dir, results.name, results.os)
             with open(tempest_config_path, 'w') as w:
@@ -298,11 +298,11 @@ nova_mysql_vip = %s
 
         # Run tests
         try:
-            check_call_return = check_call("nosetests %s/tempest/tests/compute/servers " % (opencenter_server_password, opencenter_server_ip, command), shell=True)
-            print "!!## -- command: %s on %s run successfully  -- ##!!" % (command, opencenter_server_ip)
+            print "!! ## -- Running tempest -- ## !!"
+            check_call_return = check_call("export Tnosetests %s/tempest/tests/compute/test_servers " % (results.tempest_dir), shell=True)
+            print "!!## -- Tempest tests ran successfully  -- ##!!"
         except CalledProcessError, cpe:
-            print "!!## -- Command %s failed to run on server with ip: %s -- ##!!" % (command, opencenter_server_ip)
+            print "!!## -- Tempest tests failed -- ##!!"
             print "!!## -- Return Code: %s -- ##!!" % cpe.returncode
-            #print "!!## -- Command: %s -- ##!!" % cpe.cmd
             print "!!## -- Output: %s -- ##!!" % cpe.output
             sys.exit(1)
