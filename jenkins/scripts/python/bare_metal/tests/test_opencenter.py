@@ -266,7 +266,7 @@ nova_mysql_vip = %s
                 images = json.loads(requests.get(images_url, headers={'X-Auth-Token': token}).text)
                 image_ids = (image['id'] for image in images['images'])
 		image_id = next(image_ids)
-		image_alt = next(images_ids) or image_id
+		image_alt = next(image_ids) or image_id
         except Exception, e:
             print " Failure to add keystone info to tempest config. Exited with exception: %s" % e
             sys.exit(1)
