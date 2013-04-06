@@ -304,6 +304,9 @@ nova_mysql_vip = %s
                                   (results.tempest_dir, results.name,
                                    results.os)
             with open(tempest_config_path, 'w') as w:
+                print "####### Tempest Config #######"
+                print tempest_config_path
+                print tempest_config
                 w.write(tempest_config)
            
         except Exception as e:
