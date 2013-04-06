@@ -10,7 +10,8 @@ from subprocess import check_call, CalledProcessError
 
 # Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
-parser.add_argument('--name', action="store", dest="name", required=False, default="test", 
+parser.add_argument('--name', action="store", dest="name",
+                    required=False, default="test",
                     help="This will be the name for the opencenter chef environment")
 parser.add_argument('--os', action="store", dest="os", required=False, default='ubuntu', 
                     help="Operating System to use for opencenter")
@@ -19,15 +20,14 @@ parser.add_argument('--repo_url', action="store", dest="opencenter_test_repo", r
                     help="Testing repo for opencenter")
 
 parser.add_argument('--tests', action="store", dest="opencenter_tests", required=False, 
-                    default="test_happy_path.py", 
+                    default="test_happy_path.py",
                     help="Tests to run")
 
-parser.add_argument('--HA', action="store", dest="HA", required=False, 
-                    default=True, 
-                    help="Do HA for openstack controller")
+parser.add_argument('--HA', action="store", dest="HA", required=False,
+                    default=True, help="Do HA for openstack controller")
 
-parser.add_argument('--tempest', action="store", dest="tempest", required=False, 
-                    default=False, 
+parser.add_argument('--tempest', action="store", dest="tempest",
+                    required=False, default=False,
                     help="Run tempest on openstack cluster")
 parser.add_argument('--tempest_dir', action="store", dest="tempest_dir",
                     required=False,
@@ -61,14 +61,19 @@ if results.tempest == "true":
 elif results.tempest == "false":
     results.tempest = False    
 
+
 def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
     """Runs a command over an ssh connection"""
-    command = "sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l %s %s '%s'" % (passwd, user, server_ip, remote_cmd)
+    command = "sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l %s %s '%s'" % 
+    (passwd, user, server_ip, remote_cmd)
     try:
         ret = check_call(command, shell=True)
         return {'success': True, 'return': ret, 'exception': None}
     except CalledProcessError, cpe:
-        return {'success': False, 'retrun': None, 'exception': cpe, 'command': command}
+        return {'success': False,
+                'retrun': None,
+                'exception': cpe,
+                'command': command}
 
 # Load chef and razor apis
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
@@ -80,12 +85,13 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     
     # Make sure environment exists, if not create one
     env = "%s-%s-opencenter" % (results.name, results.os)
-    if not Search("environment").query("name:%s"%env):
+    if not Search("environment").query("name:%s" % env):
         print "Making environment: %s " % env
         Environment.create(env)
     
     # Gather the servers in the environment into their roles
-    nodes = Search('node').query("name:qa-%s-pool* AND chef_environment:%s" % (results.os, env))
+    nodes = Search('node').query("name:qa-%s-pool* AND chef_environment:%s" %
+                                 (results.os, env))
     for n in nodes:
         node = Node(n['name'])
         #print "Found: %s " % node.name
@@ -108,7 +114,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         sys.exit(1)
     if results.HA:
         if len(agents) < 3:
-            print "!!## -- Not enough agents for openstack HA deployment -- ##!!"
+            print "!!## -- Not enough agents for HA deployment -- ##!!"
             sys.exit(1)
     elif len(agents) < 2:
         print "!!## -- Not enough agents for openstack deployment -- ##!!"
@@ -122,12 +128,13 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     
     # Determine if ssl is being used
     try:
-        r = requests.get("https://%s" % dashboard_ip, auth=('admin','password'),verify=False)
+        r = requests.get("https://%s" % dashboard_ip,
+                         auth=('admin', 'password'), verify=False)
         print("!!## -- SSL not being used -- ##!!")
-        dashboard_url = "https://%s" % dashboard_ip        
+        dashboard_url = "https://%s" % dashboard_ip
         server_url = "https://%s:8443" % server_ip
         user = "admin"
-        password = "password"        
+        password = "password"
     except Exception, e:
         print("!!## -- SSL being used -- ##!!")
         dashboard_url = "http://%s:3000" % dashboard_ip
@@ -137,18 +144,20 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     # Assign rolls for opencenter-testerator
     chef_server = server[0]
     controller = agents[0]
-    vip_data = {'nova_api_vip': '', 'nova_rabbitmq_vip':'', 'nova_mysql_vip':''} 
+    vip_data = {'nova_api_vip': '',
+                'nova_rabbitmq_vip': '',
+                'nova_mysql_vip': ''}
     if results.HA:
         controller = ",".join([controller, agents[1]])
         compute = ",".join(agents[2:])
-        vip_data = {'nova_api_vip': '198.101.133.160', 
-                'nova_rabbitmq_vip':'198.101.133.161', 
-                'nova_mysql_vip':'198.101.133.162'}         
+        vip_data = {'nova_api_vip': '198.101.133.160',
+                    'nova_rabbitmq_vip': '198.101.133.161',
+                    'nova_mysql_vip': '198.101.133.162'}
     else:
         compute = ",".join(agents[1:])
 
     opencenter_config = \
-"""[opencenter]
+        """[opencenter]
 endpoint_url = %s
 instance_server_hostname = %s
 instance_chef_hostname = %s
@@ -176,9 +185,9 @@ nova_vm_fixed_range = 192.168.200.0/24
 nova_api_vip = %s
 nova_rabbitmq_vip = %s
 nova_mysql_vip = %s
-
-""" % (server_url, server[0], chef_server, controller, compute, user, password, 
-       vip_data['nova_api_vip'], vip_data['nova_rabbitmq_vip'], vip_data['nova_mysql_vip'])
+        """ % (server_url, server[0], chef_server, controller,
+               compute, user, password, vip_data['nova_api_vip'],
+               vip_data['nova_rabbitmq_vip'], vip_data['nova_mysql_vip'])
     
     print "\n*******************"
     print "***    CONFIG   ***"
@@ -268,38 +277,46 @@ nova_mysql_vip = %s
 		image_id = next(image_ids)
 		image_alt = next(image_ids) or image_id
         except Exception, e:
-            print " Failure to add keystone info to tempest config. Exited with exception: %s" % e
+            print "Failure to add keystone info to tempest config. Exited with exception: %s" % e
             sys.exit(1)
 
         # Write the config
         try:
-            sample_path = "%s/etc/base_%s.conf" % (results.tempest_dir, results.tempest_version)
+            sample_path = "%s/etc/base_%s.conf" % \
+                        (results.tempest_dir, results.tempest_version)
            
             with open(sample_path) as f:
                 sample_config = f.read()
            
-            tempest_config = str(sample_config) 
-            tempest_config = tempest_config.replace('http://127.0.0.1:5000/v2.0/', url)
+            tempest_config = str(sample_config)
+            tempest_config = tempest_config.replace('http://127.0.0.1:5000/v2.0/',
+                                                    url)
             tempest_config = tempest_config.replace('{$KEYSTONE_IP}', ip)
             tempest_config = tempest_config.replace('localhost', ip)
             tempest_config = tempest_config.replace('127.0.0.1', ip)
             tempest_config = tempest_config.replace('{$IMAGE_ID}', image_id)
-            tempest_config = tempest_config.replace('{$IMAGE_ID_ALT}', image_alt)
-            tempest_config = tempest_config.replace('ostackdemo', results.keystone_admin_pass)
+            tempest_config = tempest_config.replace('{$IMAGE_ID_ALT}',
+                                                    image_alt)
+            tempest_config = tempest_config.replace('ostackdemo',
+                                                    results.keystone_admin_pass)
             tempest_config = tempest_config.replace('demo', "admin")
            
-            tempest_config_path = "%s/etc/%s-%s.conf" % (results.tempest_dir, results.name, results.os)
+            tempest_config_path = "%s/etc/%s-%s.conf" % \
+                                  (results.tempest_dir, results.name,
+                                   results.os)
             with open(tempest_config_path, 'w') as w:
                 w.write(tempest_config)
            
         except Exception as e:
-            print "Failed to write temptest config, exited with exception: %s" % e
+            print "Failed writing tempest config, exception: %s" % e
             sys.exit(1)
 
         # Run tests
         try:
             print "!! ## -- Running tempest -- ## !!"
-            check_call_return = check_call("export Tnosetests %s/tempest/tests/compute/test_servers " % (results.tempest_dir), shell=True)
+            check_call_return = check_call(
+                "export TEMPEST_CONFIG=%s; nosetests %s/tempest/tests/compute/test_servers " %
+                (tempest_config_path, results.tempest_dir), shell=True)
             print "!!## -- Tempest tests ran successfully  -- ##!!"
         except CalledProcessError, cpe:
             print "!!## -- Tempest tests failed -- ##!!"
