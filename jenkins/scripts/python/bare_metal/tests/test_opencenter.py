@@ -64,8 +64,7 @@ elif results.tempest == "false":
 
 def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
     """Runs a command over an ssh connection"""
-    command = "sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l %s %s '%s'" % 
-    (passwd, user, server_ip, remote_cmd)
+    command = "sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l %s %s '%s'" % (passwd, user, server_ip, remote_cmd)
     try:
         ret = check_call(command, shell=True)
         return {'success': True, 'return': ret, 'exception': None}
@@ -208,11 +207,11 @@ nova_mysql_vip = %s
         sys.exit(1)
 
     # Build Commands to run
-    commands=["apt-get install git python-pip -y -q", 
-              "rm -rf /root/opencenter-testerator",
-              "git clone %s" % results.opencenter_test_repo, 
-              "pip install -q -r /root/opencenter-testerator/tools/pip-requires",
-              "mv /root/%s /root/opencenter-testerator/etc/" % (config_file)]
+    commands = ["apt-get install git python-pip -y -q",
+                "rm -rf /root/opencenter-testerator",
+                "git clone %s" % results.opencenter_test_repo,
+                "pip install -q -r /root/opencenter-testerator/tools/pip-requires",
+                "mv /root/%s /root/opencenter-testerator/etc/" % (config_file)]
     for test in results.opencenter_tests.split(","):
         commands.append("export OPENCENTER_CONFIG='%s'; nosetests opencenter-testerator/opencenter/tests/%s -v" % (config_file, test))
         
@@ -228,10 +227,10 @@ nova_mysql_vip = %s
         check_call_return = check_call("sshpass -p %s scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet %s root@%s:/root/%s" % (opencenter_server_password, '/tmp/%s' % config_file, opencenter_server_ip, config_file), shell=True)
     except CalledProcessError, cpe:
         print "!!## -- Failed to transfer environment file  -- ##!!"
-        sys.exit(1)   
+        sys.exit(1)
    
     # Run commands to test
-    for command in commands: 
+    for command in commands:
         try:
             check_call_return = check_call("sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l root %s '%s'" % (opencenter_server_password, opencenter_server_ip, command), shell=True)
             print "!!## -- command: %s on %s run successfully  -- ##!!" % (command, opencenter_server_ip)
@@ -315,8 +314,7 @@ nova_mysql_vip = %s
         try:
             print "!! ## -- Running tempest -- ## !!"
             check_call_return = check_call(
-                "export TEMPEST_CONFIG=%s; nosetests %s/tempest/tests/compute/test_servers " %
-                (tempest_config_path, results.tempest_dir), shell=True)
+                "export TEMPEST_CONFIG=%s; nosetests %s/tempest/tests/compute/test_servers " % (tempest_config_path, results.tempest_dir), shell=True)
             print "!!## -- Tempest tests ran successfully  -- ##!!"
         except CalledProcessError, cpe:
             print "!!## -- Tempest tests failed -- ##!!"
