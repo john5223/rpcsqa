@@ -12,20 +12,19 @@ from subprocess import check_call, CalledProcessError
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', action="store", dest="name",
                     required=False, default="test",
-                    help="This will be the name for the opencenter chef environment")
-parser.add_argument('--os', action="store", dest="os", required=False, default='ubuntu', 
+                    help="Name for the opencenter chef environment")
+parser.add_argument('--os', action="store", dest="os", required=False,
+                    default='ubuntu',
                     help="Operating System to use for opencenter")
-parser.add_argument('--repo_url', action="store", dest="opencenter_test_repo", required=False, 
+parser.add_argument('--repo_url', action="store", dest="opencenter_test_repo",
+                    required=False,
                     default="https://github.com/john5223/opencenter-testerator.git", 
                     help="Testing repo for opencenter")
-
-parser.add_argument('--tests', action="store", dest="opencenter_tests", required=False, 
-                    default="test_happy_path.py",
+parser.add_argument('--tests', action="store", dest="opencenter_tests",
+                    required=False, default="test_happy_path.py",
                     help="Tests to run")
-
 parser.add_argument('--HA', action="store", dest="HA", required=False,
                     default=True, help="Do HA for openstack controller")
-
 parser.add_argument('--tempest', action="store", dest="tempest",
                     required=False, default=False,
                     help="Run tempest on openstack cluster")
@@ -40,18 +39,21 @@ parser.add_argument('--keystone_admin_pass', action="store",
                     default="secrete")
 
 #Defaulted arguments
-parser.add_argument('--razor_ip', action="store", dest="razor_ip", default="198.101.133.3",
+parser.add_argument('--razor_ip', action="store", dest="razor_ip",
+                    default="198.101.133.3",
                     help="IP for the Razor server")
-parser.add_argument('--chef_url', action="store", dest="chef_url", default="https://198.101.133.3:443", required=False, 
+parser.add_argument('--chef_url', action="store", dest="chef_url",
+                    default="https://198.101.133.3:443", required=False,
                     help="client for chef")
-parser.add_argument('--chef_client', action="store", dest="chef_client", default="jenkins", required=False, 
-                    help="client for chef")
-parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem", default="~/.chef/jenkins.pem", required=False, 
-                    help="client pem for chef")
+parser.add_argument('--chef_client', action="store", dest="chef_client",
+                    default="jenkins", required=False, help="client for chef")
+parser.add_argument('--chef_client_pem', action="store",
+                    dest="chef_client_pem", default="~/.chef/jenkins.pem",
+                    required=False, help="client pem for chef")
 
 # Save the parsed arguments
 results = parser.parse_args()
-results.chef_client_pem = results.chef_client_pem.replace('~',os.getenv("HOME"))
+results.chef_client_pem = results.chef_client_pem.replace('~', os.getenv("HOME"))
 if results.HA == "true":
     results.HA = True
 elif results.HA == "false":
@@ -59,7 +61,7 @@ elif results.HA == "false":
 if results.tempest == "true":
     results.tempest = True
 elif results.tempest == "false":
-    results.tempest = False    
+    results.tempest = False
 
 
 def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
@@ -257,7 +259,7 @@ nova_mysql_vip = %s
             'auth': {
                 'tenantName': 'admin',
                 'passwordCredentials': {
-                    'username': 'admin', 
+                    'username': 'admin',
                     'password': '%s' % results.keystone_admin_pass
                 }
             }
@@ -266,24 +268,25 @@ nova_mysql_vip = %s
         image_id = None
         image_alt = None
         try:
-            r = requests.post(token_url, data=json.dumps(auth), headers={'Content-type': 'application/json'})
+            r = requests.post(token_url, data=json.dumps(auth),
+                              headers={'Content-type': 'application/json'})
             ans = json.loads(r.text)
             if 'access' in ans.keys():
                 token = ans['access']['token']['id']
                 images_url = "http://%s:9292/v2/images" % ip
-                images = json.loads(requests.get(images_url, headers={'X-Auth-Token': token}).text)
+                images = json.loads(requests.get(images_url,
+                                    headers={'X-Auth-Token': token}).text)
                 image_ids = (image['id'] for image in images['images'])
-		image_id = next(image_ids)
-		image_alt = next(image_ids) or image_id
+                image_id = next(image_ids)
+                image_alt = next(image_ids) or image_id
         except Exception, e:
-            print "Failure to add keystone info to tempest config. Exited with exception: %s" % e
+            print "Failed to add keystone info. Exception: %s" % e
             sys.exit(1)
 
         # Write the config
         try:
-            sample_path = "%s/etc/base_%s.conf" % \
-                        (results.tempest_dir, results.tempest_version)
-           
+            sample_path = "%s/etc/base_%s.conf" % (results.tempest_dir,
+                                                   results.tempest_version)
             with open(sample_path) as f:
                 sample_config = f.read()
            
@@ -317,7 +320,7 @@ nova_mysql_vip = %s
         try:
             print "!! ## -- Running tempest -- ## !!"
             check_call_return = check_call(
-                "export TEMPEST_CONFIG=%s; nosetests %s/tempest/tests/compute/test_servers " % (tempest_config_path, results.tempest_dir), shell=True)
+                "export TEMPEST_CONFIG=%s; nosetests %s/tempest/tests/compute" % (tempest_config_path, results.tempest_dir), shell=True)
             print "!!## -- Tempest tests ran successfully  -- ##!!"
         except CalledProcessError, cpe:
             print "!!## -- Tempest tests failed -- ##!!"
