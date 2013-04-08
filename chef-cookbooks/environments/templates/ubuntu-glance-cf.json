@@ -87,19 +87,19 @@
       ]
     },
     "vips": {
-      "mysql-db": "198.101.133.152",
-      "rabbitmq-queue": "198.101.133.153",
-      "glance-registry": "198.101.133.154",
-      "keystone-service-api": "198.101.133.154",
-      "nova-novnc-proxy": "198.101.133.154",
-      "nova-xvpvnc-proxy": "198.101.133.154",
-      "nova-api": "198.101.133.154",
-      "keystone-admin-api": "198.101.133.154",
-      "glance-api": "198.101.133.154",
-      "nova-ec2-public": "198.101.133.154",
-      "cinder-api": "198.101.133.154",
-      "horizon-dash": "198.101.133.154",
-      "horizon-dash_ssl": "198.101.133.154"
+      "mysql-db": "198.101.133.154",
+      "rabbitmq-queue": "198.101.133.155",
+      "glance-registry": "198.101.133.156",
+      "keystone-service-api": "198.101.133.156",
+      "nova-novnc-proxy": "198.101.133.156",
+      "nova-xvpvnc-proxy": "198.101.133.156",
+      "nova-api": "198.101.133.156",
+      "keystone-admin-api": "198.101.133.156",
+      "glance-api": "198.101.133.156",
+      "nova-ec2-public": "198.101.133.156",
+      "cinder-api": "198.101.133.156",
+      "horizon-dash": "198.101.133.156",
+      "horizon-dash_ssl": "198.101.133.156"
     }
   }
 }
