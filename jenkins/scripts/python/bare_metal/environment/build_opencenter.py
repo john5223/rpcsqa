@@ -177,11 +177,12 @@ def prepare_vm_host(controller_node):
 
     if controller_node['platform_family'] == 'debian':
         command = "aptitude install -y curl dsh screen vim iptables-persistent libvirt-bin \
-                   python-libvirt qemu-kvm guestfish; ssh-keygen -N ''; apt-get update -y -qq"
+        python-libvirt qemu-kvm guestfish; ssh-keygen -N \'\'; apt-get update -y -qq"
     else:
         command = "yum install -y curl dsh screen vim iptables-persistent libvirt-bin \
-                   python-libvirt qemu-kvm guestfish; ssh-keygen -N ''; yum update -y -q"
+        python-libvirt qemu-kvm guestfish; ssh-keygen -N \'\'; yum update -y -q"
 
+    print "Prepare command to run: %s" % command
     prepare_run = run_remote_ssh_cmd(controller_ip, 'root', root_pass, command)
     
     if not prepare_run['success']:
@@ -189,7 +190,7 @@ def prepare_vm_host(controller_node):
             controller_node, controller_ip)
         sys.exit(1)
     else:
-        print "VM host %s prepared successfully..." % controller_node['name']
+        print "VM host %s prepared successfully..." % controller_node
 
 def install_server_vms(controller_node, opencenter_server_ip, chef_server_ip, vm_bridge, vm_bridge_device):
     controller_ip = controller_node['ipaddress']
@@ -200,7 +201,7 @@ def install_server_vms(controller_node, opencenter_server_ip, chef_server_ip, vm
     command = "mkdir /opt/rpcs; git clone https://github.com/rsoprivatecloud/scripts /opt/rpcs"
     download_run = run_remote_ssh_cmd(controller_ip, 'root', root_pass, command)
     if not download_run['success']:
-        print "Failed to download script on server %s@%s...." % (controller_node['name'], controller_ip)
+        print "Failed to download script on server %s@%s...." % (controller_node, controller_ip)
         print "Return Code: %s" % download_run['exception'].returncode
         print "Exception: %s" % download_run['exception']
         sys.exit(1)
@@ -212,12 +213,12 @@ def install_server_vms(controller_node, opencenter_server_ip, chef_server_ip, vm
     command = "./oc_prepare.sh %s %s %s %s" % (chef_server_ip, opencenter_server_ip, vm_bridge, vm_bridge_device)
     install_run = run_remote_ssh_cmd(controller_ip, 'root', root_pass, command)
     if not install_run['success']:
-        print "Failed to run VM setup script on server %s@%s...." % (controller_node['name'], controller_ip)
+        print "Failed to run VM setup script on server %s@%s...." % (controller_node, controller_ip)
         print "Return Code: %s" % install_run['exception'].returncode
         print "Exception: %s" % install_run['exception']
         sys.exit(1)
     else:
-        print "VM's successfully setup on server %s..." % controller_node['name']
+        print "VM's successfully setup on server %s..." % controller_node
 
 def ping_check_vm(ip_address):
     command = "ping -c 5 %s" % ip_address
