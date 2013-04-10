@@ -1,8 +1,9 @@
 #!/usr/bin/python
 import os
-import requests
 import sys
 import time
+import json
+import requests
 import argparse
 from chef import *
 from razor_api import razor_api
@@ -19,6 +20,9 @@ parser.add_argument('--name', action="store", dest="name", required=False, defau
 
 parser.add_argument('--cluster_size', action="store", dest="cluster_size", required=False, default=1, 
                     help="Size of the OpenCenter cluster to build")
+
+parser.add_argument('--server_vms', action="store", dest="server_vms", required=False, default=False, 
+                    help="Whether or not to install opencenter server and chef server on vms on the controller")
 
 parser.add_argument('--os', action="store", dest="os", required=False, default='ubuntu', 
                     help="Operating System to use for opencenter")
@@ -46,7 +50,6 @@ parser.add_argument('--clear_pool', action="store", dest="clear_pool", default=T
 results = parser.parse_args()
 results.chef_client_pem = results.chef_client_pem.replace('~',os.getenv("HOME"))
 
-
 def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
     command = "sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l %s %s '%s'" % (passwd, user, server_ip, remote_cmd)
     try:
@@ -54,6 +57,19 @@ def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
         return {'success': True, 'return': ret, 'exception': None}
     except CalledProcessError, cpe:
         return {'success': False, 'return': None, 'exception': cpe, 'command': command}
+
+def run_remote_scp_cmd(server_ip, user, password, to_copy):
+    command = "sshpass -p %s scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet %s %s@%s:~/" % (password, to_copy, user, server_ip)
+    try:
+        ret = check_call(command, shell=True)
+        return {'success': True, 
+                'return': ret, 
+                'exception': None}
+    except CalledProcessError, cpe:
+        return {'success': False, 
+                'return': None, 
+                'exception': cpe, 
+                'command': command}
 
 def remove_broker_fail(policy):
     active_models = razor.simple_active_models(policy)    
@@ -138,6 +154,91 @@ def install_opencenter(server, install_script, role, server_ip="0.0.0.0"):
         print "Failed to install opencenter %s" % type
         sys.exit(1)
 
+def install_opencenter_vm(install_script, role, vm_ip, user, password):
+    command = "bash <(curl %s) --role=%s --ip=%s" % (install_script, role, vm_ip)
+    install_run = run_remote_ssh_cmd(vm_ip, user, password, command)
+    if not install_run['success']:
+        print "Failed to install OpenCenter %s on VM..." % role
+        print "Return Code: %s" % install_run['exception'].returncode
+        print "Exception: %s" % install_run['exception']
+        sys.exit(1)
+    else:
+        print "OpenCenter Server successfully installed..."
+
+def prepare_vm_host(controller_node):
+    controller_ip = controller_node['ipaddress']
+    root_pass = razor.get_active_model_pass(controller_node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
+
+    if controller_node['platform_family'] == 'debian':
+        command = "aptitude install -y curl dsh screen vim iptables-persistent libvirt-bin \
+                   python-libvirt qemu-kvm guestfish; ssh-keygen -N ''; apt-get update -y -qq"
+    else:
+        command = "yum install -y curl dsh screen vim iptables-persistent libvirt-bin \
+                   python-libvirt qemu-kvm guestfish; ssh-keygen -N ''; yum update -y -q"
+
+    prepare_run = run_remote_ssh_cmd(controller_ip, 'root', root_pass, command)
+    
+    if not prepare_run['success']:
+        print "Failed to prepare server %s for vm installation, please check the server @ ip %s for errors..." % (
+            controller_node, controller_ip)
+        sys.exit(1)
+    else:
+        print "VM host prepared successfully..."
+
+def install_server_vms(controller_node, opencenter_server_ip, chef_server_ip, vm_bridge, vm_bridge_device):
+    controller_ip = controller_node['ipaddress']
+    root_pass = razor.get_active_model_pass(controller_node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
+    
+    # Download vm setup script on controller node.
+    print "Downloading VM setup script..."
+    command = "mkdir /opt/rpcs; git clone https://github.com/rsoprivatecloud/scripts /opt/rpcs"
+    download_run = run_remote_ssh_cmd(controller_ip, 'root', root_pass, command)
+    if not download_run['success']:
+        print "Failed to download script on server %s@%s...." % (controller_node, controller_ip)
+        print "Return Code: %s" % download_run['exception'].returncode
+        print "Exception: %s" % download_run['exception']
+        sys.exit(1)
+    else:
+        print "Successfully downloaded VM setup script..."
+    
+    # Run vm setup script on controller node
+    print "Running VM setup script..."
+    command = "./oc_prepare.sh %s %s %s %s" % (chef_server_ip, opencenter_server_ip, vm_bridge, vm_bridge_device)
+    install_run = run_remote_ssh_cmd(controller_ip, 'root', root_pass, command)
+    if not install_run['success']:
+        print "Failed to run VM setup script on server %s@%s...." % (controller_node, controller_ip)
+        print "Return Code: %s" % install_run['exception'].returncode
+        print "Exception: %s" % install_run['exception']
+        sys.exit(1)
+    else:
+        print "VM's successfully setup on server %s..." % controller_node
+
+def ping_check_vm(ip_address):
+    command = "ping -c 5 %s" % ip_address
+    try:
+        ret = check_call(command, shell=True)
+        return {'success': True, 'return': ret, 'exception': None}
+    except CalledProcessError, cpe:
+        return {'success': False, 'return': None, 'exception': cpe, 'command': command}
+    
+# If we want vms, assign them ips, these ips are static which means we can only have 1 ubuntu and 1 centos cluster running vms when testing
+# We may need to change this later but as this is a matrix for support only 1 cluster testing should be needed.
+# Maybe not? If not we need a more clever way of assigning ips to the vms
+
+server_vms = False
+if results.server_vms == 'true':
+    server_vms = True
+    vm_bridge = 'ocbr0'
+    if results.os == 'ubuntu':
+        oc_server_ip = '198.101.133.150'
+        chef_server_ip = '198.101.133.151'
+        vm_bridge_device = 'eth0'
+    else:
+        oc_server_ip = '198.101.133.152'
+        chef_server_ip = '198.101.133.153'
+        vm_bridge_device = 'em1'
+        
+
 """
 Steps
 1. Make an environment for {{name}}-{{os}}-opencenter
@@ -198,6 +299,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                      
     # Collect environment and install opencenter.
     if results.action == "build":
+
         #Collect the amount of servers we need for the opencenter install   
         nodes = Search('node').query("name:qa-%s-pool* AND chef_environment:_default" % results.os)          
         if len(nodes) < cluster_size:
@@ -205,6 +307,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             print "Not enough nodes for the cluster_size given: %s " % cluster_size
             print "*****************************************************"
             sys.exit(1)
+        
         count = 0    
         opencenter_list = []
         for n in nodes:
@@ -228,60 +331,150 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         #Remove chef on all nodes
         for n in opencenter_list:
             remove_chef(n)
+
+        # Install chef and opencenter on vms on the controller
+        if server_vms:
+            
+            # Set the controller and compute lists
+            controller = opencenter_list[1]
+            computes = opencenter_list[2:]
+
+            # Edit the controller in our chef
+            controller_node = Node(controller)
+            controller_node['in_use'] = 'controller_with_vms'
+            controller_node.save()
+
+            # Check to make sure the VMs ips dont ping
+            # Ping the opencenter vm
+            oc_ping = ping_check_vm(oc_server_ip)
+            if oc_ping['success']:
+                print "OpenCenter VM pinged, please tear down old vms before proceeding...."
+                sys.exit(1)
+
+            # Ping the chef server vm
+            cf_ping = ping_check_vm(chef_server_ip)
+            if oc_ping['success']:
+                print "Chef Server VM pinged, please tear down old vms before proceeding...."
+                sys.exit(1)
+
+            # Prepare the server by installing needed packages
+            print "Preparing the VM host server"
+            prepare_vm_host(controller_node)
+
+            # install the server vms and ping check them
+            print "Setting up VMs on the host server"
+            install_server_vms(controller_node, oc_server_ip, chef_server_ip, vm_bridge, vm_bridge_device)
+            
+            # Ping the opencenter vm
+            oc_ping = ping_check_vm(oc_server_ip)
+            if not oc_ping['success']:
+                print "OpenCenter VM failed to ping..."
+                print "Return Code: %s" % oc_ping['exception'].returncode
+                print "Output: %s" % oc_ping['exception'].output
+                sys.exit(1)
+            else:
+                print "OpenCenter Server VM set up..."
+
+            # Ping the chef server vm
+            cf_ping = ping_check_vm(chef_server_ip)
+            if not cf_ping['success']:
+                print "OpenCenter VM failed to ping..."
+                print "Return Code: %s" % cf_ping['exception'].returncode
+                print "Output: %s" % cf_ping['exception'].output
+                sys.exit(1)
+            else:
+                print "Chef Server VM set up..."
+
+            # Open file containing vm login info, load into variable
+            try:
+                # Open the file
+                fo = open("/var/lib/jenkins/source_files/vminfo.json", "r")
+            except IOError:
+                print "Failed to open /var/lib/jenkins/source_files/vminfo.json"
+            else:
+                # Write the json string
+                vminfo = json.loads(fo.read())
+
+                #close the file
+                fo.close()
+
+                # print message for debugging
+                print "/var/lib/jenkins/source_files/vminfo.json successfully open, read, and closed."
+
+            vm_user = vminfo['user_info']['user']
+            vm_user_pass = vminfo['user_info']['password']
+
+            # Install OpenCenter Server / Dashboard on VM
+            install_opencenter_vm(results.repo, 'server', oc_server_ip, vm_user, vm_user_pass)
+            install_opencenter_vm(results.repo, 'dashboard', oc_server_ip, vm_user, vm_user_pass)
+
+            # Install OpenCenter Client on Chef VM
+            install_opencenter_vm(results.repo, 'agent', chef_server_ip, vm_user, vm_user_pass)
+
+            # Install OpenCenter Client on Controller
+            install_opencenter(controller, results.repo, 'agent', oc_server_ip)
+
+            # Install OpenCenter Client on Computes
+            for client in computes:
+                agent_node = Node(client)
+                agent_node['in_use'] = "agent"
+                agent_node.save()
+                install_opencenter(client, results.repo, 'agent', oc_server_ip)
+
+        else:
+            #Pick an opencenter server, and rest for agents
+            server = opencenter_list[0]
+            dashboard = []
+            clients = []
+            if len(opencenter_list) > 1:
+                dashboard = opencenter_list[1]
+            if len(opencenter_list) > 2:
+                clients = opencenter_list[2:]
+            
+            #Remove chef client...install opencenter server
+            print "Making %s the server node" % server
+            server_node = Node(server)
+            server_ip = server_node['ipaddress']
+            server_node['in_use'] = "server"
+            server_node.save()
+            
+            install_opencenter(server, results.repo, 'server')
+            
+            if dashboard:
+                dashboard_node = Node(dashboard) 
+                dashboard_node['in_use'] = "dashboard"
+                dashboard_node.save()            
+                install_opencenter(dashboard, results.repo, 'dashboard', server_ip)    
+            
+            for client in clients:
+                agent_node = Node(client)
+                agent_node['in_use'] = "agent"
+                agent_node.save()
+                install_opencenter(client, results.repo, 'agent', server_ip)
         
-        #Pick an opencenter server, and rest for agents
-        server = opencenter_list[0]
-        dashboard = []
-        clients = []
-        if len(opencenter_list) > 1:
-            dashboard = opencenter_list[1]
-        if len(opencenter_list) > 2:
-            clients = opencenter_list[2:]
-        
-        #Remove chef client...install opencenter server
-        print "Making %s the server node" % server
-        server_node = Node(server)
-        server_ip = server_node['ipaddress']
-        server_node['in_use'] = "server"
-        server_node.save()
-        
-        install_opencenter(server, results.repo, 'server')
-        
-        if dashboard:
-            dashboard_node = Node(dashboard) 
-            dashboard_node['in_use'] = "dashboard"
-            dashboard_node.save()            
-            install_opencenter(dashboard, results.repo, 'dashboard', server_ip)    
-        
-        for client in clients:
-            agent_node = Node(client)
-            agent_node['in_use'] = "agent"
-            agent_node.save()
-            install_opencenter(client, results.repo, 'agent', server_ip)
-    
-        print ""
-        print ""
-        print ""
-        print ""
-        
-        dashboard_ip = Node(dashboard)['ipaddress']
-        dashboard_url = ""
-        try:
-            r = requests.get("https://%s" % dashboard_ip, auth=('admin','password'),verify=False)
-            dashboard_url = "https://%s" % dashboard_ip
-        except:
-            dashboard_url = "http://%s:3000" % dashboard_ip
-            pass
-                
-        print "********************************************************************"
-        print "Server: %s - %s  " % (server, server_ip)
-        print "Dashboard: %s - %s " % (dashboard, dashboard_url)
-        for a in clients:
-            node = Node(a)
-            print "Agent: %s - %s " % (a, node['ipaddress'])
-        print "********************************************************************"
-         
-        print ""
-        print ""
-        print ""
-        print ""
+            print ""
+            print ""
+            print ""
+            print ""
+            
+            dashboard_ip = Node(dashboard)['ipaddress']
+            dashboard_url = ""
+            try:
+                r = requests.get("https://%s" % dashboard_ip, auth=('admin','password'),verify=False)
+                dashboard_url = "https://%s" % dashboard_ip
+            except:
+                dashboard_url = "http://%s:3000" % dashboard_ip
+                pass
+                    
+            print "********************************************************************"
+            print "Server: %s - %s  " % (server, server_ip)
+            print "Dashboard: %s - %s " % (dashboard, dashboard_url)
+            for a in clients:
+                node = Node(a)
+                print "Agent: %s - %s " % (a, node['ipaddress'])
+            print "********************************************************************"
+             
+            print ""
+            print ""
+            print ""
+            print ""
