@@ -1,6 +1,7 @@
 from subprocess import check_call, CalledProcessError
 import argparse
 import sys
+import os
 from chef import ChefAPI, Search, Node
 from opencenterclient.client import OpenCenterEndpoint
 from razor_api import razor_api
@@ -31,7 +32,8 @@ parser.add_argument('--chef_url', action="store", dest="chef_url",
 parser.add_argument('--chef_client', action="store", dest="chef_client",
                     default="jenkins", required=False, help="client for chef")
 parser.add_argument('--chef_client_pem', action="store",
-                    dest="chef_client_pem", default="~/.chef/jenkins.pem",
+                    dest="chef_client_pem",
+                    default="%s/.chef/jenkins.pem" % os.getenv("HOME"),
                     required=False, help="client pem for chef")
 results = parser.parse_args()
 
@@ -63,9 +65,9 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     if not Search("environment").query("name:%s" % env):
         print "environment %s not found" % env
         sys.exit(1)
-    query = "in_use:\"server\" AND chef_environment:%s" % (results.os, env)
+    query = "in_use:\"server\" AND chef_environment:%s" % env
     opencenter_server = Search('node').query(query)
-    ep = OpenCenterEndpoint("https://%s:8443" % opencenter_server.ipaddress,
+    ep = OpenCenterEndpoint("https://%s:8443" % opencenter_server['ipaddress'],
                             user="admin",
                             password="password")
     chef_envs = []
