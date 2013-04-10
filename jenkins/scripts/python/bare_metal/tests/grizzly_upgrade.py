@@ -67,7 +67,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         sys.exit(1)
     query = "in_use:\"server\" AND chef_environment:%s" % env
     opencenter_server_ip = next(Search('node').query(query)).attributes['ipaddress']
-    ep = OpenCenterEndpoint("https://%s:8443" % opencenter_server
+    ep = OpenCenterEndpoint("https://%s:8443" % opencenter_server_ip,
                             user="admin",
                             password="password")
     chef_envs = []
