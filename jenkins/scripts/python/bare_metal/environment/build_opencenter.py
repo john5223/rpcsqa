@@ -336,8 +336,8 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         if server_vms:
             
             # Set the controller and compute lists
-            controller = opencenter_list[1]
-            computes = opencenter_list[2:]
+            controller = opencenter_list[0]
+            computes = opencenter_list[1:]
 
             # Edit the controller in our chef
             controller_node = Node(controller)
