@@ -79,8 +79,9 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         chef_envs.append(chef_env)
     for node in ep.nodes.filter('facts.chef_environment = "test_cluster"'):
         if 'agent' in node.facts['backends']:
-            ipaddress = Node(node.name).attributes['ipaddress']
-            uuid = node.attributes['razor_metadata']['razor_active_model_uuid']
+            chef_node = Node(node.name)
+            ipaddress = chef_node.attributes['ipaddress']
+            uuid = chef_node.attributes['razor_metadata']['razor_active_model_uuid']
             password = razor.get_active_model_pass(uuid)['password']
             for command in commands:
                 run_remote_ssh_cmd(ipaddress, 'root', password, command)
