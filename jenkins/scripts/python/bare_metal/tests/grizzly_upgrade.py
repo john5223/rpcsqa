@@ -66,8 +66,8 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         print "environment %s not found" % env
         sys.exit(1)
     query = "in_use:\"server\" AND chef_environment:%s" % env
-    opencenter_server = Search('node').query(query)
-    ep = OpenCenterEndpoint("https://%s:8443" % opencenter_server['ipaddress'],
+    opencenter_server_ip = next(Search('node').query(query)).attributes['ipaddress']
+    ep = OpenCenterEndpoint("https://%s:8443" % opencenter_server_ip,
                             user="admin",
                             password="password")
     chef_envs = []
@@ -77,7 +77,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         chef_envs.append(chef_env)
     for node in ep.nodes.filter('facts.chef_environment = "test_cluster"'):
         if 'agent' in node.facts['backends']:
-            ipaddress = Node(node.name).ipaddress
+            ipaddress = Node(node.name).attributes['ipaddress']
             uuid = node.attributes['razor_metadata']['razor_active_model_uuid']
             password = razor.get_active_model_pass(uuid)['password']
             for command in commands:
