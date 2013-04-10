@@ -177,10 +177,10 @@ def prepare_vm_host(controller_node):
 
     if controller_node['platform_family'] == 'debian':
         command = "aptitude install -y curl dsh screen vim iptables-persistent libvirt-bin \
-        python-libvirt qemu-kvm guestfish; ssh-keygen -N \'\'; apt-get update -y -qq"
+        python-libvirt qemu-kvm guestfish git; ssh-keygen -N \'\'; apt-get update -y -qq"
     else:
         command = "yum install -y curl dsh screen vim iptables-persistent libvirt-bin \
-        python-libvirt qemu-kvm guestfish; ssh-keygen -N \'\'; yum update -y -q"
+        python-libvirt qemu-kvm guestfish git; ssh-keygen -N \'\'; yum update -y -q"
 
     print "Prepare command to run: %s" % command
     prepare_run = run_remote_ssh_cmd(controller_ip, 'root', root_pass, command)
@@ -276,6 +276,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     for n in nodes:
         node = Node(n['name'])        
         if "role[qa-base]" in node.run_list:
+            node['in_use'] = 0
             node.run_list = ["recipe[network-interfaces]"]
             node.save()
             print "Running network interfaces for %s" % node.name
@@ -297,12 +298,15 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         for n in nodes:    
             name = n['name']  
             node = Node(name)      
-            if node.chef_environment != "_default":                     
+            if node.chef_environment != "_default" and node['in_use'] != 0:                     
                 if (results.action == "destroy" and results.name == "all"):
                     erase_node(name)
                 else:                              
                     if node.chef_environment == env:                                    
                         erase_node(name)
+            else:
+                node.chef_environment = "_default"
+                node.save()
                      
     # Collect environment and install opencenter.
     if results.action == "build":
@@ -322,7 +326,6 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             node = Node(name)        
             
             if node.chef_environment == "_default" and "recipe[network-interfaces]" in node.run_list:
-                node['in_use'] = 1
                 node.chef_environment = env
                 node.save()
                 opencenter_list.append(name)
@@ -346,12 +349,6 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             controller = opencenter_list[0]
             computes = opencenter_list[1:]
 
-            # Edit the controller in our chef
-            controller_node = Node(controller)
-            controller_node['in_use'] = 'controller_with_vms'
-            controller_ip = controller_node['ipaddress']
-            controller_node.save()
-
             # Check to make sure the VMs ips dont ping
             # Ping the opencenter vm
             oc_ping = ping_check_vm(oc_server_ip)
@@ -365,6 +362,12 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 print "Chef Server VM pinged, please tear down old vms before proceeding...."
                 sys.exit(1)
 
+            # Edit the controller in our chef
+            controller_node = Node(controller)
+            controller_node['in_use'] = 'controller_with_vms'
+            controller_ip = controller_node['ipaddress']
+            controller_node.save()
+            
             # Prepare the server by installing needed packages
             print "Preparing the VM host server"
             prepare_vm_host(controller_node)
