@@ -392,6 +392,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 fo = open("/var/lib/jenkins/source_files/vminfo.json", "r")
             except IOError:
                 print "Failed to open /var/lib/jenkins/source_files/vminfo.json"
+                sys.exit(1)
             else:
                 # Write the json string
                 vminfo = json.loads(fo.read())
