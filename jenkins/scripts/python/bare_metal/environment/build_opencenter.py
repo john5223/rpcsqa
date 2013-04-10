@@ -154,8 +154,8 @@ def install_opencenter(server, install_script, role, server_ip="0.0.0.0"):
         print "Failed to install opencenter %s" % type
         sys.exit(1)
 
-def install_opencenter_vm(install_script, role, vm_ip, user, password):
-    command = "bash <(curl %s) --role=%s --ip=%s" % (install_script, role, vm_ip)
+def install_opencenter_vm(vm_ip, oc_server_ip, install_script, role, user, password):
+    command = "bash <(curl %s) --role=%s --ip=%s" % (install_script, role, oc_server_ip)
     install_run = run_remote_ssh_cmd(vm_ip, user, password, command)
     if not install_run['success']:
         print "Failed to install OpenCenter %s on VM..." % role
@@ -183,7 +183,7 @@ def prepare_vm_host(controller_node):
             controller_node, controller_ip)
         sys.exit(1)
     else:
-        print "VM host prepared successfully..."
+        print "VM host %s prepared successfully..." % controller_node['name']
 
 def install_server_vms(controller_node, opencenter_server_ip, chef_server_ip, vm_bridge, vm_bridge_device):
     controller_ip = controller_node['ipaddress']
@@ -211,7 +211,7 @@ def install_server_vms(controller_node, opencenter_server_ip, chef_server_ip, vm
         print "Exception: %s" % install_run['exception']
         sys.exit(1)
     else:
-        print "VM's successfully setup on server %s..." % controller_node
+        print "VM's successfully setup on server %s..." % controller_node['name']
 
 def ping_check_vm(ip_address):
     command = "ping -c 5 %s" % ip_address
@@ -407,11 +407,11 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             vm_user_pass = vminfo['user_info']['password']
 
             # Install OpenCenter Server / Dashboard on VM
-            install_opencenter_vm(results.repo, 'server', oc_server_ip, vm_user, vm_user_pass)
-            install_opencenter_vm(results.repo, 'dashboard', oc_server_ip, vm_user, vm_user_pass)
+            install_opencenter_vm(oc_server_ip, oc_server_ip, results.repo, 'server', vm_user, vm_user_pass)
+            install_opencenter_vm(oc_server_ip, oc_server_ip, results.repo, 'dashboard', vm_user, vm_user_pass)
 
             # Install OpenCenter Client on Chef VM
-            install_opencenter_vm(results.repo, 'agent', chef_server_ip, vm_user, vm_user_pass)
+            install_opencenter_vm(chef_server_ip, oc_server_ip, results.repo, 'agent', vm_user, vm_user_pass)
 
             # Install OpenCenter Client on Controller
             install_opencenter(controller, results.repo, 'agent', oc_server_ip)
