@@ -65,9 +65,9 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     if not Search("environment").query("name:%s" % env):
         print "environment %s not found" % env
         sys.exit(1)
-    query = "in_use:\"server\" AND chef_environment:%s" % (env)
+    query = "in_use:\"server\" AND chef_environment:%s" % env
     opencenter_server = Search('node').query(query)
-    ep = OpenCenterEndpoint("https://%s:8443" % opencenter_server.ipaddress,
+    ep = OpenCenterEndpoint("https://%s:8443" % opencenter_server['ipaddress'],
                             user="admin",
                             password="password")
     chef_envs = []
