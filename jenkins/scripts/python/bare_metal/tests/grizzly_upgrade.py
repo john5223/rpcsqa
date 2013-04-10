@@ -16,10 +16,10 @@ parser.add_argument('--os', action="store", dest="os", required=False,
                     help="Operating System to use for opencenter")
 parser.add_argument('--url', action="store", dest="url",
                     required=False,
-                    default='http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly',
+                    default='deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly',
                     help="Update Resource url")
 parser.add_argument('--file', action="store", dest="file", required=False,
-                    default="deb/etc/apt/sources.list.d/grizzly.list",
+                    default="/etc/apt/sources.list.d/grizzly.list",
                     help="File to place new resource")
 
 #Defaulted arguments
