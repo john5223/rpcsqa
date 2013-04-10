@@ -342,6 +342,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             # Edit the controller in our chef
             controller_node = Node(controller)
             controller_node['in_use'] = 'controller_with_vms'
+            controller_ip = controller_node['ipaddress']
             controller_node.save()
 
             # Check to make sure the VMs ips dont ping
@@ -420,6 +421,17 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 agent_node['in_use'] = "agent"
                 agent_node.save()
                 install_opencenter(client, results.repo, 'agent', oc_server_ip)
+
+            # Print Cluster Info
+            print "************************************************************"
+            print "2 VMs, 1 controller ( VM Host ), %i Computes" % len(computes)
+            print "OpenCenter Server (VM) with IP: %s on Host: %s" % (oc_server_ip, controller)
+            print "Chef Server (VM) with IP: %s on Host: %s" % (chef_server_ip, controller)
+            print "Controller Node: %s with IP: %s" % (controller, controller_ip)
+            for agent in computes:
+                node = Node(agent)
+                print "Agent Node: %s with IP: %s" % (agent, node['ipaddress'])
+            print "************************************************************"
 
         else:
             #Pick an opencenter server, and rest for agents
