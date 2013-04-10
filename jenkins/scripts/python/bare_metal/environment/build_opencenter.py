@@ -10,7 +10,13 @@ from razor_api import razor_api
 from subprocess import check_call, CalledProcessError
 
 """
-# TODO: JOHN DOCUMENT EXACTLY WHAT THIS MONSTER DOES!!
+This script will automatically build a OpenCenter cluster based on passed parameters
+@param name         Name of the cluster
+@param cluster_size Size of the cluster
+@param server_vms   Whether or not to install OpenCenter Server and Chef Server on VM's on the Controller node
+@param os           The operating system to install on (Ubuntu, Centos)
+@param repo_url     The URL of the OpenCenter install script
+@param action       What to do with the cluster (build, destroy)
 """
 
 # Parse arguments from the cmd line
