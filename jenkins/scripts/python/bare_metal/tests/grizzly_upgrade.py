@@ -77,7 +77,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         chef_envs.append(chef_env)
     for node in ep.nodes.filter('facts.chef_environment = "test_cluster"'):
         if 'agent' in node.facts['backends']:
-            ipaddress = Node(node.name).ipaddress
+            ipaddress = Node(node.name).attributes['ipaddress']
             uuid = node.attributes['razor_metadata']['razor_active_model_uuid']
             password = razor.get_active_model_pass(uuid)['password']
             for command in commands:
