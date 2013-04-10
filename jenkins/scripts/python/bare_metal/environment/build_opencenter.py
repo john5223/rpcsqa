@@ -194,7 +194,7 @@ def install_server_vms(controller_node, opencenter_server_ip, chef_server_ip, vm
     command = "mkdir /opt/rpcs; git clone https://github.com/rsoprivatecloud/scripts /opt/rpcs"
     download_run = run_remote_ssh_cmd(controller_ip, 'root', root_pass, command)
     if not download_run['success']:
-        print "Failed to download script on server %s@%s...." % (controller_node, controller_ip)
+        print "Failed to download script on server %s@%s...." % (controller_node['name'], controller_ip)
         print "Return Code: %s" % download_run['exception'].returncode
         print "Exception: %s" % download_run['exception']
         sys.exit(1)
@@ -206,7 +206,7 @@ def install_server_vms(controller_node, opencenter_server_ip, chef_server_ip, vm
     command = "./oc_prepare.sh %s %s %s %s" % (chef_server_ip, opencenter_server_ip, vm_bridge, vm_bridge_device)
     install_run = run_remote_ssh_cmd(controller_ip, 'root', root_pass, command)
     if not install_run['success']:
-        print "Failed to run VM setup script on server %s@%s...." % (controller_node, controller_ip)
+        print "Failed to run VM setup script on server %s@%s...." % (controller_node['name'], controller_ip)
         print "Return Code: %s" % install_run['exception'].returncode
         print "Exception: %s" % install_run['exception']
         sys.exit(1)
