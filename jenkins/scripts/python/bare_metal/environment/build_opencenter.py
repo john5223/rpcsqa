@@ -424,7 +424,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
 
             # Print Cluster Info
             print "************************************************************"
-            print "2 VMs, 1 controller ( VM Host ), %i Computes" % len(computes)
+            print "2 VMs, 1 controller ( VM Host ), %i Agents" % len(computes)
             print "OpenCenter Server (VM) with IP: %s on Host: %s" % (oc_server_ip, controller)
             print "Chef Server (VM) with IP: %s on Host: %s" % (chef_server_ip, controller)
             print "Controller Node: %s with IP: %s" % (controller, controller_ip)
