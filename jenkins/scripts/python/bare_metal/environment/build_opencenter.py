@@ -195,6 +195,8 @@ def prepare_vm_host(controller_node):
     
         if not prepare_run['success']:
             print "Failed to run command %s, please check the server %s @ ip: %s for errors..." % (command, controller_node, controller_ip)
+            print "Return Code: %s" % prepare_run['exception'].returncode
+            print "Exception: %s" % prepare_run['exception']
             sys.exit(1)
 
 def clone_git_repo(chef_node, github_user, github_user_pass):
