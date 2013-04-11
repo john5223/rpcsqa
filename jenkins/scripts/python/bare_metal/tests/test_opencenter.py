@@ -229,10 +229,6 @@ nova_mysql_vip = %s
     opencenter_server_password = razor.get_active_model_pass(am_uuid)['password']
 
     # Transfer the testerator Config file to the server
-    
-        run_remote_ssh_cmd(opencenter_server_ip, 'root',
-                           opencenter_server_password,
-                           )
     try:
         print "!!## -- Transfering the config file to the server: %s -- ##!!" % opencenter_server_ip
         check_call_return = check_call("sshpass -p %s scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet %s root@%s:/root/%s" % (opencenter_server_password, '/tmp/%s' % config_file, opencenter_server_ip, config_file), shell=True)
