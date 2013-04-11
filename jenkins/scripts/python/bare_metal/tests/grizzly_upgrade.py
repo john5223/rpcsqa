@@ -69,7 +69,7 @@ else:
                 'yum upgrade -y',
                 'wget http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-openstack-grizzly.repo -O /etc/yum.repos.d/epel-openstack-grizzly.repo',
                 'cat /etc/yum.repos.d/epel-openstack-grizzly.repo',
-                'rpm -e openstack-nova-volume --nodeps',
+                "if [[ `rpm -V openstack-nova-volume` ]]; then rpm -e openstack-nova-volume --nodeps; fi"
                 'yum upgrade -y']
 
 razor = razor_api(results.razor_ip)
