@@ -64,9 +64,9 @@ if results.os == "ubuntu":
                 'sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade']
 else:
     print "##### Placing centos repo in: /etc/yum.repos.d/epel-openstack-grizzly.repo #####"
-    commands = ['yum upgrade',
+    commands = ['yum upgrade -y',
                 'wget http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-openstack-grizzly.repo -O /etc/yum.repos.d/epel-openstack-grizzly.repo',
-                'yum upgrade']
+                'yum upgrade -y']
 
 razor = razor_api(results.razor_ip)
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
