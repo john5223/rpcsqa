@@ -50,13 +50,12 @@ def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
                 'exception': cpe,
                 'command': command}
 
-
+print "##### Updating agents to Grizzly #####"
 apt_source = "deb %s main" % results.url
 apt_file = results.file
-# commands = ["echo %s > %s" % (apt_source, apt_file),
-#             'apt-get update',
-#             'apt-get dist-upgrade -y']
-commands = ["echo %s > %s" % (apt_source, apt_file)]
+commands = ["echo %s > %s" % (apt_source, apt_file),
+            'apt-get update',
+            'sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade']
 
 razor = razor_api(results.razor_ip)
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
@@ -83,6 +82,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             ipaddress = chef_node.attributes['ipaddress']
             uuid = chef_node.attributes['razor_metadata']['razor_active_model_uuid']
             password = razor.get_active_model_pass(uuid)['password']
+            print "##### Grizzifying: %s - %s #####" % (node.name, ipaddress)
             for command in commands:
                 run_remote_ssh_cmd(ipaddress, 'root', password, command)
             # Run chef client?
