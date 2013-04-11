@@ -176,19 +176,21 @@ def prepare_vm_host(controller_node):
     root_pass = razor.get_active_model_pass(controller_node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
 
     if controller_node['platform_family'] == 'debian':
-        command = "aptitude install -y curl dsh screen vim iptables-persistent libvirt-bin python-libvirt qemu-kvm guestfish git;\
-        apt-get update -y -qq; ssh-keygen -N \'\'"
+        commands = ["aptitude install -y curl dsh screen vim iptables-persistent libvirt-bin python-libvirt qemu-kvm guestfish git",
+                    "apt-get update -y -qq",
+                    "ssh-keygen -f /root/.ssh/id_rsa -N \'\'"]
     else:
-        command = "yum install -y curl dsh screen vim iptables-persistent libvirt-bin python-libvirt qemu-kvm guestfish git;\
-        yum update -y -q; ssh-keygen -N \'\'"
+        commands = ["yum install -y curl dsh screen vim iptables-persistent libvirt-bin python-libvirt qemu-kvm guestfish git",
+                    "yum update -y -q",
+                    "ssh-keygen -f /root/.ssh/id_rsa -N \'\'"]
 
-    print "Prepare command to run: %s" % command
-    prepare_run = run_remote_ssh_cmd(controller_ip, 'root', root_pass, command)
+    for command in commands:
+        print "Prepare command to run: %s" % command
+        prepare_run = run_remote_ssh_cmd(controller_ip, 'root', root_pass, command)
     
-    if not prepare_run['success']:
-        print "Failed to prepare server %s for vm installation, please check the server @ ip %s for errors..." % (
-            controller_node, controller_ip)
-        sys.exit(1)
+        if not prepare_run['success']:
+            print "Failed to prepare server %s for vm installation, please check the server @ ip %s for errors..." % (controller_node, controller_ip)
+            sys.exit(1)
 
 def clone_git_repo(chef_node, github_user, github_user_pass):
     controller_ip = chef_node['ipaddress']
