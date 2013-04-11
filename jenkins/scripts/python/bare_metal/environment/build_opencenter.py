@@ -216,8 +216,8 @@ def clone_git_repo(chef_node, github_user, github_user_pass):
         print "Successfully cloned repo with setup script..."
 
 def install_server_vms(controller_node, opencenter_server_ip, chef_server_ip, vm_bridge, vm_bridge_device):
-    controller_ip = chef_node['ipaddress']
-    root_pass = razor.get_active_model_pass(chef_node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
+    controller_ip = controller_node['ipaddress']
+    root_pass = razor.get_active_model_pass(controller_node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
 
     # Run vm setup script on controller node
     print "Running VM setup script..."
