@@ -16,7 +16,7 @@ parser.add_argument('--os', action="store", dest="os", required=False,
                     help="Operating System to use for opencenter")
 parser.add_argument('--url', action="store", dest="url",
                     required=False,
-                    default='deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly',
+                    default='deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly main',
                     help="Update Resource url")
 parser.add_argument('--file', action="store", dest="file", required=False,
                     default="/etc/apt/sources.list.d/grizzly.list",
@@ -51,12 +51,12 @@ def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
                 'command': command}
 
 print "##### Updating agents to Grizzly #####"
-apt_source = "deb %s main" % results.url
+apt_source = "%s" % results.url
 apt_file = results.file
 print "##### Placing: #####\n"
 print "#####   %s #####\n" % apt_source
 print "##### In: #####\n"
-print "#####   %s #####\n" % apt_source
+print "#####   %s #####\n" % apt_file
 commands = ["echo %s > %s" % (apt_source, apt_file),
             'apt-get update',
             'sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade']
