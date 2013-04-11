@@ -213,7 +213,7 @@ nova_mysql_vip = %s
     pip = ""
     if results.os == "centos":
         commands.append("yum install openssh-clients git python-pip -y")
-        pip = "python-pip"
+        pip = "pip-python"
     elif results.os == "ubuntu":
         commands.append("apt-get install git python-pip -y -q")
         pip = "pip"
