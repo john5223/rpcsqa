@@ -16,10 +16,10 @@ parser.add_argument('--os', action="store", dest="os", required=False,
                     help="Operating System to use for opencenter")
 parser.add_argument('--url', action="store", dest="url",
                     required=False,
-                    default='http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly',
+                    default='deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly main',
                     help="Update Resource url")
 parser.add_argument('--file', action="store", dest="file", required=False,
-                    default="deb/etc/apt/sources.list.d/grizzly.list",
+                    default="/etc/apt/sources.list.d/grizzly.list",
                     help="File to place new resource")
 
 #Defaulted arguments
@@ -50,13 +50,16 @@ def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
                 'exception': cpe,
                 'command': command}
 
-
-apt_source = "deb %s main" % results.url
+print "##### Updating agents to Grizzly #####"
+apt_source = "%s" % results.url
 apt_file = results.file
-# commands = ["echo %s > %s" % (apt_source, apt_file),
-#             'apt-get update',
-#             'apt-get dist-upgrade -y']
-commands = ["echo %s > %s" % (apt_source, apt_file)]
+print "##### Placing: #####\n"
+print "#####   %s #####\n" % apt_source
+print "##### In: #####\n"
+print "#####   %s #####\n" % apt_file
+commands = ["echo %s > %s" % (apt_source, apt_file),
+            'apt-get update',
+            'sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade']
 
 razor = razor_api(results.razor_ip)
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
@@ -66,7 +69,9 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         print "environment %s not found" % env
         sys.exit(1)
     query = "in_use:\"server\" AND chef_environment:%s" % env
-    opencenter_server_ip = next(Search('node').query(query)).attributes['ipaddress']
+    opencenter_server = Node(next(node['name'] for node in
+                                  Search('node').query(query)))
+    opencenter_server_ip = opencenter_server.attributes['ipaddress']
     ep = OpenCenterEndpoint("https://%s:8443" % opencenter_server_ip,
                             user="admin",
                             password="password")
@@ -77,9 +82,11 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         chef_envs.append(chef_env)
     for node in ep.nodes.filter('facts.chef_environment = "test_cluster"'):
         if 'agent' in node.facts['backends']:
-            ipaddress = Node(node.name).attributes['ipaddress']
-            uuid = node.attributes['razor_metadata']['razor_active_model_uuid']
+            chef_node = Node(node.name)
+            ipaddress = chef_node.attributes['ipaddress']
+            uuid = chef_node.attributes['razor_metadata']['razor_active_model_uuid']
             password = razor.get_active_model_pass(uuid)['password']
+            print "##### Grizzifying: %s - %s #####" % (node.name, ipaddress)
             for command in commands:
                 run_remote_ssh_cmd(ipaddress, 'root', password, command)
             # Run chef client?
