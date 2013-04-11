@@ -226,6 +226,7 @@ def install_server_vms(controller_node, opencenter_server_ip, chef_server_ip, vm
     install_run = run_remote_ssh_cmd(controller_ip, 'root', root_pass, command)
     if not install_run['success']:
         print "Failed to run VM setup script on server %s@%s...." % (controller_node, controller_ip)
+        print "Command ran: %s" % install_run['command']
         print "Return Code: %s" % install_run['exception'].returncode
         print "Exception: %s" % install_run['exception']
         sys.exit(1)
