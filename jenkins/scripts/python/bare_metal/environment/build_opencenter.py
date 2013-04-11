@@ -56,6 +56,11 @@ parser.add_argument('--clear_pool', action="store", dest="clear_pool", default=T
 results = parser.parse_args()
 results.chef_client_pem = results.chef_client_pem.replace('~',os.getenv("HOME"))
 
+def cleanup_environment(chef_environment):
+    nodes = Search('node').query("chef_environment:%s AND NOT in_use:0") % chef_environment
+    for n in nodes:
+        erase_node(n)
+
 def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
     command = "sshpass -p %s ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet -l %s %s '%s'" % (passwd, user, server_ip, remote_cmd)
     try:
@@ -178,11 +183,11 @@ def prepare_vm_host(controller_node):
     if controller_node['platform_family'] == 'debian':
         commands = ["aptitude install -y curl dsh screen vim iptables-persistent libvirt-bin python-libvirt qemu-kvm guestfish git",
                     "aptitude update -y",
-                    "ssh-keygen -f /root/.ssh/id_rsa -N \\\'\\\'"]
+                    "ssh-keygen -f /root/.ssh/id_rsa -N \'\'"]
     else:
         commands = ["yum install -y curl dsh screen vim iptables-persistent libvirt-bin python-libvirt qemu-kvm guestfish git",
                     "yum update -y",
-                    "ssh-keygen -f /root/.ssh/id_rsa -N \\\'\\\'"]
+                    "ssh-keygen -f /root/.ssh/id_rsa -N \'\'"]
 
     for command in commands:
         print "Prepare command to run: %s" % command
