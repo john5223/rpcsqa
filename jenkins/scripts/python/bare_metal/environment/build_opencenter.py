@@ -176,9 +176,11 @@ def prepare_vm_host(controller_node):
     root_pass = razor.get_active_model_pass(controller_node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
 
     if controller_node['platform_family'] == 'debian':
-        command = "aptitude install -y curl dsh screen vim iptables-persistent libvirt-bin python-libvirt qemu-kvm guestfish git; ssh-keygen -N \'\'; apt-get update -y -qq"
+        command = "aptitude install -y curl dsh screen vim iptables-persistent libvirt-bin python-libvirt qemu-kvm guestfish git;\
+        apt-get update -y -qq; ssh-keygen -N \'\'"
     else:
-        command = "yum install -y curl dsh screen vim iptables-persistent libvirt-bin python-libvirt qemu-kvm guestfish git; ssh-keygen -N \'\'; yum update -y -q"
+        command = "yum install -y curl dsh screen vim iptables-persistent libvirt-bin python-libvirt qemu-kvm guestfish git;\
+        yum update -y -q; ssh-keygen -N \'\'"
 
     print "Prepare command to run: %s" % command
     prepare_run = run_remote_ssh_cmd(controller_ip, 'root', root_pass, command)
@@ -194,7 +196,7 @@ def clone_git_repo(chef_node, github_user, github_user_pass):
     
     # Download vm setup script on controller node.
     print "Cloning repo with setup script..."
-    command = "mkdir /opt/rpcs; git clone https://%s:%s@github.com/rsoprivatecloud/scripts /opt/rpcs" % (github_user, github_user_pass)
+    command = "mkdir -p /opt/rpcs; git clone https://%s:%s@github.com/rsoprivatecloud/scripts /opt/rpcs" % (github_user, github_user_pass)
     download_run = run_remote_ssh_cmd(controller_ip, 'root', root_pass, command)
     if not download_run['success']:
         print "Failed to clone script repo on server %s@%s...." % (chef_node, controller_ip)
@@ -207,7 +209,7 @@ def clone_git_repo(chef_node, github_user, github_user_pass):
 def install_server_vms(controller_node, opencenter_server_ip, chef_server_ip, vm_bridge, vm_bridge_device):
     controller_ip = chef_node['ipaddress']
     root_pass = razor.get_active_model_pass(chef_node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
-    
+
     # Run vm setup script on controller node
     print "Running VM setup script..."
     command = "bash /opt/rpcs/oc_prepare.sh %s %s %s %s" % (chef_server_ip, opencenter_server_ip, vm_bridge, vm_bridge_device)
