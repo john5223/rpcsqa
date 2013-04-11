@@ -189,7 +189,7 @@ def prepare_vm_host(controller_node):
         prepare_run = run_remote_ssh_cmd(controller_ip, 'root', root_pass, command)
     
         if not prepare_run['success']:
-            print "Failed to run command %s, please check the server @ ip: %s for errors..." % (command, controller_ip)
+            print "Failed to run command %s, please check the server %s @ ip: %s for errors..." % (command, controller_node, controller_ip)
             sys.exit(1)
 
 def clone_git_repo(chef_node, github_user, github_user_pass):
