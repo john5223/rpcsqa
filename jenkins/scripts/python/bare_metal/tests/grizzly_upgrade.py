@@ -53,6 +53,10 @@ def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
 print "##### Updating agents to Grizzly #####"
 apt_source = "deb %s main" % results.url
 apt_file = results.file
+print "##### Placing: #####\n"
+print "#####   %s #####\n" % apt_source
+print "##### In: #####\n"
+print "#####   %s #####\n" % apt_source
 commands = ["echo %s > %s" % (apt_source, apt_file),
             'apt-get update',
             'sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade']
