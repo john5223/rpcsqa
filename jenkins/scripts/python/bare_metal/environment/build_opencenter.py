@@ -189,24 +189,24 @@ def prepare_vm_host(controller_node):
         print "Failed to prepare server %s for vm installation, please check the server @ ip %s for errors..." % (
             controller_node, controller_ip)
         sys.exit(1)
-    else:
-        print "VM host %s prepared successfully..." % controller_node
 
-def install_server_vms(controller_node, opencenter_server_ip, chef_server_ip, vm_bridge, vm_bridge_device):
-    controller_ip = controller_node['ipaddress']
-    root_pass = razor.get_active_model_pass(controller_node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
+def clone_git_repo(chef_node, github_user, github_user_pass):
+    controller_ip = chef_node['ipaddress']
+    root_pass = razor.get_active_model_pass(chef_node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
     
     # Download vm setup script on controller node.
-    print "Downloading VM setup script..."
-    command = "mkdir /opt/rpcs; git clone https://github.com/rsoprivatecloud/scripts /opt/rpcs"
+    print "Cloning repo with setup script..."
+    command = "mkdir /opt/rpcs; git clone https://%s:%s@github.com/rsoprivatecloud/scripts /opt/rpcs" % (github_user, github_user_pass)
     download_run = run_remote_ssh_cmd(controller_ip, 'root', root_pass, command)
     if not download_run['success']:
-        print "Failed to download script on server %s@%s...." % (controller_node, controller_ip)
+        print "Failed to clone script repo on server %s@%s...." % (chef_node, controller_ip)
         print "Return Code: %s" % download_run['exception'].returncode
         print "Exception: %s" % download_run['exception']
         sys.exit(1)
     else:
-        print "Successfully downloaded VM setup script..."
+        print "Successfully cloned repo with setup script..."
+
+def install_server_vms(controller_node, opencenter_server_ip, chef_server_ip, vm_bridge, vm_bridge_device):
     
     # Run vm setup script on controller node
     print "Running VM setup script..."
@@ -362,19 +362,44 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 print "Chef Server VM pinged, please tear down old vms before proceeding...."
                 sys.exit(1)
 
+            # Open file containing vm login info, load into variable
+            try:
+                # Open the file
+                fo = open("/var/lib/jenkins/source_files/vminfo.json", "r")
+            except IOError:
+                print "Failed to open /var/lib/jenkins/source_files/vminfo.json"
+                sys.exit(1)
+            else:
+                # Write the json string
+                vminfo = json.loads(fo.read())
+
+                #close the file
+                fo.close()
+
+                # print message for debugging
+                print "/var/lib/jenkins/source_files/vminfo.json successfully open, read, and closed."
+
             # Edit the controller in our chef
             controller_node = Node(controller)
             controller_node['in_use'] = 'controller_with_vms'
             controller_ip = controller_node['ipaddress']
             controller_node.save()
-            
+
             # Prepare the server by installing needed packages
             print "Preparing the VM host server"
             prepare_vm_host(controller_node)
 
+            # Get github user info
+            github_user = vminfo['github_info']['user']
+            github_user_pass = vminfo['github_info']['password']
+            
+            # Clone Repo onto controller
+            print "Cloning setup script repo onto %s" % controller_node
+            clone_git_repo(controller_node, github_user, github_user_pass)
+
             # install the server vms and ping check them
             print "Setting up VMs on the host server"
-            install_server_vms(controller_node, oc_server_ip, chef_server_ip, vm_bridge, vm_bridge_device)
+            install_server_vms(controller_node, oc_server_ip, chef_server_ip, vm_bridge, vm_bridge_device, github_user, github_user_pass)
             
             # Ping the opencenter vm
             oc_ping = ping_check_vm(oc_server_ip)
@@ -396,23 +421,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             else:
                 print "Chef Server VM set up..."
 
-            # Open file containing vm login info, load into variable
-            try:
-                # Open the file
-                fo = open("/var/lib/jenkins/source_files/vminfo.json", "r")
-            except IOError:
-                print "Failed to open /var/lib/jenkins/source_files/vminfo.json"
-                sys.exit(1)
-            else:
-                # Write the json string
-                vminfo = json.loads(fo.read())
-
-                #close the file
-                fo.close()
-
-                # print message for debugging
-                print "/var/lib/jenkins/source_files/vminfo.json successfully open, read, and closed."
-
+            # Get vm user info
             vm_user = vminfo['user_info']['user']
             vm_user_pass = vminfo['user_info']['password']
 
