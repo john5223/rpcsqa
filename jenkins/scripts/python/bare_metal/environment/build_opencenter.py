@@ -207,10 +207,9 @@ def clone_git_repo(chef_node, github_user, github_user_pass):
         print "Successfully cloned repo with setup script..."
 
 def install_server_vms(controller_node, opencenter_server_ip, chef_server_ip, vm_bridge, vm_bridge_device):
-    
     # Run vm setup script on controller node
     print "Running VM setup script..."
-    command = "./oc_prepare.sh %s %s %s %s" % (chef_server_ip, opencenter_server_ip, vm_bridge, vm_bridge_device)
+    command = "bash /opt/rpcs/oc_prepare.sh %s %s %s %s" % (chef_server_ip, opencenter_server_ip, vm_bridge, vm_bridge_device)
     install_run = run_remote_ssh_cmd(controller_ip, 'root', root_pass, command)
     if not install_run['success']:
         print "Failed to run VM setup script on server %s@%s...." % (controller_node, controller_ip)
