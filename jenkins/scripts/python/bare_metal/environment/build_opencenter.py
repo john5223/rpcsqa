@@ -176,11 +176,9 @@ def prepare_vm_host(controller_node):
     root_pass = razor.get_active_model_pass(controller_node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
 
     if controller_node['platform_family'] == 'debian':
-        command = "aptitude install -y curl dsh screen vim iptables-persistent libvirt-bin \
-        python-libvirt qemu-kvm guestfish git; ssh-keygen -N \'\'; apt-get update -y -qq"
+        command = "aptitude install -y curl dsh screen vim iptables-persistent libvirt-bin python-libvirt qemu-kvm guestfish git; ssh-keygen -N \'\'; apt-get update -y -qq"
     else:
-        command = "yum install -y curl dsh screen vim iptables-persistent libvirt-bin \
-        python-libvirt qemu-kvm guestfish git; ssh-keygen -N \'\'; yum update -y -q"
+        command = "yum install -y curl dsh screen vim iptables-persistent libvirt-bin python-libvirt qemu-kvm guestfish git; ssh-keygen -N \'\'; yum update -y -q"
 
     print "Prepare command to run: %s" % command
     prepare_run = run_remote_ssh_cmd(controller_ip, 'root', root_pass, command)
@@ -399,7 +397,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
 
             # install the server vms and ping check them
             print "Setting up VMs on the host server"
-            install_server_vms(controller_node, oc_server_ip, chef_server_ip, vm_bridge, vm_bridge_device, github_user, github_user_pass)
+            install_server_vms(controller_node, oc_server_ip, chef_server_ip, vm_bridge, vm_bridge_device)
             
             # Ping the opencenter vm
             oc_ping = ping_check_vm(oc_server_ip)
