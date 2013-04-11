@@ -239,9 +239,12 @@ if results.server_vms == 'true':
         chef_server_ip = '198.101.133.151'
         vm_bridge_device = 'eth0'
     else:
-        oc_server_ip = '198.101.133.152'
-        chef_server_ip = '198.101.133.153'
-        vm_bridge_device = 'em1'
+        print "%s isnt currently supported for vm deploy, please select Ubuntu" % results.os
+        sys.exit(1)
+        # !!!When CentOS gets support, turn these on!!!
+        # oc_server_ip = '198.101.133.152'
+        # chef_server_ip = '198.101.133.153'
+        # vm_bridge_device = 'em1'
         
 
 """
@@ -342,7 +345,6 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
 
         # Install chef and opencenter on vms on the controller
         if server_vms:
-            
             # Set the controller and compute lists
             controller = opencenter_list[0]
             computes = opencenter_list[1:]
