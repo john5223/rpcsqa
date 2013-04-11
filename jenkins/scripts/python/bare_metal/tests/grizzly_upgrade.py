@@ -62,9 +62,9 @@ if results.os == "ubuntu":
                 'apt-get update',
                 'sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade']
 else:
-    commands = ['yum update'
+    commands = ['yum upgrade'
                 'wget http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-openstack-grizzly.repo -O /etc/yum.repos.d/epel-openstack-grizzly.repo'
-                'yum update']
+                'yum upgrade']
 
 razor = razor_api(results.razor_ip)
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
