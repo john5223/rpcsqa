@@ -397,7 +397,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             controller_node.save()
 
             #Remove chef on controller
-            remove_chef(controller_node)
+            remove_chef(controller)
 
             # Prepare the server by installing needed packages
             print "Preparing the VM host server"
