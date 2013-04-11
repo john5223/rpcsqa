@@ -53,17 +53,19 @@ def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
 print "##### Updating agents to Grizzly #####"
 apt_source = "%s" % results.url
 apt_file = results.file
-print "##### Placing: #####\n"
-print "#####   %s #####\n" % apt_source
-print "##### In: #####\n"
-print "#####   %s #####\n" % apt_file
+
 if results.os == "ubuntu":
+    print "##### Placing: #####\n"
+    print "#####   %s #####" % apt_source
+    print "##### In: #####"
+    print "#####   %s #####" % apt_file
     commands = ["echo %s > %s" % (apt_source, apt_file),
                 'apt-get update',
                 'sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade']
 else:
-    commands = ['yum upgrade'
-                'wget http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-openstack-grizzly.repo -O /etc/yum.repos.d/epel-openstack-grizzly.repo'
+    print "##### Placing centos repo in: /etc/yum.repos.d/epel-openstack-grizzly.repo #####"
+    commands = ['yum upgrade',
+                'wget http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-openstack-grizzly.repo -O /etc/yum.repos.d/epel-openstack-grizzly.repo',
                 'yum upgrade']
 
 razor = razor_api(results.razor_ip)
