@@ -183,11 +183,11 @@ def prepare_vm_host(controller_node):
     if controller_node['platform_family'] == 'debian':
         commands = ["aptitude install -y curl dsh screen vim iptables-persistent libvirt-bin python-libvirt qemu-kvm guestfish git",
                     "aptitude update -y",
-                    "ssh-keygen -f /root/.ssh/id_rsa -N \'\'"]
+                    "ssh-keygen -f /root/.ssh/id_rsa -N \"\""]
     else:
         commands = ["yum install -y curl dsh screen vim iptables-persistent libvirt-bin python-libvirt qemu-kvm guestfish git",
                     "yum update -y",
-                    "ssh-keygen -f /root/.ssh/id_rsa -N \'\'"]
+                    "ssh-keygen -f /root/.ssh/id_rsa -N \"\""]
 
     for command in commands:
         print "Prepare command to run: %s" % command
@@ -353,10 +353,6 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         if not opencenter_list:
             print "No nodes"
             sys.exit(1)
-        
-        #Remove chef on all nodes
-        for n in opencenter_list:
-            remove_chef(n)
 
         # Install chef and opencenter on vms on the controller
         if server_vms:
@@ -399,6 +395,9 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             controller_node['in_use'] = 'controller_with_vms'
             controller_ip = controller_node['ipaddress']
             controller_node.save()
+
+            #Remove chef on controller
+            remove_chef(controller_node)
 
             # Prepare the server by installing needed packages
             print "Preparing the VM host server"
@@ -455,6 +454,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 agent_node = Node(client)
                 agent_node['in_use'] = "agent"
                 agent_node.save()
+                remove_chef(client)
                 install_opencenter(client, results.repo, 'agent', oc_server_ip)
 
             # Print Cluster Info
@@ -485,18 +485,21 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             server_node['in_use'] = "server"
             server_node.save()
             
+            remove_chef(server)
             install_opencenter(server, results.repo, 'server')
             
             if dashboard:
                 dashboard_node = Node(dashboard) 
                 dashboard_node['in_use'] = "dashboard"
-                dashboard_node.save()            
+                dashboard_node.save()
+                remove_chef(dashboard)            
                 install_opencenter(dashboard, results.repo, 'dashboard', server_ip)    
             
             for client in clients:
                 agent_node = Node(client)
                 agent_node['in_use'] = "agent"
                 agent_node.save()
+                remove_chef(client)
                 install_opencenter(client, results.repo, 'agent', server_ip)
         
             print ""
