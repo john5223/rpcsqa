@@ -210,13 +210,17 @@ nova_mysql_vip = %s
 
     # Build Commands to run
     commands = []
+    pip = ""
     if results.os == "centos":
         commands.append("yum install openssh-clients git python-pip -y")
+        pip = "python-pip"
     elif results.os == "ubuntu":
         commands.append("apt-get install git python-pip -y -q")
+        pip = "pip"
+        
     commands += ["rm -rf /root/opencenter-testerator",
                  "git clone %s" % results.opencenter_test_repo,
-                 "pip install -q -r /root/opencenter-testerator/tools/pip-requires",
+                 "%s install -q -r /root/opencenter-testerator/tools/pip-requires" % pip,
                  "mv /root/%s /root/opencenter-testerator/etc/" % (config_file)]
 
     for test in results.opencenter_tests.split(","):
@@ -229,10 +233,6 @@ nova_mysql_vip = %s
     opencenter_server_password = razor.get_active_model_pass(am_uuid)['password']
 
     # Transfer the testerator Config file to the server
-    
-        run_remote_ssh_cmd(opencenter_server_ip, 'root',
-                           opencenter_server_password,
-                           )
     try:
         print "!!## -- Transfering the config file to the server: %s -- ##!!" % opencenter_server_ip
         check_call_return = check_call("sshpass -p %s scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet %s root@%s:/root/%s" % (opencenter_server_password, '/tmp/%s' % config_file, opencenter_server_ip, config_file), shell=True)
