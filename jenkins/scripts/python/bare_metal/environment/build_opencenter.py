@@ -314,7 +314,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         for n in nodes:    
             name = n['name']  
             node = Node(name)
-            if node.chef_environment != "_default" and 'in_use' in node and node['in_use'] != 0:                     
+            if node.chef_environment != "_default" and 'in_use' in node.keys() and node['in_use'] != 0:                     
                 if (results.action == "destroy" and results.name == "all"):
                     erase_node(name)
                 else:                              
