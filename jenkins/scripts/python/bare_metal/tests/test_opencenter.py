@@ -208,11 +208,20 @@ nova_mysql_vip = %s
         print e
         sys.exit(1)
 
+    # Get password for OpenCenter server
+    server_node = Node(server[0])
+    opencenter_server_ip = server_node['ipaddress']
+    am_uuid = server_node.attributes['razor_metadata']['razor_active_model_uuid']
+    opencenter_server_password = razor.get_active_model_pass(am_uuid)['password']
+
     # Build Commands to run
     commands = []
     pip = ""
     if results.os == "centos":
-        commands.append("yum install openssh-clients git python-pip -y")
+        command = "yum install openssh-clients"
+        run_remote_ssh_cmd(opencenter_server_ip, 'root',
+                           opencenter_server_password, command)
+        commands.append("yum install git python-pip -y")
         pip = "pip-python"
     elif results.os == "ubuntu":
         commands.append("apt-get install git python-pip -y -q")
@@ -226,12 +235,6 @@ nova_mysql_vip = %s
     for test in results.opencenter_tests.split(","):
         commands.append("export OPENCENTER_CONFIG='%s'; nosetests opencenter-testerator/opencenter/tests/%s -v" % (config_file, test))
         
-    # Get password for OpenCenter server
-    server_node = Node(server[0])
-    opencenter_server_ip = server_node['ipaddress']
-    am_uuid = server_node.attributes['razor_metadata']['razor_active_model_uuid']
-    opencenter_server_password = razor.get_active_model_pass(am_uuid)['password']
-
     # Transfer the testerator Config file to the server
     try:
         print "!!## -- Transfering the config file to the server: %s -- ##!!" % opencenter_server_ip
