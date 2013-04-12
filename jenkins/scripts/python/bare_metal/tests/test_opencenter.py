@@ -218,7 +218,7 @@ nova_mysql_vip = %s
     commands = []
     pip = ""
     if results.os == "centos":
-        command = "yum install openssh-clients"
+        command = "yum install openssh-clients -y"
         run_remote_ssh_cmd(opencenter_server_ip, 'root',
                            opencenter_server_password, command)
         commands.append("yum install git python-pip -y")
