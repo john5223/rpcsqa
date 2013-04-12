@@ -1,22 +1,19 @@
 from opencenterclient.client import OpenCenterEndpoint
-from chef import ChefAPI, Search
+from chef import Search, autoconfigure, Node
 import sys
-
-chef_url = ''
-chef_client_pem = None
-chef_client = ''
 
 
 def openstack_endpoints(name='test', os='ubuntu'):
-    with ChefAPI(chef_url, chef_client_pem, chef_client):
+    with autoconfigure():
         # Make sure environment exists
         env = "%s-%s-opencenter" % (name, os)
         if not Search("environment").query("name:%s" % env):
             print "environment %s not found" % env
             sys.exit(1)
-        query = "in_use:\"server\" AND chef_environment:%s" % (os, env)
-        opencenter_server = Search('node').query(query)
-        ep_url = "https://%s:8443" % opencenter_server.ipaddress
+        query = "in_use:\"server\" AND chef_environment:%s" % env
+        opencenter_server = next(Node(node['name']) for node in
+                                 Search('node').query(query))
+        ep_url = "https://%s:8443" % opencenter_server['ipaddress']
         ep = OpenCenterEndpoint(ep_url,
                                 user="admin",
                                 password="password")
@@ -27,7 +24,8 @@ def openstack_endpoints(name='test', os='ubuntu'):
             if ha:
                 endpoint = infrastructure_nodes[node_id].facts["nova_api_vip"]
             else:
-                endpoint = next(node for node in ep.nodes
-                                if "nova-controller" in node.facts["backends"])
+                name = next(node.name for node in ep.nodes
+                            if "nova-controller" in node.facts["backends"])
+                endpoint = Node(name)['ipaddress']
             yield endpoint
             
