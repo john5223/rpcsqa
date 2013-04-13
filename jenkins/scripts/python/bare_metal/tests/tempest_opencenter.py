@@ -25,9 +25,11 @@ parser.add_argument('--keystone_admin_pass', action="store",
 results = parser.parse_args()
 
 # Gather information of cluster
+
 ip = next(openstack_endpoints(name='cameron', os='ubuntu'))
 url = "http://%s:5000/v2.0" % ip
 token_url = "%s/tokens" % url
+print "##### URL: %s #####" % url
 
 # Gather cluster information from the cluster
 auth = {
@@ -54,6 +56,8 @@ try:
         image_ids = (image['id'] for image in images['images'])
         image_id = next(image_ids)
         image_alt = next(image_ids, image_id)
+        print "##### Image 1: %s #####" % image_id
+        print "##### Image 2: %s #####" % image_alt
 except Exception, e:
     print "Failed to add keystone info. Exception: %s" % e
     sys.exit(1)
