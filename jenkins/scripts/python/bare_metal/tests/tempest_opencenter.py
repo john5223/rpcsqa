@@ -3,6 +3,7 @@ from opencenter_helper import openstack_endpoints
 import requests
 import json
 import sys
+from pprint import pprint
 from subprocess import check_call, CalledProcessError
 
 # Parse arguments from the cmd line
@@ -30,8 +31,6 @@ ip = next(openstack_endpoints(name='cameron', os='ubuntu'))
 url = "http://%s:5000/v2.0" % ip
 token_url = "%s/tokens" % url
 print "##### URL: %s #####" % url
-
-# Gather cluster information from the cluster
 auth = {
     'auth': {
         'tenantName': 'admin',
@@ -42,22 +41,25 @@ auth = {
     }
 }
 
+# Gather cluster information from the cluster
 image_id = None
 image_alt = None
 try:
     r = requests.post(token_url, data=json.dumps(auth),
                       headers={'Content-type': 'application/json'})
     ans = json.loads(r.text)
-    if 'access' in ans.keys():
-        token = ans['access']['token']['id']
-        images_url = "http://%s:9292/v2/images" % ip
-        images = json.loads(requests.get(images_url,
-                            headers={'X-Auth-Token': token}).text)
-        image_ids = (image['id'] for image in images['images'])
-        image_id = next(image_ids)
-        image_alt = next(image_ids, image_id)
-        print "##### Image 1: %s #####" % image_id
-        print "##### Image 2: %s #####" % image_alt
+    if 'error' in ans.keys():
+        pprint(ans['error'])
+        sys.exit(1)
+    token = ans['access']['token']['id']
+    images_url = "http://%s:9292/v2/images" % ip
+    images = json.loads(requests.get(images_url,
+                        headers={'X-Auth-Token': token}).text)
+    image_ids = (image['id'] for image in images['images'])
+    image_id = next(image_ids)
+    image_alt = next(image_ids, image_id)
+    print "##### Image 1: %s #####" % image_id
+    print "##### Image 2: %s #####" % image_alt
 except Exception, e:
     print "Failed to add keystone info. Exception: %s" % e
     sys.exit(1)
