@@ -49,6 +49,7 @@ try:
                       headers={'Content-type': 'application/json'})
     ans = json.loads(r.text)
     if 'error' in ans.keys():
+        print "##### Error authenticating with Keystone: #####"
         pprint(ans['error'])
         sys.exit(1)
     token = ans['access']['token']['id']
