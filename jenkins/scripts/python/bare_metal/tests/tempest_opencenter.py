@@ -117,6 +117,7 @@ command = "export TEMPEST_CONFIG=%s; " % tempest_config_path
 # Run tests
 try:
     print "!! ## -- Running tempest -- ## !!"
+    print command
     check_call_return = check_call(command, shell=True)
     print "!!## -- Tempest tests ran successfully  -- ##!!"
 except CalledProcessError, cpe:
