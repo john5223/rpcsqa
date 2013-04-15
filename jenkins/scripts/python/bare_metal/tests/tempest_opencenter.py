@@ -104,7 +104,7 @@ except Exception as e:
 
 xunit = ' '
 if results.xunit:
-    file = '/tmp/%s-%s-%s' % (time.strftime("%Y-%m-%d %H:%M:%S",
+    file = '/tmp/%s-%s-%s' % (time.strftime("%Y-%m-%d-%H:%M:%S",
                                             time.gmtime()),
                               results.name,
                               results.os)
