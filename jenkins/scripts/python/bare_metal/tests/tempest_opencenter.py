@@ -1,10 +1,11 @@
-import argparse
 from opencenter_helper import openstack_endpoints
 import requests
 import json
 import sys
 from pprint import pprint
 from subprocess import check_call, CalledProcessError
+from chef import autoconfigure
+import argparse
 
 # Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
@@ -23,11 +24,14 @@ parser.add_argument('--tempest_version', action="store",
 parser.add_argument('--keystone_admin_pass', action="store",
                     dest="keystone_admin_pass", required=False,
                     default="secrete")
+parser.add_argument('--xunit', action="store_true",
+                    dest="xunit", required=False,
+                    default=False)
 results = parser.parse_args()
 
 # Gather information of cluster
-
-ip = next(openstack_endpoints(name='cameron', os='ubuntu'))
+chef = autoconfigure()
+ip = next(openstack_endpoints(chef, name='cameron', os='ubuntu'))
 url = "http://%s:5000/v2.0" % ip
 token_url = "%s/tokens" % url
 print "##### URL: %s #####" % url
@@ -97,12 +101,14 @@ except Exception as e:
     print "Failed writing tempest config, exception: %s" % e
     sys.exit(1)
 
+xunit = ' '
+if results.xunit:
+    xunit = ' --with-xunit '
 # Run tests
 try:
     print "!! ## -- Running tempest -- ## !!"
-    
     check_call_return = check_call(
-        "export TEMPEST_CONFIG=%s; python -u /usr/local/bin/nosetests %s/tempest/tests/compute" % (tempest_config_path, results.tempest_dir), shell=True)
+        "export TEMPEST_CONFIG=%s; python -u /usr/local/bin/nosetests%s%s/tempest/tests/compute" % (xunit, tempest_config_path, results.tempest_dir), shell=True)
     print "!!## -- Tempest tests ran successfully  -- ##!!"
 except CalledProcessError, cpe:
     print "!!## -- Tempest tests failed -- ##!!"
