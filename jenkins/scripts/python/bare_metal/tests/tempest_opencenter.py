@@ -32,7 +32,7 @@ results = parser.parse_args()
 
 # Gather information of cluster
 chef = autoconfigure()
-ip = next(openstack_endpoints(chef, name='cameron', os='ubuntu'))
+ip = next(openstack_endpoints(chef, results.name, results.os))
 url = "http://%s:5000/v2.0" % ip
 token_url = "%s/tokens" % url
 print "##### URL: %s #####" % url
