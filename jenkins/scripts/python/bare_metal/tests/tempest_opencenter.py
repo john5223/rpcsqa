@@ -113,7 +113,7 @@ if results.xunit:
         results.os)
     xunit = ' --with-xunit --xunit-file=%s ' % file
 command = ("export TEMPEST_CONFIG=%s; "
-           "python -u /usr/local/bin/nosetests%s%s/tempest/tests/compute" % (
+           "python -u /usr/local/bin/nosetests%s%s/tempest/tests" % (
                tempest_config_path,
                xunit,
                results.tempest_dir))
