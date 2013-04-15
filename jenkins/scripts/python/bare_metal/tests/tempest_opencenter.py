@@ -104,10 +104,13 @@ except Exception as e:
 
 xunit = ' '
 if results.xunit:
-    file = '/tmp/%s-%s-%s.xunit' % (time.strftime("%Y-%m-%d-%H:%M:%S",
-                                                  time.gmtime()),
-                                    results.name,
-                                    results.os)
+    # workspace = '/var/lib/jenkins/jobs/Tempest_OpenCenter/workspace'
+    file = '%s-%s-%s.xunit' % (
+        # workspace,
+        time.strftime("%Y-%m-%d-%H:%M:%S",
+                      time.gmtime()),
+        results.name,
+        results.os)
     xunit = ' --with-xunit --xunit-file=%s ' % file
 command = ("export TEMPEST_CONFIG=%s; "
            "python -u /usr/local/bin/nosetests%s%s/tempest/tests/compute" % (
