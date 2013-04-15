@@ -104,10 +104,10 @@ except Exception as e:
 
 xunit = ' '
 if results.xunit:
-    file = '/tmp/%s-%s-%s' (time.strftime("%Y-%m-%d %H:%M:%S",
-                                          time.gmtime()),
-                            results.name,
-                            results.os)
+    file = '/tmp/%s-%s-%s' % (time.strftime("%Y-%m-%d %H:%M:%S",
+                                            time.gmtime()),
+                              results.name,
+                              results.os)
     xunit = ' --with-xunit --xunit-file=%s' % file
 # Run tests
 try:
