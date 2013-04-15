@@ -108,7 +108,7 @@ if results.xunit:
                                             time.gmtime()),
                               results.name,
                               results.os)
-    xunit = ' --with-xunit --xunit-file=%s' % file
+    xunit = ' --with-xunit --xunit-file=%s ' % file
 command = ("export TEMPEST_CONFIG=%s; "
            "python -u /usr/local/bin/nosetests%s%s/tempest/tests/compute" % (
                tempest_config_path,
