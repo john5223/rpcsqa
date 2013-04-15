@@ -6,6 +6,7 @@ from pprint import pprint
 from subprocess import check_call, CalledProcessError
 from chef import autoconfigure
 import argparse
+import time
 
 # Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
@@ -103,7 +104,11 @@ except Exception as e:
 
 xunit = ' '
 if results.xunit:
-    xunit = ' --with-xunit '
+    file = '/tmp/%s-%s-%s' (time.strftime("%Y-%m-%d %H:%M:%S",
+                                          time.gmtime()),
+                            results.name,
+                            results.os)
+    xunit = ' --with-xunit --xunit-file=%s' % file
 # Run tests
 try:
     print "!! ## -- Running tempest -- ## !!"
