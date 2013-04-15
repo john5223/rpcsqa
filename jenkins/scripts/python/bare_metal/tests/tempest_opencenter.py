@@ -109,11 +109,16 @@ if results.xunit:
                               results.name,
                               results.os)
     xunit = ' --with-xunit --xunit-file=%s' % file
+command = "export TEMPEST_CONFIG=%s; "
+"python -u /usr/local/bin/nosetests%s%s/tempest/tests/compute" % (
+    tempest_config_path,
+    xunit,
+    results.tempest_dir)
+
 # Run tests
 try:
     print "!! ## -- Running tempest -- ## !!"
-    check_call_return = check_call(
-        "export TEMPEST_CONFIG=%s; python -u /usr/local/bin/nosetests%s%s/tempest/tests/compute" % (xunit, tempest_config_path, results.tempest_dir), shell=True)
+    check_call_return = check_call(command, shell=True)
     print "!!## -- Tempest tests ran successfully  -- ##!!"
 except CalledProcessError, cpe:
     print "!!## -- Tempest tests failed -- ##!!"
