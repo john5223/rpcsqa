@@ -83,9 +83,7 @@ except Exception, e:
 tempest_dir = "%s/%s/tempest" % (results.tempest_root, results.tempest_version)
 sample_path = "%s/etc/base_%s.conf" % (tempest_dir, results.tempest_version)
 with open(sample_path) as f:
-    sample_config = Template(f.read())
-sample_config.substitute(cluster)
-tempest_config = str(sample_config)
+    tempest_config = Template(f.read()).substitute(cluster)
 tempest_config_path = "%s/etc/%s-%s.conf" % (tempest_dir, results.name,
                                              results.os)
 with open(tempest_config_path, 'w') as w:
