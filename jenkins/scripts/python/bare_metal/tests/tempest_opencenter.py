@@ -58,7 +58,7 @@ cluster = {'host': ip,
            'alt_username': username,
            'alt_password': password,
            'alt_tenant': tenant}
-if results.grizzly:
+if results.tempest_version == 'grizzly':
     cluster['admin_username'] = username
     cluster['admin_password'] = password
     cluster['admin_tenant'] = tenant
