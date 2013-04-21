@@ -7,6 +7,7 @@ from subprocess import check_call, CalledProcessError
 from chef import autoconfigure
 import argparse
 import time
+from string import Template
 
 # Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
@@ -16,16 +17,16 @@ parser.add_argument('--name', action="store", dest="name",
 parser.add_argument('--os', action="store", dest="os", required=False,
                     default='ubuntu',
                     help="Operating System to use for opencenter")
-parser.add_argument('--tempest_dir', action="store", dest="tempest_dir",
+parser.add_argument('--tempest_root', action="store", dest="tempest_root",
                     required=False,
-                    default="/var/lib/jenkins/tempest/folsom/tempest")
+                    default="/var/lib/jenkins/tempest")
 parser.add_argument('--tempest_version', action="store",
                     dest="tempest_version", required=False,
                     default="folsom")
 parser.add_argument('--keystone_admin_pass', action="store",
                     dest="keystone_admin_pass", required=False,
                     default="secrete")
-parser.add_argument('--xunit', action="store_true",
+parser.add_argument('-xunit', action="store_true",
                     dest="xunit", required=False,
                     default=False)
 results = parser.parse_args()
@@ -47,8 +48,16 @@ auth = {
 }
 
 # Gather cluster information from the cluster
-image_id = None
-image_alt = None
+username = 'admin'
+password = results.keystone_admin_pass
+tenant = 'admin'
+cluster = {'host': ip,
+           'username': username,
+           'password': password,
+           'tenant': tenant,
+           'alt_username': username,
+           'alt_password': password,
+           'alt_tenant': tenant}
 try:
     r = requests.post(token_url, data=json.dumps(auth),
                       headers={'Content-type': 'application/json'})
@@ -62,51 +71,32 @@ try:
     images = json.loads(requests.get(images_url,
                         headers={'X-Auth-Token': token}).text)
     image_ids = (image['id'] for image in images['images'])
-    image_id = next(image_ids)
-    image_alt = next(image_ids, image_id)
-    print "##### Image 1: %s #####" % image_id
-    print "##### Image 2: %s #####" % image_alt
+    cluster['image_id'] = next(image_ids)
+    cluster['alt_image_id'] = next(image_ids, cluster['image_id'])
+    print "##### Image 1: %s #####" % cluster['image_id']
+    print "##### Image 2: %s #####" % cluster['alt_image_id']
 except Exception, e:
     print "Failed to add keystone info. Exception: %s" % e
     sys.exit(1)
 
 # Write the config
-try:
-    sample_path = "%s/etc/base_%s.conf" % (results.tempest_dir,
-                                           results.tempest_version)
-    with open(sample_path) as f:
-        sample_config = f.read()
-    tempest_config = str(sample_config)
-    tempest_config = tempest_config.replace('http://127.0.0.1:5000/v2.0/',
-                                            url)
-    tempest_config = tempest_config.replace('{$KEYSTONE_IP}', ip)
-    tempest_config = tempest_config.replace('localhost', ip)
-    tempest_config = tempest_config.replace('127.0.0.1', ip)
-    tempest_config = tempest_config.replace('{$IMAGE_ID}', image_id)
-    tempest_config = tempest_config.replace('{$IMAGE_ID_ALT}',
-                                            image_alt)
-    tempest_config = tempest_config.replace('ostackdemo',
-                                            results.keystone_admin_pass)
-    tempest_config = tempest_config.replace('demo', "admin")
-   
-    tempest_config_path = "%s/etc/%s-%s.conf" % \
-                          (results.tempest_dir, results.name,
-                           results.os)
-    with open(tempest_config_path, 'w') as w:
-        print "####### Tempest Config #######"
-        print tempest_config_path
-        print tempest_config
-        w.write(tempest_config)
-   
-except Exception as e:
-    print "Failed writing tempest config, exception: %s" % e
-    sys.exit(1)
+tempest_dir = "%s/%s/tempest" % (results.tempest_root, results.tempest_version)
+sample_path = "%s/etc/base_%s.conf" % (tempest_dir, results.tempest_version)
+with open(sample_path) as f:
+    sample_config = Template(f.read())
+sample_config.substitute(cluster)
+tempest_config = str(sample_config)
+tempest_config_path = "%s/etc/%s-%s.conf" % (tempest_dir, results.name,
+                                             results.os)
+with open(tempest_config_path, 'w') as w:
+    print "####### Tempest Config #######"
+    print tempest_config_path
+    print tempest_config
+    w.write(tempest_config)
 
 xunit = ' '
 if results.xunit:
-    # workspace = '/var/lib/jenkins/jobs/Tempest_OpenCenter/workspace'
     file = '%s-%s-%s.xunit' % (
-        # workspace,
         time.strftime("%Y-%m-%d-%H:%M:%S",
                       time.gmtime()),
         results.name,
@@ -116,7 +106,7 @@ command = ("export TEMPEST_CONFIG=%s; "
            "python -u /usr/local/bin/nosetests%s%s/tempest/tests" % (
                tempest_config_path,
                xunit,
-               results.tempest_dir))
+               tempest_dir))
 
 # Run tests
 try:
