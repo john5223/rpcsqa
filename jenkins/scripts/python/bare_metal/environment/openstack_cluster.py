@@ -16,10 +16,10 @@ parser.add_argument('--name', action="store", dest="name", required=False, defau
 parser.add_argument('--cluster_size', action="store", dest="cluster_size", required=False, default=4, 
                     help="Size of the Open Stack cluster.")
 
-parser.add_argument('--ha_enabled', action='store', dest='ha_enabled', required=False, default=False,
+parser.add_argument('--ha_enabled', action='store_true', dest='ha_enabled', required=False, default=False,
                     help="Do you want to HA this environment?")
 
-parser.add_argument('--dir_service', action='store', dest='dir_service', required=False, default=False,
+parser.add_argument('--dir_service', action='store_true', dest='dir_service', required=False, default=False,
                     help="Will this cluster use a form of directory management?")
 
 parser.add_argument('--dir_version', action='store', dest='dir_version', required=False, default='openldap',
@@ -41,20 +41,11 @@ parser.add_argument('--chef_client', action="store", dest="chef_client", default
 parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem", default="~/.chef/jenkins.pem", required=False, 
                     help="client pem for chef")
 
-parser.add_argument('--clear_pool', action="store", dest="clear_pool", default=True, required=False)
+parser.add_argument('--clear_pool', action="store_true", dest="clear_pool", default=True, required=False)
 
 # Save the parsed arguments
 results = parser.parse_args()
 results.chef_client_pem = results.chef_client_pem.replace('~',os.getenv("HOME"))
-
-# Convert parameter string to boolean
-ha_enabled = False
-if results.ha_enabled == 'true':
-    ha_enabled = True
-
-dir_service = False
-if results.dir_service == 'true':
-    dir_service = True
 
 def build_computes(computes):
     # Run computes
@@ -392,15 +383,15 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         if results.clear_pool:
             clear_pool(nodes, env)
 
-        # Check the cluster size, if <5 and dir_service is enabled, set to 4
-        if cluster_size < 4 and dir_service:
-            if ha_enabled:
+        # Check the cluster size, if <5 and results.dir_service is enabled, set to 4
+        if cluster_size < 4 and results.dir_service:
+            if results.ha_enabled:
                 cluster_size = 5
                 print "HA and Directory Services are requested, re-setting cluster size to %i." % cluster_size
             else:
                 cluster_size = 4
                 print "Directory Services are requested, re-setting cluster size to %i." % cluster_size
-        elif cluster_size < 4 and ha_enabled:
+        elif cluster_size < 4 and results.ha_enabled:
             cluster_size = 4
             print "HA is enabled, re-setting cluster size to %i." % cluster_size
         else:
@@ -418,16 +409,16 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             sys.exit(1)
 
         # Build cluster accordingly
-        if dir_service and ha_enabled:
+        if results.dir_service and results.ha_enabled:
             
             # Set each servers roles
-            dir_service = openstack_list[0]
+            dir_server = openstack_list[0]
             ha_controller_1 = openstack_list[1]
             ha_controller_2 = openstack_list[2]
             computes = openstack_list[3:]
 
             # Build directory service server
-            build_dir_server(dir_service)
+            build_dir_server(dir_server)
 
             # Build HA Controllers
             build_controller(ha_controller_1, True, 1)
@@ -442,21 +433,21 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
 
             # print all servers info
             print "********************************************************************"
-            print "Directory Service Server: %s" % print_server_info(dir_service)
+            print "Directory Service Server: %s" % print_server_info(dir_server)
             print "HA-Controller 1: %s" % print_server_info(ha_controller_1)
             print "HA-Controller 2: %s" % print_server_info(ha_controller_2)
             print_computes_info(computes)
             print "********************************************************************"
 
-        elif dir_service:
+        elif results.dir_service:
             
             # Set each servers roles
-            dir_service = openstack_list[0]
+            dir_server = openstack_list[0]
             controller = openstack_list[1]
             computes = openstack_list[2:]
 
             # Build the dir server
-            build_dir_server(dir_service)
+            build_dir_server(dir_server)
 
             # Build controller
             build_controller(controller)
@@ -466,12 +457,12 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
 
             # print all servers info
             print "********************************************************************"
-            print "Directory Service Server: %s" % print_server_info(dir_service)
+            print "Directory Service Server: %s" % print_server_info(dir_server)
             print "Controller: %s" % print_server_info(controller)
             print_computes_info(computes)
             print "********************************************************************"
 
-        elif ha_enabled:
+        elif results.ha_enabled:
             
             # Set each servers roles
             ha_controller_1 = openstack_list[0]
@@ -496,6 +487,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             print "HA-Controller 2: %s" % print_server_info(ha_controller_2)
             print_computes_info(computes)
             print "********************************************************************"
+            
         else:
             
             # Set each servers roles
