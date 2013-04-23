@@ -23,12 +23,8 @@ parser.add_argument('--repo_url', action="store", dest="opencenter_test_repo",
 parser.add_argument('--tests', action="store", dest="opencenter_tests",
                     required=False, default="test_happy_path.py",
                     help="Tests to run")
-parser.add_argument('--HA', action="store", dest="HA", required=False,
+parser.add_argument('-HA', action="store_true", dest="HA", required=False,
                     default=True, help="Do HA for openstack controller")
-parser.add_argument('--tempest', action="store", dest="tempest",
-                    required=False, default=False,
-                    help="Run tempest on openstack cluster")
-
 
 #Defaulted arguments
 parser.add_argument('--razor_ip', action="store", dest="razor_ip",
@@ -46,10 +42,6 @@ parser.add_argument('--chef_client_pem', action="store",
 # Save the parsed arguments
 results = parser.parse_args()
 results.chef_client_pem = results.chef_client_pem.replace('~', os.getenv("HOME"))
-if results.HA == "true":
-    results.HA = True
-elif results.HA == "false":
-    results.HA = False
 
 # Load chef and razor apis
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
