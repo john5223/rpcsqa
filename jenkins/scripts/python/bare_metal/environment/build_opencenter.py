@@ -27,7 +27,7 @@ parser.add_argument('--name', action="store", dest="name", required=False, defau
 parser.add_argument('--cluster_size', action="store", dest="cluster_size", required=False, default=1, 
                     help="Size of the OpenCenter cluster to build")
 
-parser.add_argument('--server_vms', action="store", dest="server_vms", required=False, default=False, 
+parser.add_argument('--server_vms', action="store_true", dest="server_vms", required=False, default=False, 
                     help="Whether or not to install opencenter server and chef server on vms on the controller")
 
 parser.add_argument('--os', action="store", dest="os", required=False, default='ubuntu', 
@@ -50,7 +50,7 @@ parser.add_argument('--chef_client', action="store", dest="chef_client", default
 parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem", default="~/.chef/jenkins.pem", required=False, 
                     help="client pem for chef")
 
-parser.add_argument('--clear_pool', action="store", dest="clear_pool", default=True, required=False)
+parser.add_argument('--clear_pool', action="store_true", dest="clear_pool", default=True, required=False)
 
 # Save the parsed arguments
 results = parser.parse_args()
@@ -245,9 +245,7 @@ def ping_check_vm(ip_address):
 # We may need to change this later but as this is a matrix for support only 1 cluster testing should be needed.
 # Maybe not? If not we need a more clever way of assigning ips to the vms
 
-server_vms = False
-if results.server_vms == 'true':
-    server_vms = True
+if results.server_vms:
     vm_bridge = 'ocbr0'
     if results.os == 'ubuntu':
         oc_server_ip = '198.101.133.150'
@@ -355,7 +353,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             sys.exit(1)
 
         # Install chef and opencenter on vms on the controller
-        if server_vms:
+        if results.server_vms:
             # Set the controller and compute lists
             controller = opencenter_list[0]
             computes = opencenter_list[1:]
