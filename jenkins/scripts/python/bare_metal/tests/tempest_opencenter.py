@@ -1,4 +1,4 @@
-from opencenter_helper import openstack_endpoints
+from opencenter_helper import openstack_endpoints, opencenter_endpoint
 import requests
 import json
 import sys
@@ -33,7 +33,8 @@ results = parser.parse_args()
 
 # Gather information of cluster
 chef = autoconfigure()
-ip = next(openstack_endpoints(chef, results.name, results.os))
+opencenter_ep = opencenter_endpoint(chef, results.name, results.os)
+ip = next(openstack_endpoints(opencenter_ep))
 url = "http://%s:5000/v2.0" % ip
 token_url = "%s/tokens" % url
 print "##### URL: %s #####" % url
