@@ -174,7 +174,7 @@ def install_opencenter_vm(vm_ip, oc_server_ip, install_script, role, user, passw
         print "Exception: %s" % install_run['exception']
         sys.exit(1)
     else:
-        print "OpenCenter Server successfully installed..."
+        print "OpenCenter %s successfully installed on vm with ip %s..." % (role, vm_ip)
 
 def prepare_vm_host(controller_node):
     controller_ip = controller_node['ipaddress']
@@ -423,7 +423,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 print "Output: %s" % oc_ping['exception'].output
                 sys.exit(1)
             else:
-                print "OpenCenter Server VM set up..."
+                print "OpenCenter Server VM set up and pinging..."
 
             # Ping the chef server vm
             cf_ping = ping_check_vm(chef_server_ip)
@@ -433,7 +433,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 print "Output: %s" % cf_ping['exception'].output
                 sys.exit(1)
             else:
-                print "Chef Server VM set up..."
+                print "Chef Server VM set up and pinging..."
 
             # Get vm user info
             vm_user = vminfo['user_info']['user']
