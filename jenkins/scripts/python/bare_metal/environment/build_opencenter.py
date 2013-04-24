@@ -415,6 +415,10 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             print "Setting up VMs on the host server"
             install_server_vms(controller_node, oc_server_ip, chef_server_ip, vm_bridge, vm_bridge_device)
             
+            # Need to sleep for 30 seconds to let virsh completely finish
+            print "Sleeping for 30 seconds to let VM's complete..."
+            time.sleep(30)
+            
             # Ping the opencenter vm
             oc_ping = ping_check_vm(oc_server_ip)
             if not oc_ping['success']:
