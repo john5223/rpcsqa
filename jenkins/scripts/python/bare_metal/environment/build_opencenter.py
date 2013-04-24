@@ -183,10 +183,12 @@ def prepare_vm_host(controller_node):
     if controller_node['platform_family'] == 'debian':
         commands = ["aptitude install -y curl dsh screen vim iptables-persistent libvirt-bin python-libvirt qemu-kvm guestfish git",
                     "aptitude update -y",
+                    "update-guestfs-appliance",
                     "ssh-keygen -f /root/.ssh/id_rsa -N \"\""]
     else:
         commands = ["yum install -y curl dsh screen vim iptables-persistent libvirt-bin python-libvirt qemu-kvm guestfish git",
                     "yum update -y",
+                    "update-guestfs-appliance",
                     "ssh-keygen -f /root/.ssh/id_rsa -N \"\""]
 
     for command in commands:
