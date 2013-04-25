@@ -1,8 +1,8 @@
 #!/usr/bin/python
 import os
-import requests
 import sys
 import time
+import requests
 import argparse
 from chef import *
 from razor_api import razor_api
