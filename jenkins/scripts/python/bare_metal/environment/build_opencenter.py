@@ -192,7 +192,9 @@ def prepare_vm_host(controller_node):
                     "ssh-keygen -f /root/.ssh/id_rsa -N \"\""]
 
     for command in commands:
+        print "************************************"
         print "Prepare command to run: %s" % command
+        print "************************************"
         prepare_run = run_remote_ssh_cmd(controller_ip, 'root', root_pass, command)
     
         if not prepare_run['success']:
