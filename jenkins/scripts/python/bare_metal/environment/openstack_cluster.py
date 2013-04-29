@@ -46,7 +46,6 @@ parser.add_argument('--clear_pool', action="store_true", dest="clear_pool", defa
 results = parser.parse_args()
 results.chef_client_pem = results.chef_client_pem.replace('~',os.getenv("HOME"))
 
-
 """
 Steps
 1. Make an environment for {{name}}-{{os}}-openstack
@@ -59,7 +58,7 @@ chef = rpcsqa.chef
 razor = rpcsqa.razor
 
 with chef:
-    
+
     # Remove broker fails for qa-%os-pool
     remove_broker_fail("qa-%s-pool" % results.os)
 
