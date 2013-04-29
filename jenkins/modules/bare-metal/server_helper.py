@@ -1,5 +1,6 @@
 from chef import Node
-from razor_api import razor_api, razor_password
+from razor_api import razor_api
+from razor_helper import razor_password
 from subprocess import check_call, CalledProcessError
 
 razor_ip = '198.101.133.3'
