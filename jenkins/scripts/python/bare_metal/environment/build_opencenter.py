@@ -5,7 +5,7 @@ import json
 import requests
 import argparse
 from rpcsqa_helper import *
-from chef import Search, Environment, Node, autoconfigure
+from chef import Search, Environment, Node
 
 """
 This script will automatically build a OpenCenter cluster
