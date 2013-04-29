@@ -4,8 +4,8 @@ import time
 import json
 import requests
 import argparse
-from chef import Search, Environment, Node
-from razor_api import razor_api, autoconfigure
+from chef import Search, Environment, Node, autoconfigure
+from razor_api import razor_api
 from razor_helper import remove_broker_fail
 from server_helper import (run_chef_client, ping_check_vm, remove_chef,
                            prepare_vm_host, clone_git_repo, install_server_vms,
