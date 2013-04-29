@@ -1,3 +1,5 @@
+import time
+import sys
 from chef import Node
 from razor_api import razor_api
 from razor_helper import razor_password
@@ -241,3 +243,24 @@ def ping_check_vm(ip_address):
                 'return': None,
                 'exception': cpe,
                 'command': command}
+
+
+def remove_broker_fail(policy):
+    active_models = razor.simple_active_models(policy)
+    for active in active_models:
+        data = active_models[active]
+        if 'broker_fail' in data['current_state']:
+            print "!!## -- Removing active model  (broker_fail) -- ##!!"
+            root_pass = razor.get_active_model_pass(
+                data['am_uuid'])['password']
+            ip = data['eth1_ip']
+            run = run_remote_ssh_cmd(ip, 'root', root_pass, 'reboot 0')
+            if run['success']:
+                razor.remove_active_model(data['am_uuid'])
+                time.sleep(15)
+            else:
+                print "Trouble removing broker fail"
+                print run
+                sys.exit(1)
+
+
