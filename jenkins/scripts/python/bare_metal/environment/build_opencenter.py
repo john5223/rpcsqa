@@ -21,33 +21,33 @@ This script will automatically build a OpenCenter cluster based on passed parame
 
 # Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
-parser.add_argument('--name', action="store", dest="name", required=False, default="test", 
+parser.add_argument('--name', action="store", dest="name", required=False, default="test",
                     help="This will be the name for the opencenter chef environment")
 
-parser.add_argument('--cluster_size', action="store", dest="cluster_size", required=False, default=1, 
+parser.add_argument('--cluster_size', action="store", dest="cluster_size", required=False, default=1,
                     help="Size of the OpenCenter cluster to build")
 
-parser.add_argument('--server_vms', action="store_true", dest="server_vms", required=False, default=False, 
+parser.add_argument('--server_vms', action="store_true", dest="server_vms", required=False, default=False,
                     help="Whether or not to install opencenter server and chef server on vms on the controller")
 
-parser.add_argument('--os', action="store", dest="os", required=False, default='ubuntu', 
+parser.add_argument('--os', action="store", dest="os", required=False, default='ubuntu',
                     help="Operating System to use for opencenter")
 
-parser.add_argument('--repo_url', action="store", dest="repo", required=False, 
-                    default="https://raw.github.com/rcbops/opencenter-install-scripts/sprint/install-dev.sh", 
+parser.add_argument('--repo_url', action="store", dest="repo", required=False,
+                    default="https://raw.github.com/rcbops/opencenter-install-scripts/sprint/install-dev.sh",
                     help="URL of the OpenCenter install scripts")
 
-parser.add_argument('--action', action="store", dest="action", required=False, default="build", 
+parser.add_argument('--action', action="store", dest="action", required=False, default="build",
                     help="Action to do for opencenter (build/destroy)")
 
 #Defaulted arguments
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", default="198.101.133.3",
                     help="IP for the Razor server")
-parser.add_argument('--chef_url', action="store", dest="chef_url", default="https://198.101.133.3:443", required=False, 
+parser.add_argument('--chef_url', action="store", dest="chef_url", default="https://198.101.133.3:443", required=False,
                     help="URL of the chef server")
-parser.add_argument('--chef_client', action="store", dest="chef_client", default="jenkins", required=False, 
+parser.add_argument('--chef_client', action="store", dest="chef_client", default="jenkins", required=False,
                     help="client for chef")
-parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem", default="~/.chef/jenkins.pem", required=False, 
+parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem", default="~/.chef/jenkins.pem", required=False,
                     help="client pem for chef")
 
 parser.add_argument('--clear_pool', action="store_true", dest="clear_pool", default=True, required=False)
@@ -73,17 +73,17 @@ def run_remote_scp_cmd(server_ip, user, password, to_copy):
     command = "sshpass -p %s scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet %s %s@%s:~/" % (password, to_copy, user, server_ip)
     try:
         ret = check_call(command, shell=True)
-        return {'success': True, 
-                'return': ret, 
+        return {'success': True,
+                'return': ret,
                 'exception': None}
     except CalledProcessError, cpe:
-        return {'success': False, 
-                'return': None, 
-                'exception': cpe, 
+        return {'success': False,
+                'return': None,
+                'exception': cpe,
                 'command': command}
 
 def remove_broker_fail(policy):
-    active_models = razor.simple_active_models(policy)    
+    active_models = razor.simple_active_models(policy)
     for active in active_models:
         data = active_models[active]
         if 'broker_fail' in data['current_state']:
@@ -95,47 +95,47 @@ def remove_broker_fail(policy):
                delete = razor.remove_active_model(data['am_uuid'])
                time.sleep(15)
             else:
-                print "Trouble removing broker fail"  
-                print run              
+                print "Trouble removing broker fail"
+                print run
                 sys.exit(1)
-               
+
 def run_chef_client(name, logfile="STDOUT"):
-    node = Node(name)    
+    node = Node(name)
     ip = node.attributes['ipaddress']
     root_pass = razor.get_active_model_pass(node.attributes['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
     return run_remote_ssh_cmd(ip, 'root', root_pass, 'chef-client --logfile %s' % logfile)
-       
+
 def remove_chef(name):
     try:
         node = Node(name)
         am_uuid = node['razor_metadata'].to_dict()['razor_active_model_uuid']
-        root_pass = razor.get_active_model_pass(am_uuid)['password']        
+        root_pass = razor.get_active_model_pass(am_uuid)['password']
         print "removing chef on %s..." % name
         command = ""
         if node['platform_family'] == "debian":
             command = "apt-get remove --purge -y chef; rm -rf /etc/chef"
         elif node['platform_family'] == "rhel":
-            command = 'yum remove -y chef; rm -rf /etc/chef /var/chef'  
-        #print command          
+            command = 'yum remove -y chef; rm -rf /etc/chef /var/chef'
+        #print command
         run = run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, command)
     except:
         print "Error removing chef"
         sys.exit(1)
-    
+
 def erase_node(name):
     print "Deleting: %s" % (name)
-    node = Node(name)  
+    node = Node(name)
     am_uuid = node['razor_metadata'].to_dict()['razor_active_model_uuid']
     run = run_remote_ssh_cmd(node['ipaddress'], 'root', razor.get_active_model_pass(am_uuid)['password'], "reboot 0")
     if not run['success']:
         print "Error rebooting server %s " % node['ipaddress']
-        sys.exit(1)        
+        sys.exit(1)
     #Knife node remove; knife client remove
     Client(name).delete()
-    Node(name).delete()                
-    #Remove active model          
-    razor.remove_active_model(am_uuid)                            
-    time.sleep(15)      
+    Node(name).delete()
+    #Remove active model
+    razor.remove_active_model(am_uuid)
+    time.sleep(15)
 
 def install_opencenter(server, install_script, role, server_ip="0.0.0.0"):
     node = Node(server)
@@ -192,9 +192,11 @@ def prepare_vm_host(controller_node):
                     "ssh-keygen -f /root/.ssh/id_rsa -N \"\""]
 
     for command in commands:
+        print "************************************"
         print "Prepare command to run: %s" % command
+        print "************************************"
         prepare_run = run_remote_ssh_cmd(controller_ip, 'root', root_pass, command)
-    
+
         if not prepare_run['success']:
             print "Failed to run command %s, please check the server %s @ ip: %s for errors..." % (command, controller_node, controller_ip)
             print "Return Code: %s" % prepare_run['exception'].returncode
@@ -204,7 +206,7 @@ def prepare_vm_host(controller_node):
 def clone_git_repo(chef_node, github_user, github_user_pass):
     controller_ip = chef_node['ipaddress']
     root_pass = razor.get_active_model_pass(chef_node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
-    
+
     # Download vm setup script on controller node.
     print "Cloning repo with setup script..."
     command = "mkdir -p /opt/rpcs; git clone https://%s:%s@github.com/rsoprivatecloud/scripts /opt/rpcs" % (github_user, github_user_pass)
@@ -242,7 +244,7 @@ def ping_check_vm(ip_address):
         return {'success': True, 'return': ret, 'exception': None}
     except CalledProcessError, cpe:
         return {'success': False, 'return': None, 'exception': cpe, 'command': command}
-    
+
 # If we want vms, assign them ips, these ips are static which means we can only have 1 ubuntu and 1 centos cluster running vms when testing
 # We may need to change this later but as this is a matrix for support only 1 cluster testing should be needed.
 # Maybe not? If not we need a more clever way of assigning ips to the vms
@@ -260,7 +262,7 @@ if results.server_vms:
         # oc_server_ip = '198.101.133.152'
         # chef_server_ip = '198.101.133.153'
         # vm_bridge_device = 'em1'
-        
+
 
 """
 Steps
@@ -268,7 +270,7 @@ Steps
 2. Grab (cluster_size) amount of active models and change their env to {{name}}-{{os}}-opencenter
 3. Remove chef from all boxes
 4. Pick one for server and install opencenter-server
-5. Install opencenter-agent on the rest of the boxes. 
+5. Install opencenter-agent on the rest of the boxes.
 """
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     razor = razor_api(results.razor_ip)
@@ -282,21 +284,21 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
         print "Making environment: %s " % env
         Environment.create(env)
 
-    # Set the cluster size   
+    # Set the cluster size
     cluster_size = int(results.cluster_size)
-    
+
     #Prepare environment
     nodes = Search('node').query("name:qa-%s-pool*" % results.os)
-    
+
     #Make sure all networking interfacing is set
     for n in nodes:
-        node = Node(n['name'])        
+        node = Node(n['name'])
         if "role[qa-base]" in node.run_list:
             node['in_use'] = 0
             node.run_list = ["recipe[network-interfaces]"]
             node.save()
             print "Running network interfaces for %s" % node.name
-            
+
             #Run chef client thrice
             run = run_chef_client(node.name, logfile="/dev/null")
             run = run_chef_client(node.name, logfile="/dev/null")
@@ -310,45 +312,45 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 sys.exit(1)
 
     # If we want to clear the pool
-    if results.clear_pool:        
-        for n in nodes:    
-            name = n['name']  
+    if results.clear_pool:
+        for n in nodes:
+            name = n['name']
             node = Node(name)
-            if node.chef_environment != "_default" and 'in_use' in node.attributes and node['in_use'] != 0:                     
+            if node.chef_environment != "_default" and 'in_use' in node.attributes and node['in_use'] != 0:
                 if (results.action == "destroy" and results.name == "all"):
                     erase_node(name)
-                else:                              
-                    if node.chef_environment == env:                                    
+                else:
+                    if node.chef_environment == env:
                         erase_node(name)
             else:
                 node.chef_environment = "_default"
                 node.save()
-                     
+
     # Collect environment and install opencenter.
     if results.action == "build":
 
-        #Collect the amount of servers we need for the opencenter install   
-        nodes = Search('node').query("name:qa-%s-pool* AND chef_environment:_default" % results.os)          
+        #Collect the amount of servers we need for the opencenter install
+        nodes = Search('node').query("name:qa-%s-pool* AND chef_environment:_default" % results.os)
         if len(nodes) < cluster_size:
             print "*****************************************************"
             print "Not enough nodes for the cluster_size given: %s " % cluster_size
             print "*****************************************************"
             sys.exit(1)
-        
-        count = 0    
+
+        count = 0
         opencenter_list = []
         for n in nodes:
             name = n['name']
-            node = Node(name)        
-            
+            node = Node(name)
+
             if node.chef_environment == "_default" and "recipe[network-interfaces]" in node.run_list:
                 node.chef_environment = env
                 node.save()
                 opencenter_list.append(name)
-                print "Taking node: %s" % name    
+                print "Taking node: %s" % name
                 count += 1
                 if count >= cluster_size:
-                    break      
+                    break
 
         if not opencenter_list:
             print "No nodes"
@@ -406,7 +408,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             # Get github user info
             github_user = vminfo['github_info']['user']
             github_user_pass = vminfo['github_info']['password']
-            
+
             # Clone Repo onto controller
             print "Cloning setup script repo onto %s" % controller_node
             clone_git_repo(controller_node, github_user, github_user_pass)
@@ -414,7 +416,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             # install the server vms and ping check them
             print "Setting up VMs on the host server"
             install_server_vms(controller_node, oc_server_ip, chef_server_ip, vm_bridge, vm_bridge_device)
-            
+
             # Need to sleep for 30 seconds to let virsh completely finish
             print "Sleeping for 30 seconds to let VM's complete..."
             time.sleep(30)
@@ -481,36 +483,36 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 dashboard = opencenter_list[1]
             if len(opencenter_list) > 2:
                 clients = opencenter_list[2:]
-            
+
             #Remove chef client...install opencenter server
             print "Making %s the server node" % server
             server_node = Node(server)
             server_ip = server_node['ipaddress']
             server_node['in_use'] = "server"
             server_node.save()
-            
+
             remove_chef(server)
             install_opencenter(server, results.repo, 'server')
-            
+
             if dashboard:
-                dashboard_node = Node(dashboard) 
+                dashboard_node = Node(dashboard)
                 dashboard_node['in_use'] = "dashboard"
                 dashboard_node.save()
-                remove_chef(dashboard)            
-                install_opencenter(dashboard, results.repo, 'dashboard', server_ip)    
-            
+                remove_chef(dashboard)
+                install_opencenter(dashboard, results.repo, 'dashboard', server_ip)
+
             for client in clients:
                 agent_node = Node(client)
                 agent_node['in_use'] = "agent"
                 agent_node.save()
                 remove_chef(client)
                 install_opencenter(client, results.repo, 'agent', server_ip)
-        
+
             print ""
             print ""
             print ""
             print ""
-            
+
             dashboard_ip = Node(dashboard)['ipaddress']
             dashboard_url = ""
             try:
@@ -519,7 +521,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             except:
                 dashboard_url = "http://%s:3000" % dashboard_ip
                 pass
-                    
+
             print "********************************************************************"
             print "Server: %s - %s  " % (server, server_ip)
             print "Dashboard: %s - %s " % (dashboard, dashboard_url)
@@ -527,7 +529,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
                 node = Node(a)
                 print "Agent: %s - %s " % (a, node['ipaddress'])
             print "********************************************************************"
-             
+
             print ""
             print ""
             print ""
