@@ -1,8 +1,11 @@
 import sys
 import time
 from chef import Search, Node, Client
-from razor_api import razor
+from razor_api import razor_api
 from server_helper import run_remote_ssh_cmd
+
+razor_ip = '198.101.133.3'
+razor = razor_api(razor_ip)
 
 
 def cleanup_environment(chef_environment):
