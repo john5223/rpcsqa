@@ -41,6 +41,7 @@ def build_computes(computes):
             print "Error running chef-client for compute %s" % compute
             print run1
             sys.exit(1)
+
 def build_controller(controller, ha=False, ha_num=0):
     controller_node = Node(controller)
 
