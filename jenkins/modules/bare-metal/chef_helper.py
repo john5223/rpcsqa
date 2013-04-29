@@ -42,6 +42,7 @@ def build_computes(computes):
             print run1
             sys.exit(1)
 
+
 def build_controller(controller, ha=False, ha_num=0):
     controller_node = Node(controller)
 
@@ -80,6 +81,7 @@ def build_controller(controller, ha=False, ha_num=0):
         print "Error running chef-client for controller %s" % controller
         print run1
         sys.exit(1)
+
 
 def build_dir_server(dir_server):
     # We dont support 389 yet, so exit if it is not ldap
@@ -140,12 +142,14 @@ def build_dir_server(dir_server):
         print "Failed to set-up Directory Service: %s..." % results.dir_version
         sys.exit(1)
 
+
 def check_cluster_size(chef_nodes, size):
     if len(chef_nodes) < size:
         print "*****************************************************"
         print "Not enough nodes for the cluster_size given: %s " % cluster_size
         print "*****************************************************"
         sys.exit(1)
+
 
 def clear_pool(chef_nodes, environment):
     for n in chef_nodes:
@@ -157,7 +161,7 @@ def clear_pool(chef_nodes, environment):
             else:
                 node.chef_environment = "_default"
                 node.save()
->>>>>>> cb81ec00a72165968a4d5e854786c8dca6e4ffc3
+
 
 def cleanup_environment(chef_environment):
     """
@@ -167,6 +171,7 @@ def cleanup_environment(chef_environment):
         chef_environment
     for n in nodes:
         erase_node(n)
+
 
 def environment_has_controller(environment):
     # Load Environment
@@ -178,6 +183,7 @@ def environment_has_controller(environment):
             return True
         else:
             return False
+
 
 def gather_nodes(chef_nodes, environment, cluster_size):
     ret_nodes = []
@@ -202,6 +208,7 @@ def gather_nodes(chef_nodes, environment, cluster_size):
         sys.exit(1)
 
     return ret_nodes
+
 
 def erase_node(name):
     """
