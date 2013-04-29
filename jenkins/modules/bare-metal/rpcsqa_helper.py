@@ -1,14 +1,23 @@
 import sys
 import time
 from chef import *
-from server_helper import *
+from server_helper import autoconfigure
 from razor_api import razor_api
 
 class rpcsqa_helper:
 
     def __init__(self, razor_ip='198.101.133.3'):
-        razor = razor_api(razor_ip)
-        chef = autoconfigure()
+        self.razor = razor_api(razor_ip)
+        self.chef = autoconfigure()
+
+    def __repr__(self):
+        """ Print out current instnace of razor_api"""
+        outl = 'class :'+self.__class__.__name__
+        
+        for attr in self.__dict__:
+            outl += '\n\t'+attr+' : '+str(getattr(self, attr))
+        
+        return outl
 
     def clone_git_repo(chef_node, github_user, github_pass):
         controller_ip = chef_node['ipaddress']
