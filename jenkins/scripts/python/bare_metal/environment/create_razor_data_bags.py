@@ -19,8 +19,8 @@ def create_data_bag(ip, ident=None):
 		    			"netmask": "255.255.255.0",
 		    			"address": ip,
 		    			"gateway": "%s.%s.%s.%s" % (ip_array[0], ip_array[1], ip_array[2], 1),
-						"dnsnameservers": "8.8.8.8 8.8.4.4",
-						"dnssearch": "rcb.rackspace.com"
+		    			"dnsnameservers": "8.8.8.8 8.8.4.4",
+		    			"dnssearch": "rcb.rackspace.com"
 					}
 				],
 				"redhat": [

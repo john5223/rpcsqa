@@ -119,7 +119,7 @@ def remove_chef(name):
         #print command          
         run = run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, command)
     except:
-        "Error removing chef"
+        print "Error removing chef"
         sys.exit(1)
     
 def erase_node(name):
@@ -418,7 +418,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
             # Need to sleep for 30 seconds to let virsh completely finish
             print "Sleeping for 30 seconds to let VM's complete..."
             time.sleep(30)
-            
+
             # Ping the opencenter vm
             oc_ping = ping_check_vm(oc_server_ip)
             if not oc_ping['success']:
