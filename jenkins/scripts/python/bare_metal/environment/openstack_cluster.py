@@ -4,13 +4,8 @@ import sys
 import time
 import requests
 import argparse
-from razor_api import razor_api
-from chef_helper import erase_node
-from chef import Search, Environment, Node, autoconfigure
-from server_helper import (run_chef_client, ping_check_vm, remove_chef,
-                           prepare_vm_host, clone_git_repo, install_server_vms,
-                           install_opencenter_vm, install_opencenter,
-                           remove_broker_fail)
+from rpcsqa_helper import *
+from chef import Search, Environment, Node
 
 # Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
@@ -59,10 +54,12 @@ Steps
 3. Pick one for the controller, set roles, run chef-client
 4. Pick the rest as computes, set roles, run chef-client
 """
+rpcsqa = rpcsqa_helper(results.razor_ip)
+chef = rpcsqa.chef
+razor = rpcsqa.razor
 
-with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
-    razor = razor_api(results.razor_ip)
-
+with chef:
+    
     # Remove broker fails for qa-%os-pool
     remove_broker_fail("qa-%s-pool" % results.os)
 
@@ -70,7 +67,9 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     nodes = Search('node').query("name:qa-%s-pool*" % results.os)
 
     #Make sure all networking interfacing is set
-    set_network_interfaces(nodes)
+    for node in nodes:
+        chef_node = Node(node['name'])
+        set_network_interface(chef_node)
 
     # If the environment doesnt exist in chef, make it.
     env = "%s-%s" % (results.os, results.name)

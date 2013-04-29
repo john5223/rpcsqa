@@ -4,13 +4,8 @@ import time
 import json
 import requests
 import argparse
+from rpcsqa_helper import *
 from chef import Search, Environment, Node, autoconfigure
-from razor_api import razor_api
-from server_helper import (run_chef_client, ping_check_vm, remove_chef,
-                           prepare_vm_host, clone_git_repo, install_server_vms,
-                           install_opencenter_vm, install_opencenter,
-                           remove_broker_fail)
-from chef_helper import erase_node
 
 """
 This script will automatically build a OpenCenter cluster
