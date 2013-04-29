@@ -1,7 +1,7 @@
 import sys
 import time
 from chef import *
-from server_helper import autoconfigure
+from server_helper import *
 from razor_api import razor_api
 
 class rpcsqa_helper:
