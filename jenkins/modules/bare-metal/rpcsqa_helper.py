@@ -20,23 +20,6 @@ class rpcsqa_helper:
         
         return outl
 
-    def prepare_environment(self, os, name):
-        # Gather the nodes for the requested OS
-        nodes = Search('node').query("name:qa-%s-pool*" % os)
-
-        #Make sure all networking interfacing is set
-        for node in nodes:
-            chef_node = Node(node['name'])
-            self.set_network_interface(chef_node)
-
-        # If the environment doesnt exist in chef, make it.
-        env = "%s-%s" % (os, name)
-        if not Search("environment").query("name:%s"%env):
-            print "Making environment: %s " % env
-            Environment.create(env)
-
-        print "YEAH WE GOT THIS FAR!!"
-
     def build_computes(self, computes):
         # Run computes
         print "Making the compute nodes..."
@@ -69,6 +52,101 @@ class rpcsqa_helper:
                 print "Error running chef-client for compute %s" % compute
                 print run1
                 sys.exit(1)
+
+    def build_controller(self, chef_node, ha=False, ha_num=0):
+        # Check for ha
+        if ha:
+            print "Making %s the ha-controller%s node" % (controller, ha_num)
+            chef_node['in_use'] = "ha-controller%s" % ha_num
+            chef_node.run_list = ["role[qa-ha-controller%s]" % ha_num]
+        else:
+            print "Making %s the controller node" % controller
+            chef_node['in_use'] = "controller"
+            chef_node.run_list = ["role[qa-single-controller]"]
+        # save node
+        chef_node.save()
+
+        print "Updating server...this may take some time"
+        update_node(chef_node)
+
+        if chef_node['platform_family'] == 'rhel':
+            print "Platform is RHEL family, disabling iptables"
+            disable_iptables(chef_node)
+
+        # Run chef-client twice
+        print "Running chef-client for controller node...this may take some time..."
+        run1 = run_chef_client(chef_node)
+        if run1['success']:
+            print "First chef-client run successful...starting second run..."
+            run2 = run_chef_client(chef_node)
+            if run2['success']:
+                print "Second chef-client run successful..."
+            else:
+                print "Error running chef-client for controller %s" % controller
+                print run2
+                sys.exit(1)
+        else:
+            print "Error running chef-client for controller %s" % controller
+            print run1
+            sys.exit(1)
+
+    def build_dir_server(self, dir_node):
+        # We dont support 389 yet, so exit if it is not ldap
+        if results.dir_version != 'openldap':
+            print "%s as a directory service is not yet supported...exiting" % results.dir_version
+            sys.exit(1)
+
+        # Build directory service node
+        ip = dir_node['ipaddress']
+        root_pass = razor_password(dir_node)
+        dir_node['in_use'] = 'directory-server'
+        dir_node.run_list = ["role[qa-%s-%s]" % (results.dir_version, results.os)]
+        dir_node.save()
+
+        print "Updating server...this may take some time"
+        update_node(dir_node)
+
+        # if redhat platform, disable iptables
+        if dir_node['platform_family'] == 'rhel':
+            print "Platform is RHEL family, disabling iptables"
+            disable_iptables(dir_node)
+
+        # Run chef-client twice
+        print "Running chef-client for directory service node...this may take some time..."
+        run1 = run_chef_client(dir_node)
+        if run1['success']:
+            print "First chef-client run successful...starting second run..."
+            run2 = run_chef_client(dir_node)
+            if run2['success']:
+                print "Second chef-client run successful..."
+            else:
+                print "Error running chef-client for directory node %s" % dir_node
+                print run2
+                sys.exit(1)
+        else:
+            print "Error running chef-client for directory node %s" % dir_node
+            print run1
+            sys.exit(1)
+
+        # Directory service is set up, need to import config
+        if run1['success'] and run2['success']:
+            if results.dir_version == 'openldap':
+                scp_run = run_remote_scp_cmd(ip, 'root', root_pass, '/var/lib/jenkins/source_files/ldif/*.ldif')
+                if scp_run['success']:
+                    ssh_run = run_remote_ssh_cmd(ip, 'root', root_pass, 'ldapadd -x -D \"cn=admin,dc=dev,dc=rcbops,dc=me\" -f base.ldif -w@privatecloud')
+            elif results.dir_version == '389':
+                # Once we support 389, code here to import needed config files
+                print "389 is not yet supported..."
+                sys.exit(1)
+            else:
+                print "%s is not supported...exiting" % results.dir_version
+                sys.exit(1)
+
+        if scp_run['success'] and ssh_run['success']:
+            print "Directory Service: %s successfully set up..." % results.dir_version
+        else:
+            print "Failed to set-up Directory Service: %s..." % results.dir_version
+            sys.exit(1)
 
     def clear_pool(self, chef_nodes, environment):
         with self.chef:
@@ -234,6 +312,23 @@ class rpcsqa_helper:
                     'exception': cpe,
                     'command': command}
 
+    def prepare_environment(self, os, name):
+        # Gather the nodes for the requested OS
+        nodes = Search('node').query("name:qa-%s-pool*" % os)
+
+        #Make sure all networking interfacing is set
+        for node in nodes:
+            chef_node = Node(node['name'])
+            self.set_network_interface(chef_node)
+
+        # If the environment doesnt exist in chef, make it.
+        env = "%s-%s" % (os, name)
+        if not Search("environment").query("name:%s"%env):
+            print "Making environment: %s " % env
+            Environment.create(env)
+
+        print "YEAH WE GOT THIS FAR!!"
+
     def prepare_vm_host(self, controller_node):
         controller_ip = controller_node['ipaddress']
         root_pass = razor_password(controller_node)
@@ -341,101 +436,6 @@ class rpcsqa_helper:
             run_remote_ssh_cmd(ip, 'root', root_pass, 'yum update -y -q')
         else:
             print "Platform Family %s is not supported." % chef_node['platform_family']
-            sys.exit(1)
-
-    def build_controller(self, chef_node, ha=False, ha_num=0):
-        # Check for ha
-        if ha:
-            print "Making %s the ha-controller%s node" % (controller, ha_num)
-            chef_node['in_use'] = "ha-controller%s" % ha_num
-            chef_node.run_list = ["role[qa-ha-controller%s]" % ha_num]
-        else:
-            print "Making %s the controller node" % controller
-            chef_node['in_use'] = "controller"
-            chef_node.run_list = ["role[qa-single-controller]"]
-        # save node
-        chef_node.save()
-
-        print "Updating server...this may take some time"
-        update_node(chef_node)
-
-        if chef_node['platform_family'] == 'rhel':
-            print "Platform is RHEL family, disabling iptables"
-            disable_iptables(chef_node)
-
-        # Run chef-client twice
-        print "Running chef-client for controller node...this may take some time..."
-        run1 = run_chef_client(chef_node)
-        if run1['success']:
-            print "First chef-client run successful...starting second run..."
-            run2 = run_chef_client(chef_node)
-            if run2['success']:
-                print "Second chef-client run successful..."
-            else:
-                print "Error running chef-client for controller %s" % controller
-                print run2
-                sys.exit(1)
-        else:
-            print "Error running chef-client for controller %s" % controller
-            print run1
-            sys.exit(1)
-
-    def build_dir_server(self, dir_node):
-        # We dont support 389 yet, so exit if it is not ldap
-        if results.dir_version != 'openldap':
-            print "%s as a directory service is not yet supported...exiting" % results.dir_version
-            sys.exit(1)
-
-        # Build directory service node
-        ip = dir_node['ipaddress']
-        root_pass = razor_password(dir_node)
-        dir_node['in_use'] = 'directory-server'
-        dir_node.run_list = ["role[qa-%s-%s]" % (results.dir_version, results.os)]
-        dir_node.save()
-
-        print "Updating server...this may take some time"
-        update_node(dir_node)
-
-        # if redhat platform, disable iptables
-        if dir_node['platform_family'] == 'rhel':
-            print "Platform is RHEL family, disabling iptables"
-            disable_iptables(dir_node)
-
-        # Run chef-client twice
-        print "Running chef-client for directory service node...this may take some time..."
-        run1 = run_chef_client(dir_node)
-        if run1['success']:
-            print "First chef-client run successful...starting second run..."
-            run2 = run_chef_client(dir_node)
-            if run2['success']:
-                print "Second chef-client run successful..."
-            else:
-                print "Error running chef-client for directory node %s" % dir_node
-                print run2
-                sys.exit(1)
-        else:
-            print "Error running chef-client for directory node %s" % dir_node
-            print run1
-            sys.exit(1)
-
-        # Directory service is set up, need to import config
-        if run1['success'] and run2['success']:
-            if results.dir_version == 'openldap':
-                scp_run = run_remote_scp_cmd(ip, 'root', root_pass, '/var/lib/jenkins/source_files/ldif/*.ldif')
-                if scp_run['success']:
-                    ssh_run = run_remote_ssh_cmd(ip, 'root', root_pass, 'ldapadd -x -D \"cn=admin,dc=dev,dc=rcbops,dc=me\" -f base.ldif -w@privatecloud')
-            elif results.dir_version == '389':
-                # Once we support 389, code here to import needed config files
-                print "389 is not yet supported..."
-                sys.exit(1)
-            else:
-                print "%s is not supported...exiting" % results.dir_version
-                sys.exit(1)
-
-        if scp_run['success'] and ssh_run['success']:
-            print "Directory Service: %s successfully set up..." % results.dir_version
-        else:
-            print "Failed to set-up Directory Service: %s..." % results.dir_version
             sys.exit(1)
 
     def gather_nodes(self, chef_nodes, environment, cluster_size):

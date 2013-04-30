@@ -90,31 +90,20 @@ Steps
 rpcsqa = rpcsqa_helper(results.razor_ip)
 print rpcsqa
 
-with rpcsqa.chef:
+with rpcsqa:
 
     # Remove broker fails for qa-%os-pool
-    rpcsqa.remove_broker_fail("qa-%s-pool" % results.os)
+    remove_broker_fail("qa-%s-pool" % results.os)
 
-    #Prepare environment
-    nodes = Search('node').query("name:qa-%s-pool*" % results.os)
-
-    #Make sure all networking interfacing is set
-    for node in nodes:
-        chef_node = Node(node['name'])
-        set_network_interface(chef_node)
-
-    # If the environment doesnt exist in chef, make it.
-    env = "%s-%s-opencenter" % (results.name, results.os)
-    if not Search("environment").query("name:%s" % env):
-        print "Making environment: %s " % env
-        Environment.create(env)
+    # Prepare environment
+    prepare_environment(results.os, results.name)
 
     # Set the cluster size
     cluster_size = int(results.cluster_size)
 
     # If we want to clear the pool
     if results.clear_pool:
-        rpcsqa.clear_pool(nodes, env)
+        clear_pool(nodes, env)
 
     # Collect environment and install opencenter.
     if results.action == "build":
