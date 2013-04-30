@@ -21,13 +21,6 @@ class rpcsqa_helper:
         
         return outl
 
-    def __enter__(self):
-        print '__enter__()'
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        print '__exit__()'
-
     def build_computes(self, computes):
         # Run computes
         print "Making the compute nodes..."
@@ -462,12 +455,21 @@ class rpcsqa_helper:
             print "Platform Family %s is not supported." % chef_node['platform_family']
             sys.exit(1)
 
-    def gather_nodes(self, chef_nodes, environment, cluster_size):
+    def gather_all_nodes(self, os):
+        
+        # Gather the nodes for the requested OS
+        nodes = Search('node').query("name:qa-%s-pool*" % os)
+        return nodes
+
+    def gather_size_nodes(self, os, environment, cluster_size):
         ret_nodes = []
         count = 0
 
+        # Gather the nodes for the requested OS
+        nodes = Search('node').query("name:qa-%s-pool*" % os)
+
         # Take a node from the default environment that has its network interfaces set.
-        for n in chef_nodes:
+        for n in nodes:
             name = n['name']
             node = Node(name)
             if ((node.chef_environment == "_default" or node.chef_environment == environment) and "recipe[network-interfaces]" in node.run_list):
