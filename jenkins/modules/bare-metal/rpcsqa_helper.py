@@ -1,6 +1,5 @@
 import sys
 import time
-import contextlib
 from chef import *
 from server_helper import *
 from razor_api import razor_api
