@@ -247,7 +247,7 @@ if results.action == "build":
         rpcsqa.install_opencenter(server, results.repo, 'server')
 
         if dashboard:
-            dashboard_ip = rpscqa.set_node_in_use(dashboard, "dashboard")
+            dashboard_ip = rpcsqa.set_node_in_use(dashboard, "dashboard")
             rpscqa.remove_chef(dashboard)
             rpscqa.install_opencenter(dashboard, results.repo, 'dashboard', server_ip)
 
