@@ -99,8 +99,6 @@ class rpcsqa_helper:
 
     def clear_pool(self, chef_nodes, environment):
         for n in chef_nodes:
-            print n
-            print n.chef_environment
             name = n['name']
             node = self.chef.Node(name)
             if node.chef_environment == environment:

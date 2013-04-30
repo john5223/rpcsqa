@@ -88,12 +88,10 @@ Steps
 """
 
 rpcsqa = rpcsqa_helper(results.razor_ip)
-chef = rpcsqa.chef
-razor = rpcsqa.razor
 print rpcsqa
 
-with chef:
-    
+with rpcsqa.chef:
+
     # Remove broker fails for qa-%os-pool
     rpcsqa.remove_broker_fail("qa-%s-pool" % results.os)
 
@@ -105,7 +103,6 @@ with chef:
     #Make sure all networking interfacing is set
     for node in nodes:
         chef_node = Node(node['name'])
-        print chef_node
         set_network_interface(chef_node)
 
     # If the environment doesnt exist in chef, make it.
