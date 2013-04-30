@@ -101,9 +101,9 @@ rpcsqa.remove_broker_fail("qa-%s-pool" % results.os)
 nodes = Search('node').query("name:qa-%s-pool*" % results.os)
 
 #Make sure all networking interfacing is set
-    for node in nodes:
-        chef_node = Node(node['name'])
-        set_network_interface(chef_node)
+for node in nodes:
+    chef_node = Node(node['name'])
+    set_network_interface(chef_node)
 
 # If the environment doesnt exist in chef, make it.
 env = "%s-%s-opencenter" % (results.name, results.os)
