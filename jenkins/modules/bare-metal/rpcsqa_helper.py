@@ -260,16 +260,16 @@ class rpcsqa_helper:
         print "*****************************************************"
         print ""
         print ""
-        if node['platform_family'] == "debian":
+        if chef_node['platform_family'] == "debian":
             run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, 'apt-get update -y -qq')
-        elif node['platform_family'] == "rhel":
-            run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass,
+        elif chef_node['platform_family'] == "rhel":
+            run_remote_ssh_cmd(chef_node['ipaddress'], 'root', root_pass,
                                ('yum update -y -q;'
                                 '/etc/init.d/iptables save;'
                                 '/etc/init.d/iptables stop'))
         command = "bash <(curl %s) --role=%s --ip=%s" % (install_script, role, oc_server_ip)
         print command
-        ret = run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, command)
+        ret = run_remote_ssh_cmd(chef_node['ipaddress'], 'root', root_pass, command)
         if not ret['success']:
             print "Failed to install opencenter %s" % type
 
