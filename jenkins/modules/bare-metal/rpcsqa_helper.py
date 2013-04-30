@@ -157,16 +157,15 @@ class rpcsqa_helper:
             sys.exit(1)
 
     def clear_pool(self, chef_nodes, environment):
-        with self.chef:
-            for n in chef_nodes:
-                name = n['name']
-                node = Node(name)
-                if node.chef_environment == environment:
-                    if "recipe[network-interfaces]" not in node.run_list:
-                        self.erase_node(node)
-                    else:
-                        node.chef_environment = "_default"
-                        node.save()
+        for n in chef_nodes:
+            name = n['name']
+            node = Node(name)
+            if node.chef_environment == environment:
+                if "recipe[network-interfaces]" not in node.run_list:
+                    self.erase_node(node)
+                else:
+                    node.chef_environment = "_default"
+                    node.save()
 
     def cleanup_environment(self, chef_environment):
         """
@@ -433,7 +432,7 @@ class rpcsqa_helper:
             if run1['success'] and run2['success'] and run3['success']:
                 print "Done running chef-client"
             else:
-                print "Error running chef client for network interfaces"
+                print "Error running chef client to set network interfaces"
                 print "First run: %s" % run1
                 print "Second run: %s" % run2
                 print "Final run: %s" % run3

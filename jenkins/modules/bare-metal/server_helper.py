@@ -10,10 +10,10 @@ def run_remote_ssh_cmd(server_ip, user, passwd, remote_cmd):
     @param remote_cmd
     @return A map based on pass / fail run info
     """
-    command = ("sshpass -p %s ssh"
-               "-o UserKnownHostsFile=/dev/null"
-               "-o StrictHostKeyChecking=no"
-               "-o LogLevel=quiet"
+    command = ("sshpass -p %s ssh "
+               "-o UserKnownHostsFile=/dev/null "
+               "-o StrictHostKeyChecking=no "
+               "-o LogLevel=quiet "
                "-l %s %s '%s'") % (passwd,
                                    user,
                                    server_ip,
@@ -35,10 +35,10 @@ def run_remote_scp_cmd(server_ip, user, passwd, to_copy):
     @param to_copy
     @return A map based on pass / fail run info
     """
-    command = ("sshpass -p %s scp"
-               "-o UserKnownHostsFile=/dev/null"
-               "-o StrictHostKeyChecking=no"
-               "-o LogLevel=quiet"
+    command = ("sshpass -p %s scp "
+               "-o UserKnownHostsFile=/dev/null "
+               "-o StrictHostKeyChecking=no "
+               "-o LogLevel=quiet "
                "%s %s@%s:~/") % (passwd,
                                  to_copy,
                                  user,
