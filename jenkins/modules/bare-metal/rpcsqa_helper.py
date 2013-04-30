@@ -161,7 +161,7 @@ class rpcsqa_helper:
             name = n['name']
             node = Node(name)
             if node.chef_environment == environment:
-                if "recipe[network-interfaces]" not in node.run_list:
+                if node['in_use'] != 0:
                     self.erase_node(node)
                 else:
                     node.chef_environment = "_default"
@@ -207,25 +207,24 @@ class rpcsqa_helper:
         """
         @param chef_node
         """
-        with self.chef:
-            print "Deleting: %s" % chef_node['name']
-            am_uuid = chef_node['razor_metadata'].to_dict()['razor_active_model_uuid']
-            run = run_remote_ssh_cmd(chef_node['ipaddress'],
-                                     'root',
-                                     self.razor_password(chef_node),
-                                     "reboot 0")
-            if not run['success']:
-                print "Error rebooting server %s@%s " % (chef_node, chef_node['ipaddress'])
-                # TODO: return failure
-                sys.exit(1)
+        print "Deleting: %s" % chef_node['name']
+        am_uuid = chef_node['razor_metadata'].to_dict()['razor_active_model_uuid']
+        run = run_remote_ssh_cmd(chef_node['ipaddress'],
+                                 'root',
+                                 self.razor_password(chef_node),
+                                 "reboot 0")
+        if not run['success']:
+            print "Error rebooting server %s@%s " % (chef_node, chef_node['ipaddress'])
+            # TODO: return failure
+            sys.exit(1)
 
-            #Knife node remove; knife client remove
-            Client(chef_node).delete()
-            chef_node.delete()
+        #Knife node remove; knife client remove
+        Client(chef_node).delete()
+        chef_node.delete()
 
-            #Remove active model
-            self.razor.remove_active_model(am_uuid)
-            time.sleep(15)
+        #Remove active model
+        self.razor.remove_active_model(am_uuid)
+        time.sleep(15)
 
     def razor_password(self, chef_node):
         metadata = chef_node.attributes['razor_metadata'].to_dict()
@@ -414,6 +413,7 @@ class rpcsqa_helper:
     def set_network_interface(self, chef_node):
         if "role[qa-base]" in chef_node.run_list:
             chef_node.run_list = ["recipe[network-interfaces]"]
+            chef_node['in_use'] = 0
             chef_node.save()
             print "Running network interfaces for %s" % chef_node
           
@@ -464,8 +464,7 @@ class rpcsqa_helper:
         for n in nodes:
             name = n['name']
             node = Node(name)
-            if ((node.chef_environment == "_default" or node.chef_environment == environment) and "recipe[network-interfaces]" in node.run_list):
-                node['in_use'] = 1
+            if ((node.chef_environment == "_default" or node.chef_environment == environment) and node['in_use'] == 0):
                 self.set_nodes_environment(node, environment)
                 ret_nodes.append(name)          
                 print "Taking node: %s" % name
