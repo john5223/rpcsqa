@@ -213,7 +213,7 @@ class rpcsqa_helper:
         """
         @param chef_node
         """
-        print "Deleting: %s" % chef_node['name']
+        print "Deleting: %s" % chef_node
         am_uuid = chef_node['razor_metadata'].to_dict()['razor_active_model_uuid']
         run = run_remote_ssh_cmd(chef_node['ipaddress'],
                                  'root',
