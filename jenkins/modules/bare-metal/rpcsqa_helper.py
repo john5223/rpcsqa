@@ -54,14 +54,14 @@ class rpcsqa_helper:
                 print run1
                 sys.exit(1)
 
-    def build_controller(self, chef_node, ha=False, ha_num=0):
+    def build_controller(self, controller_node, ha=False, ha_num=0):
         # Check for ha
         if ha:
-            print "Making %s the ha-controller%s node" % (controller, ha_num)
+            print "Making %s the ha-controller%s node" % (controller_node, ha_num)
             chef_node['in_use'] = "ha-controller%s" % ha_num
             chef_node.run_list = ["role[qa-ha-controller%s]" % ha_num]
         else:
-            print "Making %s the controller node" % controller
+            print "Making %s the controller node" % controller_node
             chef_node['in_use'] = "controller"
             chef_node.run_list = ["role[qa-single-controller]"]
         # save node
@@ -87,7 +87,7 @@ class rpcsqa_helper:
                 print run2
                 sys.exit(1)
         else:
-            print "Error running chef-client for controller %s" % controller
+            print "Error running chef-client for controller %s" % controller_node
             print run1
             sys.exit(1)
 
