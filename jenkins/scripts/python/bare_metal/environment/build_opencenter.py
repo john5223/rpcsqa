@@ -87,12 +87,12 @@ Steps
 5. Install opencenter-agent on the rest of the boxes.
 """
 
-with rpcsqa_helper(results.razor_ip):
+with rpcsqa_helper(results.razor_ip) as rpcsqa:
 
     print "inside helper context"
 
     # Remove broker fails for qa-%os-pool
-    self.remove_broker_fail("qa-%s-pool" % results.os)
+    rpcsqa.remove_broker_fail("qa-%s-pool" % results.os)
 
     # Prepare environment
     prepare_environment(results.os, results.name)
