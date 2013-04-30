@@ -248,7 +248,7 @@ class rpcsqa_helper:
                     print run
                     sys.exit(1)
 
-    def install_opencenter(self, chef_node, install_script, role):
+    def install_opencenter(self, chef_node, install_script, role, oc_server_ip='0.0.0.0'):
         root_pass = self.razor_password(chef_node)
         print ""
         print ""
@@ -260,29 +260,20 @@ class rpcsqa_helper:
         print ""
         print ""
         if node['platform_family'] == "debian":
-            run_remote_ssh_cmd(node['ipaddress'],
-                               'root',
-                               root_pass,
-                               'apt-get update -y -qq')
+            run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, 'apt-get update -y -qq')
         elif node['platform_family'] == "rhel":
-            run_remote_ssh_cmd(node['ipaddress'],
-                               'root',
-                               root_pass,
+            run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass,
                                ('yum update -y -q;'
                                 '/etc/init.d/iptables save;'
                                 '/etc/init.d/iptables stop'))
-        command = "bash <(curl %s) --role=%s --ip=%s" % (install_script,
-                                                         role,
-                                                         chef_node['ipaddress'])
+        command = "bash <(curl %s) --role=%s --ip=%s" % (install_script, role, oc_server_ip)
         print command
         ret = run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, command)
         if not ret['success']:
             print "Failed to install opencenter %s" % type
 
     def install_opencenter_vm(self, vm_ip, oc_server_ip, install_script, role, user, passwd):
-        command = "bash <(curl %s) --role=%s --ip=%s" % (install_script,
-                                                         role,
-                                                         oc_server_ip)
+        command = "bash <(curl %s) --role=%s --ip=%s" % (install_script, role, oc_server_ip)
         install_run = run_remote_ssh_cmd(vm_ip, user, passwd, command)
         if not install_run['success']:
             print "Failed to install OpenCenter %s on VM..." % role

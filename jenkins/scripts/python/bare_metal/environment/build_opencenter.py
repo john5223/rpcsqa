@@ -242,39 +242,29 @@ if results.action == "build":
         if len(opencenter_list) > 1:
             dashboard = opencenter_list[1]
         if len(opencenter_list) > 2:
-            clients = opencenter_list[2:]
+            agents = opencenter_list[2:]
 
         #Remove chef client...install opencenter server
         print "Making %s the server node" % server
-        self.set_node_in_use(server, "server")
-        server_node = Node(server)
-        server_ip = server_node['ipaddress']
-        server_node['in_use'] = "server"
-        server_node.save()
-
-        remove_chef(server)
-        install_opencenter(server, results.repo, 'server')
+        server_ip = rpcsqa.set_node_in_use(server, "server")
+        rpcsqa.remove_chef(server)
+        rpcsqa.install_opencenter(server, results.repo, 'server')
 
         if dashboard:
-            dashboard_node = Node(dashboard)
-            dashboard_node['in_use'] = "dashboard"
-            dashboard_node.save()
-            remove_chef(dashboard)
-            install_opencenter(dashboard, results.repo, 'dashboard', server_ip)
+            dashboard_ip = rpscqa.set_node_in_use(dashboard, "dashboard")
+            rpscqa.remove_chef(dashboard)
+            rpscqa.install_opencenter(dashboard, results.repo, 'dashboard', server_ip)
 
-        for client in clients:
-            agent_node = Node(client)
-            agent_node['in_use'] = "agent"
-            agent_node.save()
-            remove_chef(client)
-            install_opencenter(client, results.repo, 'agent', server_ip)
+        for agent in agents:
+            agent_ip = rpcsqa.set_node_in_use(agent, 'agent')
+            rpscqa.remove_chef(agent)
+            rpscqa.install_opencenter(agent, results.repo, 'agent', server_ip)
 
         print ""
         print ""
         print ""
         print ""
 
-        dashboard_ip = rpscqa.chef.Node(dashboard)['ipaddress']
         dashboard_url = ""
         try:
             r = requests.get("https://%s" % dashboard_ip,
@@ -288,9 +278,7 @@ if results.action == "build":
         print "***************************************************************"
         print "Server: %s - %s  " % (server, server_ip)
         print "Dashboard: %s - %s " % (dashboard, dashboard_url)
-        for a in clients:
-            node = Node(a)
-            print "Agent: %s - %s " % (a, node['ipaddress'])
+        rpcsqa.print_computes_info(agents)
         print "***************************************************************"
         print ""
         print ""
