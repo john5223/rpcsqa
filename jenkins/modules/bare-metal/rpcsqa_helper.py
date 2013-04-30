@@ -178,7 +178,7 @@ class rpcsqa_helper:
             node = Node(name)
             if node['in_use'] != 0:
                 self.erase_node(node)
-            else
+            else:
                 node.chef_environment = "_default"
                 node.save()
 
