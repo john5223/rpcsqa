@@ -379,7 +379,7 @@ class rpcsqa_helper:
 
     def print_computes_info(self, computes):
         for compute in computes:
-            c = Node(c['name'])
+            c = Node(compute['name'])
             print "Compute: %s" % print_server_info(c)
 
     def run_chef_client(self, chef_node, logfile="STDOUT"):
@@ -434,7 +434,9 @@ class rpcsqa_helper:
                 raise Exception("Failed to set network interface for %s" % chef_node)
 
     def set_nodes_environment(self, chef_node, environment):
+        print "Nodes environment is %s, trying to set to %s" % (chef_node.environment, environment)
         if chef_node.chef_environment != environment:
+            print "Environment mismatch, setting environment"
             chef_node.chef_environment = environment
             chef_node.save()
 
