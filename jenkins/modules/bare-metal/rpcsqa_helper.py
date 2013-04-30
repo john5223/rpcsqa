@@ -338,12 +338,12 @@ class rpcsqa_helper:
             self.set_network_interface(chef_node)
 
         # If the environment doesnt exist in chef, make it.
-        env = "%s-%s" % (os, name)
-        if not Search("environment").query("name:%s"%env):
+        env = "%s-%s" % (name, os)
+        if not Search("environment").query("name:%s" % env):
             print "Making environment: %s " % env
             Environment.create(env)
 
-        print "YEAH WE GOT THIS FAR!!"
+        return env
 
     def prepare_vm_host(self, controller_node):
         controller_ip = controller_node['ipaddress']
