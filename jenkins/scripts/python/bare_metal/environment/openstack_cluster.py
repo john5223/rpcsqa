@@ -54,187 +54,174 @@ Steps
 4. Pick the rest as computes, set roles, run chef-client
 """
 rpcsqa = rpcsqa_helper(results.razor_ip)
-chef = rpcsqa.chef
-razor = rpcsqa.razor
 
-with chef:
+with rpcsqa:
 
-    # Remove broker fails for qa-%os-pool
-    remove_broker_fail("qa-%s-pool" % results.os)
+        # Remove broker fails for qa-%os-pool
+        remove_broker_fail("qa-%s-pool" % results.os)
 
-    #Prepare environment
-    nodes = Search('node').query("name:qa-%s-pool*" % results.os)
+        #Prepare environment
+        prepare_environment(results.os, results.name)
+        
+        # Set the cluster size   
+        cluster_size = int(results.cluster_size)
 
-    #Make sure all networking interfacing is set
-    for node in nodes:
-        chef_node = Node(node['name'])
-        set_network_interface(chef_node)
+        # Collect environment and install Open Stack.
+        if results.action == "build":
 
-    # If the environment doesnt exist in chef, make it.
-    env = "%s-%s" % (results.os, results.name)
-    if not Search("environment").query("name:%s"%env):
-        print "Making environment: %s " % env
-        Environment.create(env)
+            # If we want to clear the pool
+            if results.clear_pool:
+                clear_pool(nodes, env)
 
-    # Set the cluster size   
-    cluster_size = int(results.cluster_size)
-
-    # Collect environment and install Open Stack.
-    if results.action == "build":
-
-        # If we want to clear the pool
-        if results.clear_pool:
-            clear_pool(nodes, env)
-
-        # Check the cluster size, if <5 and results.dir_service is enabled, set to 4
-        if cluster_size < 4 and results.dir_service:
-            if results.ha_enabled:
-                cluster_size = 5
-                print "HA and Directory Services are requested, re-setting cluster size to %i." % cluster_size
-            else:
+            # Check the cluster size, if <5 and results.dir_service is enabled, set to 4
+            if cluster_size < 4 and results.dir_service:
+                if results.ha_enabled:
+                    cluster_size = 5
+                    print "HA and Directory Services are requested, re-setting cluster size to %i." % cluster_size
+                else:
+                    cluster_size = 4
+                    print "Directory Services are requested, re-setting cluster size to %i." % cluster_size
+            elif cluster_size < 4 and results.ha_enabled:
                 cluster_size = 4
-                print "Directory Services are requested, re-setting cluster size to %i." % cluster_size
-        elif cluster_size < 4 and results.ha_enabled:
-            cluster_size = 4
-            print "HA is enabled, re-setting cluster size to %i." % cluster_size
-        else:
-            print "Cluster size is %i." % cluster_size
+                print "HA is enabled, re-setting cluster size to %i." % cluster_size
+            else:
+                print "Cluster size is %i." % cluster_size
 
-        #Collect the amount of servers we need for the openstack install
-        check_cluster_size(nodes, cluster_size)        
+            #Collect the amount of servers we need for the openstack install
+            check_cluster_size(nodes, cluster_size)        
 
-        # gather the nodes and set there environment
-        openstack_list = gather_nodes(nodes, env, cluster_size)
-
-        # If there were no nodes available, exit
-        if not openstack_list:
-            print "No nodes available..."
-            sys.exit(1)
-
-        # Build cluster accordingly
-        if results.dir_service and results.ha_enabled:
-            
-            # Set each servers roles
-            dir_server = openstack_list[0]
-            ha_controller_1 = openstack_list[1]
-            ha_controller_2 = openstack_list[2]
-            computes = openstack_list[3:]
-
-            # Build directory service server
-            build_dir_server(dir_server)
-
-            # Build HA Controllers
-            build_controller(ha_controller_1, True, 1)
-            build_controller(ha_controller_2, True, 2)
-
-            # Have to run chef client on controller 1 again
-            ha_controller_1_node = Node(ha_controller_1)
-            run_chef_client(ha_controller_1_node)
-
-            # Build computes
-            build_computes(computes)
-
-            # print all servers info
-            print "********************************************************************"
-            print "Directory Service Server: %s" % print_server_info(dir_server)
-            print "HA-Controller 1: %s" % print_server_info(ha_controller_1)
-            print "HA-Controller 2: %s" % print_server_info(ha_controller_2)
-            print_computes_info(computes)
-            print "********************************************************************"
-
-        elif results.dir_service:
-            
-            # Set each servers roles
-            dir_server = openstack_list[0]
-            controller = openstack_list[1]
-            computes = openstack_list[2:]
-
-            # Build the dir server
-            build_dir_server(dir_server)
-
-            # Build controller
-            build_controller(controller)
-
-            # Build computes
-            build_computes(computes)
-
-            # print all servers info
-            print "********************************************************************"
-            print "Directory Service Server: %s" % print_server_info(dir_server)
-            print "Controller: %s" % print_server_info(controller)
-            print_computes_info(computes)
-            print "********************************************************************"
-
-        elif results.ha_enabled:
-            
-            # Set each servers roles
-            ha_controller_1 = openstack_list[0]
-            ha_controller_2 = openstack_list[1]
-            computes = openstack_list[2:]
-
-            # Make the controllers
-            build_controller(ha_controller_1, True, 1)
-            build_controller(ha_controller_2, True, 2)
-
-            # Have to run chef client on controller 1 again
-            ha_controller_1_node = Node(ha_controller_1)
-            print "HA Setup...have to run chef client on %s again cause it is ha-controller1..." % ha_controller_1
-            run_chef_client(ha_controller_1_node)
-
-            # build computes
-            build_computes(computes)
-
-            # print all servers info
-            print "********************************************************************"
-            print "HA-Controller 1: %s" % print_server_info(ha_controller_1)
-            print "HA-Controller 2: %s" % print_server_info(ha_controller_2)
-            print_computes_info(computes)
-            print "********************************************************************"
-            
-        else:
-            
-            # Set each servers roles
-            controller = openstack_list[0]
-            computes = openstack_list[1:]
-
-            # Make servers
-            build_controller(controller)
-            build_computes(computes)
-
-            # print all servers info
-            print "********************************************************************"
-            print "Controller: %s" % print_server_info(controller)
-            print_computes_info(computes)
-            print "********************************************************************"
-
-    # We want to add more nodes to the environment
-    elif results.action == 'add':
-
-        # make sure there is a controller
-        if environment_has_controller(env):
-
-            # make sure we have enough nodes
-            check_cluster_size(nodes, cluster_size)
-
-            # set all nodes to compute in the requested environment
-            computes = gather_nodes(nodes, env, cluster_size)
+            # gather the nodes and set there environment
+            openstack_list = gather_nodes(nodes, env, cluster_size)
 
             # If there were no nodes available, exit
-            if not computes:
+            if not openstack_list:
                 print "No nodes available..."
                 sys.exit(1)
 
-            # Build out the computes
-            build_computes(computes)
-            print_computes_info(computes)
+            # Build cluster accordingly
+            if results.dir_service and results.ha_enabled:
+                
+                # Set each servers roles
+                dir_server = openstack_list[0]
+                ha_controller_1 = openstack_list[1]
+                ha_controller_2 = openstack_list[2]
+                computes = openstack_list[3:]
+
+                # Build directory service server
+                build_dir_server(dir_server)
+
+                # Build HA Controllers
+                build_controller(ha_controller_1, True, 1)
+                build_controller(ha_controller_2, True, 2)
+
+                # Have to run chef client on controller 1 again
+                ha_controller_1_node = Node(ha_controller_1)
+                run_chef_client(ha_controller_1_node)
+
+                # Build computes
+                build_computes(computes)
+
+                # print all servers info
+                print "********************************************************************"
+                print "Directory Service Server: %s" % print_server_info(dir_server)
+                print "HA-Controller 1: %s" % print_server_info(ha_controller_1)
+                print "HA-Controller 2: %s" % print_server_info(ha_controller_2)
+                print_computes_info(computes)
+                print "********************************************************************"
+
+            elif results.dir_service:
+                
+                # Set each servers roles
+                dir_server = openstack_list[0]
+                controller = openstack_list[1]
+                computes = openstack_list[2:]
+
+                # Build the dir server
+                build_dir_server(dir_server)
+
+                # Build controller
+                build_controller(controller)
+
+                # Build computes
+                build_computes(computes)
+
+                # print all servers info
+                print "********************************************************************"
+                print "Directory Service Server: %s" % print_server_info(dir_server)
+                print "Controller: %s" % print_server_info(controller)
+                print_computes_info(computes)
+                print "********************************************************************"
+
+            elif results.ha_enabled:
+                
+                # Set each servers roles
+                ha_controller_1 = openstack_list[0]
+                ha_controller_2 = openstack_list[1]
+                computes = openstack_list[2:]
+
+                # Make the controllers
+                build_controller(ha_controller_1, True, 1)
+                build_controller(ha_controller_2, True, 2)
+
+                # Have to run chef client on controller 1 again
+                ha_controller_1_node = Node(ha_controller_1)
+                print "HA Setup...have to run chef client on %s again cause it is ha-controller1..." % ha_controller_1
+                run_chef_client(ha_controller_1_node)
+
+                # build computes
+                build_computes(computes)
+
+                # print all servers info
+                print "********************************************************************"
+                print "HA-Controller 1: %s" % print_server_info(ha_controller_1)
+                print "HA-Controller 2: %s" % print_server_info(ha_controller_2)
+                print_computes_info(computes)
+                print "********************************************************************"
+                
+            else:
+                
+                # Set each servers roles
+                controller = openstack_list[0]
+                computes = openstack_list[1:]
+
+                # Make servers
+                build_controller(controller)
+                build_computes(computes)
+
+                # print all servers info
+                print "********************************************************************"
+                print "Controller: %s" % print_server_info(controller)
+                print_computes_info(computes)
+                print "********************************************************************"
+
+        # We want to add more nodes to the environment
+        elif results.action == 'add':
+
+            # make sure there is a controller
+            if environment_has_controller(env):
+
+                # make sure we have enough nodes
+                check_cluster_size(nodes, cluster_size)
+
+                # set all nodes to compute in the requested environment
+                computes = gather_nodes(nodes, env, cluster_size)
+
+                # If there were no nodes available, exit
+                if not computes:
+                    print "No nodes available..."
+                    sys.exit(1)
+
+                # Build out the computes
+                build_computes(computes)
+                print_computes_info(computes)
+
+            else:
+                print "Chef Environment %s doesnt have a controller, cant take action %s" % (env, results.action)
+                sys.exit(1)
+
+        elif results.action == 'destroy':
+            clear_pool(nodes, env)
 
         else:
-            print "Chef Environment %s doesnt have a controller, cant take action %s" % (env, results.action)
+            print "Action %s is not supported..." % results.action
             sys.exit(1)
-
-    elif results.action == 'destroy':
-        clear_pool(nodes, env)
-
-    else:
-        print "Action %s is not supported..." % results.action
-        sys.exit(1)
