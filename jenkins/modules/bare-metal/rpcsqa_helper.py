@@ -395,7 +395,7 @@ class rpcsqa_helper:
         @return run_remote_ssh_cmd of chef-client
         """
         ip = chef_node['ipaddress']
-        root_pass = razor_password(chef_node)
+        root_pass = self.razor_password(chef_node)
         return run_remote_ssh_cmd(ip,
                                   'root',
                                   root_pass,
