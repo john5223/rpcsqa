@@ -213,7 +213,7 @@ class rpcsqa_helper:
         """
         @param chef_node
         """
-        print "Deleting: %s" % chef_node
+        print "Deleting: %s" % str(chef_node)
         am_uuid = chef_node['razor_metadata'].to_dict()['razor_active_model_uuid']
         run = run_remote_ssh_cmd(chef_node['ipaddress'],
                                  'root',
@@ -225,7 +225,7 @@ class rpcsqa_helper:
             sys.exit(1)
 
         #Knife node remove; knife client remove
-        Client(chef_node).delete()
+        Client(str(chef_node)).delete()
         chef_node.delete()
 
         #Remove active model
