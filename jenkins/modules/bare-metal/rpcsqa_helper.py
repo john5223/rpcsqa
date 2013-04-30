@@ -379,7 +379,7 @@ class rpcsqa_helper:
 
     def print_computes_info(self, computes):
         for compute in computes:
-            c = Node(compute['name'])
+            c = Node(compute)
             print "Compute: %s" % print_server_info(c)
 
     def run_chef_client(self, chef_node, logfile="STDOUT"):
