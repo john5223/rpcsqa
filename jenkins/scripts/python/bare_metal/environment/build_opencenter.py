@@ -91,18 +91,19 @@ rpcsqa = rpcsqa_helper(results.razor_ip)
 chef = rpcsqa.chef
 razor = rpcsqa.razor
 print rpcsqa
-print chef
-print razor
 
 # Remove broker fails for qa-%os-pool
 rpcsqa.remove_broker_fail("qa-%s-pool" % results.os)
 
 #Prepare environment
-nodes = Search('node').query("name:qa-%s-pool*" % results.os)
+nodes = chef.Search('node').query("name:qa-%s-pool*" % results.os)
+
+print nodes
 
 #Make sure all networking interfacing is set
 for node in nodes:
     chef_node = Node(node['name'])
+    print chef_node
     set_network_interface(chef_node)
 
 # If the environment doesnt exist in chef, make it.
@@ -116,7 +117,7 @@ cluster_size = int(results.cluster_size)
 
 # If we want to clear the pool
 if results.clear_pool:
-    clear_pool(nodes, env)
+    rpcsqa.clear_pool(nodes, env)
 
 # Collect environment and install opencenter.
 if results.action == "build":
