@@ -19,51 +19,6 @@ class rpcsqa_helper:
         
         return outl
 
-    def razor_password(self, chef_node):
-        metadata = chef_node.attributes['razor_metadata'].to_dict()
-        uuid = metadata['razor_active_model_uuid']
-        return self.razor.get_active_model_pass(uuid)['password']
-
-    def erase_node(self, chef_node):
-        """
-        @param chef_node
-        """
-        print "Deleting: %s" % chef_node['name']
-        am_uuid = chef_node['razor_metadata'].to_dict()['razor_active_model_uuid']
-        run = run_remote_ssh_cmd(chef_node['ipaddress'],
-                                 'root',
-                                 razor_password(chef_node),
-                                 "reboot 0")
-        if not run['success']:
-            print "Error rebooting server %s@%s " % (chef_node, chef_node['ipaddress'])
-            # TODO: return failure
-            sys.exit(1)
-
-        #Knife node remove; knife client remove
-        self.chef.Client(chef_node['name']).delete()
-        chef_node.delete()
-
-        #Remove active model
-        self.razor.remove_active_model(am_uuid)
-        time.sleep(15)
-
-    def remove_broker_fail(self, policy):
-        active_models = self.razor.simple_active_models(policy)
-        for active in active_models:
-            data = active_models[active]
-            if 'broker_fail' in data['current_state']:
-                print "!!## -- Removing active model  (broker_fail) -- ##!!"
-                root_pass = razor.get_active_model_pass(data['am_uuid'])['password']
-                ip = data['eth1_ip']
-                run = run_remote_ssh_cmd(ip, 'root', root_pass, 'reboot 0')
-                if run['success']:
-                    self.razor.remove_active_model(data['am_uuid'])
-                    time.sleep(15)
-                else:
-                    print "Trouble removing broker fail"
-                    print run
-                    sys.exit(1)
-
     def build_computes(self, computes):
         # Run computes
         print "Making the compute nodes..."
@@ -98,15 +53,62 @@ class rpcsqa_helper:
                 sys.exit(1)
 
     def clear_pool(self, chef_nodes, environment):
-        for n in chef_nodes:
-            name = n['name']
-            node = self.chef.Node(name)
-            if node.chef_environment == environment:
-                if "recipe[network-interfaces]" not in node.run_list:
-                    self.erase_node(node)
+        with self.chef:
+            for n in chef_nodes:
+                name = n['name']
+                node = Node(name)
+                if node.chef_environment == environment:
+                    if "recipe[network-interfaces]" not in node.run_list:
+                        self.erase_node(node)
+                    else:
+                        node.chef_environment = "_default"
+                        node.save()
+
+    def erase_node(self, chef_node):
+        """
+        @param chef_node
+        """
+        with self.chef:
+            print "Deleting: %s" % chef_node['name']
+            am_uuid = chef_node['razor_metadata'].to_dict()['razor_active_model_uuid']
+            run = run_remote_ssh_cmd(chef_node['ipaddress'],
+                                     'root',
+                                     razor_password(chef_node),
+                                     "reboot 0")
+            if not run['success']:
+                print "Error rebooting server %s@%s " % (chef_node, chef_node['ipaddress'])
+                # TODO: return failure
+                sys.exit(1)
+
+            #Knife node remove; knife client remove
+            Client(chef_node).delete()
+            chef_node.delete()
+
+            #Remove active model
+            self.razor.remove_active_model(am_uuid)
+            time.sleep(15)
+
+    def razor_password(self, chef_node):
+        metadata = chef_node.attributes['razor_metadata'].to_dict()
+        uuid = metadata['razor_active_model_uuid']
+        return self.razor.get_active_model_pass(uuid)['password']
+
+    def remove_broker_fail(self, policy):
+        active_models = self.razor.simple_active_models(policy)
+        for active in active_models:
+            data = active_models[active]
+            if 'broker_fail' in data['current_state']:
+                print "!!## -- Removing active model  (broker_fail) -- ##!!"
+                root_pass = razor.get_active_model_pass(data['am_uuid'])['password']
+                ip = data['eth1_ip']
+                run = run_remote_ssh_cmd(ip, 'root', root_pass, 'reboot 0')
+                if run['success']:
+                    self.razor.remove_active_model(data['am_uuid'])
+                    time.sleep(15)
                 else:
-                    node.chef_environment = "_default"
-                    node.save()
+                    print "Trouble removing broker fail"
+                    print run
+                    sys.exit(1)
 
 def clone_git_repo(chef_node, github_user, github_pass):
     controller_ip = chef_node['ipaddress']
@@ -322,39 +324,6 @@ def update_node(chef_node):
     else:
         print "Platform Family %s is not supported." % chef_node['platform_family']
         sys.exit(1)
-
-def build_computes(computes):
-    # Run computes
-    print "Making the compute nodes..."
-    for compute in computes:
-        compute_node = Node(compute)
-        compute_node['in_use'] = "compute"
-        compute_node.run_list = ["role[qa-single-compute]"]
-        compute_node.save()
-
-        print "Updating server...this may take some time"
-        update_node(compute_node)
-
-        if compute_node['platform_family'] == 'rhel':
-            print "Platform is RHEL family, disabling iptables"
-            disable_iptables(compute_node)
-
-        # Run chef client twice
-        print "Running chef-client on compute node: %s, this may take some time..." % compute
-        run1 = run_chef_client(compute_node)
-        if run1['success']:
-            print "First chef-client run successful...starting second run..."
-            run2 = run_chef_client(compute_node)
-            if run2['success']:
-                print "Second chef-client run successful..."
-            else:
-                print "Error running chef-client for compute %s" % compute
-                print run2
-                sys.exit(1)
-        else:
-            print "Error running chef-client for compute %s" % compute
-            print run1
-            sys.exit(1)
 
 def build_controller(chef_node, ha=False, ha_num=0):
     # Check for ha

@@ -98,8 +98,6 @@ with rpcsqa.chef:
     #Prepare environment
     nodes = Search('node').query("name:qa-%s-pool*" % results.os)
 
-    print nodes
-
     #Make sure all networking interfacing is set
     for node in nodes:
         chef_node = Node(node['name'])
