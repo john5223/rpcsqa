@@ -90,6 +90,9 @@ Steps
 rpcsqa = rpcsqa_helper(results.razor_ip)
 chef = rpcsqa.chef
 razor = rpcsqa.razor
+print rpcsqa
+print chef
+print razor
 
 # Remove broker fails for qa-%os-pool
 remove_broker_fail("qa-%s-pool" % results.os)
