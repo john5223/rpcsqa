@@ -56,6 +56,7 @@ class rpcsqa_helper:
 
     def build_controller(self, controller_node, ha=False, ha_num=0):
         # Check for ha
+        chef_node = Node(controller_node)
         if ha:
             print "Making %s the ha-controller%s node" % (controller_node, ha_num)
             chef_node['in_use'] = "ha-controller%s" % ha_num
