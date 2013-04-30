@@ -45,7 +45,6 @@ Find opencenter agents and update their repos
 """
 with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     razor = razor_api(results.razor_ip)
-    servers = []
     env = "%s-%s-opencenter" % (results.name, results.os)
     nodes = Search('node').query("name:qa-%s-pool* AND chef_environment:%s" % (results.os, env))
     
@@ -54,7 +53,9 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     if results.os == "ubuntu":  # Ubuntu upgrade
         package = "deb %s precise rcb-utils" % results.repo
         commands = ["sed -i 's/\(.*\)/#\1/g' /etc/apt/sources.list.d/rcb-utils.list",
-                    "echo '%s' >> /etc/apt/sources.list.d/rcb-utils.list" % package ]
+                    "echo '%s' >> /etc/apt/sources.list.d/rcb-utils.list" % package,
+                    "apt-get update -q",
+                    "apt-get upgrade -y -q"]
     else:                       
         commands = ["if [ -e /etc/yum.repos.d/rcb-utils.repo ]; then mv /etc/yum.repos.d/rcb-utils.repo /etc/yum.repos.d/rcb-utils.repo.old; fi",
 """echo '[rcb-utils-test]
@@ -63,7 +64,8 @@ baseurl=http://build.monkeypuppetlabs.com/repo-testing/RedHat/6/\$basearch/
 enabled=1
 gpgcheck=1
 gpgkey=http://build.monkeypuppetlabs.com/repo-testing/RPM-GPG-RCB.key' > /etc/yum.repos.d/rcb-utils-test.repo""",
-                    "rpm --import http://build.monkeypuppetlabs.com/repo-testing/RPM-GPG-RCB.key"]
+                    "rpm --import http://build.monkeypuppetlabs.com/repo-testing/RPM-GPG-RCB.key",
+                    """for service in `initctl list | grep opencenter | awk '{print $1}'`; do initctl restart $service; done"""]
     
     # Run the commands to change packages on each node
     for n in nodes:

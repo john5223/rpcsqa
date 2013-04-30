@@ -16,6 +16,13 @@ iface <%= iface[:device] %> inet <%= iface[:type] %>
 <% if iface[:gateway] -%>
     gateway <%= iface[:gateway] %>
 <% end %>
+<% if iface[:dnsnameservers] -%>
+    # dns-* options are implemented by the resolvconf package, if installed
+    dns-nameservers <%= iface[:dnsnameservers] %>
+<% end %>
+<% if iface[:dnssearch] -%>
+    dns-search <%= iface[:dnssearch] %>
+<% end %>
 <% if iface[:vlan_dev] -%>
     vlan_raw_device <%= iface[:vlan_dev] %>
 <% end %>
@@ -23,7 +30,7 @@ iface <%= iface[:device] %> inet <%= iface[:type] %>
     bridge_ports<% iface[:bridge_ports].each do |port| -%> <%= port %><% end %>
 <% end %>
 <% if iface[:bond_slaves] -%>
-    bond-slaves<% iface[:bond_slaves].each do |bond_slave| -%> <%= bond_slave %><% end %>
+    bond-slaves <% iface[:bond_slaves].each do |bond_slave| -%> <%= bond_slave %><% end %>
 <% end %>
 <% if iface[:bond_mode] -%>
     bond-mode <%= iface[:bond_mode] %>

@@ -18,7 +18,9 @@ def create_data_bag(ip, ident=None):
 		    			"device": "eth0",
 		    			"netmask": "255.255.255.0",
 		    			"address": ip,
-		    			"gateway": "%s.%s.%s.%s" % (ip_array[0], ip_array[1], ip_array[2], 1)
+		    			"gateway": "%s.%s.%s.%s" % (ip_array[0], ip_array[1], ip_array[2], 1),
+		    			"dnsnameservers": "8.8.8.8 8.8.4.4",
+		    			"dnssearch": "rcb.rackspace.com"
 					}
 				],
 				"redhat": [
@@ -28,6 +30,9 @@ def create_data_bag(ip, ident=None):
 						"onboot": "yes",
 						"netmask": "255.255.255.0",
 						"gateway": "%s.%s.%s.%s" % (ip_array[0], ip_array[1], ip_array[2], 1),
+						"peerdns": "yes",
+						"dns1": "8.8.8.8",
+						"dns2": "8.8.4.4",
 						"ipaddr": ip,
 						"userctl": "no"
 					}
@@ -60,7 +65,9 @@ def create_data_bag(ip, ident=None):
 		    			"device": "eth0",
 		    			"netmask": "255.255.255.0",
 		    			"address": ip,
-		    			"gateway": "%s.%s.%s.%s" % (ip_array[0], ip_array[1], ip_array[2], 1)
+		    			"gateway": "%s.%s.%s.%s" % (ip_array[0], ip_array[1], ip_array[2], 1),
+						"dnsnameservers": "8.8.8.8 8.8.4.4",
+						"dnssearch": "rcb.rackspace.com"
 					}
 				],
 				"redhat": [
@@ -70,6 +77,9 @@ def create_data_bag(ip, ident=None):
 						"onboot": "yes",
 						"netmask": "255.255.255.0",
 						"gateway": "%s.%s.%s.%s" % (ip_array[0], ip_array[1], ip_array[2], 1),
+						"peerdns": "yes",
+						"dns1": "8.8.8.8",
+						"dns2": "8.8.4.4",
 						"ipaddr": ip,
 						"userctl": "no"
 					}
