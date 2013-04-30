@@ -175,7 +175,7 @@ class rpcsqa_helper:
         nodes = Search('node').query("chef_environment:%s AND NOT in_use:0" % chef_environment)
         for n in nodes:
             print "Found to delete node %s" % n
-            erase_node(n)
+            self.erase_node(n)
 
     def clone_git_repo(self, server, github_user, github_pass):
         chef_node = Node(server)
