@@ -392,20 +392,20 @@ class rpcsqa_helper:
                                   root_pass,
                                   'chef-client --logfile %s' % logfile)
 
-    def remove_chef(self, chef_node):
+    def remove_chef(self, server):
         """
         @param chef_node
         """
-        run = None
+        chef_node = Node(server)
         try:
             root_pass = self.razor_password(chef_node)
             print "removing chef on %s..." % chef_node
             command = ""
-            if node['platform_family'] == "debian":
+            if chef_node['platform_family'] == "debian":
                 command = "apt-get remove --purge -y chef; rm -rf /etc/chef"
-            elif node['platform_family'] == "rhel":
+            elif chef_node['platform_family'] == "rhel":
                 command = 'yum remove -y chef; rm -rf /etc/chef /var/chef'
-            run = run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, command)
+            run = run_remote_ssh_cmd(chef_node['ipaddress'], 'root', root_pass, command)
         except:
             raise Exception("Error removing chef")
 
