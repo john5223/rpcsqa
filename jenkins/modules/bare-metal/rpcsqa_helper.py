@@ -1,8 +1,10 @@
 import sys
 import time
+import contextlib
 from chef import *
 from server_helper import *
 from razor_api import razor_api
+
 
 class rpcsqa_helper:
 
@@ -23,8 +25,8 @@ class rpcsqa_helper:
     def __enter__(self):
         return self
 
-    def __exit__(self, type, value, traceback):
-        pass
+    def __exit__(self, *exc):
+        return False
 
     def build_computes(self, computes):
         # Run computes
