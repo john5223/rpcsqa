@@ -101,9 +101,8 @@ env = rpcsqa.prepare_environment(results.os, results.name)
 # Gather all the nodes for the os
 all_nodes = rpcsqa.gather_all_nodes(results.os)
 
-# If we want to clear the pool
-if results.clear_pool:
-    rpcsqa.clear_pool(all_nodes, env)
+# Clean up the current running environment
+rpcsqa.cleanup_environment(env)
 
 # Collect environment and install opencenter.
 if results.action == "build":
