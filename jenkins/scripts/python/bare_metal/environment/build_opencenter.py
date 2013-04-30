@@ -88,9 +88,6 @@ Steps
 """
 
 rpcsqa = rpcsqa_helper(results.razor_ip)
-
-print rpcsqa
-
 chef = rpcsqa.chef
 razor = rpcsqa.razor
 
