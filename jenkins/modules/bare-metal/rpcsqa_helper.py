@@ -27,7 +27,6 @@ class rpcsqa_helper:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         print '__exit__()'
-        return False
 
     def build_computes(self, computes):
         # Run computes

@@ -89,6 +89,7 @@ Steps
 
 with rpcsqa_helper(results.razor_ip):
 
+    print "inside helper context"
     # Remove broker fails for qa-%os-pool
     remove_broker_fail("qa-%s-pool" % results.os)
 
