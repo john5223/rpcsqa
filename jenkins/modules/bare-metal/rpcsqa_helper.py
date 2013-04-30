@@ -20,6 +20,9 @@ class rpcsqa_helper:
         
         return outl
 
+    def __exit__(self):
+        pass
+
     def build_computes(self, computes):
         # Run computes
         print "Making the compute nodes..."
@@ -197,6 +200,11 @@ class rpcsqa_helper:
         else:
             print "Successfully cloned repo with setup script..."
 
+    def disable_iptables(self, chef_node, logfile="STDOUT"):
+        ip = chef_node['ipaddress']
+        root_pass = razor_password(chef_node)
+        return run_remote_ssh_cmd(ip, 'root', root_pass, '/etc/init.d/iptables save; /etc/init.d/iptables stop; /etc/init.d/iptables save')
+
     def erase_node(self, chef_node):
         """
         @param chef_node
@@ -242,11 +250,6 @@ class rpcsqa_helper:
                     print "Trouble removing broker fail"
                     print run
                     sys.exit(1)
-
-    def disable_iptables(self, chef_node, logfile="STDOUT"):
-        ip = chef_node['ipaddress']
-        root_pass = razor_password(chef_node)
-        return run_remote_ssh_cmd(ip, 'root', root_pass, '/etc/init.d/iptables save; /etc/init.d/iptables stop; /etc/init.d/iptables save')
 
     def install_opencenter(self, chef_node, install_script, role):
         root_pass = razor_password(chef_node)
