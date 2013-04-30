@@ -171,8 +171,7 @@ class rpcsqa_helper:
         """
         @param chef_environment
         """
-        nodes = Search('node').query("chef_environment:%s AND NOT in_use:0") % \
-            chef_environment
+        nodes = Search('node').query("chef_environment:%s AND NOT in_use:0") % chef_environment
         for n in nodes:
             erase_node(n)
 
@@ -203,10 +202,11 @@ class rpcsqa_helper:
         root_pass = self.razor_password(chef_node)
         return run_remote_ssh_cmd(ip, 'root', root_pass, '/etc/init.d/iptables save; /etc/init.d/iptables stop; /etc/init.d/iptables save')
 
-    def erase_node(self, chef_node):
+    def erase_node(self, node):
         """
         @param chef_node
         """
+        chef_node = Node(node)
         print "Deleting: %s" % chef_node['name']
         am_uuid = chef_node['razor_metadata'].to_dict()['razor_active_model_uuid']
         run = run_remote_ssh_cmd(chef_node['ipaddress'],
