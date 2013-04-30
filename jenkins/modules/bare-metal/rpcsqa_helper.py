@@ -376,7 +376,8 @@ class rpcsqa_helper:
 
     def print_computes_info(self, computes):
         for compute in computes:
-            print "Compute: %s" % print_server_info(compute)
+            c = Node(c['name'])
+            print "Compute: %s" % print_server_info(c)
 
     def run_chef_client(self, chef_node, logfile="STDOUT"):
         """
@@ -490,9 +491,9 @@ class rpcsqa_helper:
 
     def set_node_in_use(self, node, role):
         # Edit the controller in our chef
-        node = Node(controller)
-        node['in_use'] = '%s' % role
-        node_ip = node['ipaddress']
-        node.save()
+        chef_node = Node(node)
+        chef_node['in_use'] = '%s' % role
+        node_ip = chef_node['ipaddress']
+        chef_node.save()
 
         return node_ip
