@@ -262,7 +262,7 @@ class rpcsqa_helper:
         print ""
         print ""
         if chef_node['platform_family'] == "debian":
-            run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, 'apt-get update -y -qq')
+            run_remote_ssh_cmd(chef_node['ipaddress'], 'root', root_pass, 'apt-get update -y -qq')
         elif chef_node['platform_family'] == "rhel":
             run_remote_ssh_cmd(chef_node['ipaddress'], 'root', root_pass,
                                ('yum update -y -q;'
@@ -301,8 +301,7 @@ class rpcsqa_helper:
         print "Prepare command to run: %s" % command
         install_run = run_remote_ssh_cmd(node_ip, 'root', root_pass, command)
         if not install_run['success']:
-            print "Failed VM setup script on server %s@%s" % (chef_node,
-                                                              node_ip)
+            print "Failed VM setup script on server %s@%s" % (chef_node, node_ip)
             print "Command ran: %s" % install_run['command']
             print "Return Code: %s" % install_run['exception'].returncode
             print "Exception: %s" % install_run['exception']
