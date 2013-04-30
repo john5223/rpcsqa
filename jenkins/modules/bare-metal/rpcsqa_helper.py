@@ -24,25 +24,24 @@ class rpcsqa_helper:
         uuid = metadata['razor_active_model_uuid']
         return self.razor.get_active_model_pass(uuid)['password']
 
-    def erase_node(self, name):
+    def erase_node(self, chef_node):
         """
         @param name
         """
-        print "Deleting: %s" % (name)
-        node = Node(name)
-        am_uuid = node['razor_metadata'].to_dict()['razor_active_model_uuid']
-        run = run_remote_ssh_cmd(node['ipaddress'],
+        print "Deleting: %s" % chef_node['name']
+        am_uuid = chef_node['razor_metadata'].to_dict()['razor_active_model_uuid']
+        run = run_remote_ssh_cmd(chef_node['ipaddress'],
                                  'root',
-                                 razor_password(node),
+                                 razor_password(chef_node),
                                  "reboot 0")
         if not run['success']:
-            print "Error rebooting server %s " % node['ipaddress']
+            print "Error rebooting server %s@%s " % (chef_node, chef_node['ipaddress'])
             # TODO: return failure
             sys.exit(1)
 
         #Knife node remove; knife client remove
-        Client(name).delete()
-        Node(name).delete()
+        self.chef.Client(chef_node['name']).delete()
+        chef_node.delete()
 
         #Remove active model
         self.razor.remove_active_model(am_uuid)
@@ -97,6 +96,17 @@ class rpcsqa_helper:
                 print "Error running chef-client for compute %s" % compute
                 print run1
                 sys.exit(1)
+
+    def clear_pool(self, chef_nodes, environment):
+        for n in chef_nodes:
+            name = n['name']
+            node = self.chef.Node(name)
+            if node.chef_environment == environment:
+                if "recipe[network-interfaces]" not in node.run_list:
+                    self.erase_node(node)
+                else:
+                    node.chef_environment = "_default"
+                    node.save()
 
 def clone_git_repo(chef_node, github_user, github_pass):
     controller_ip = chef_node['ipaddress']
@@ -464,17 +474,6 @@ def gather_nodes(chef_nodes, environment, cluster_size):
         sys.exit(1)
 
     return ret_nodes
-
-def clear_pool(chef_nodes, environment):
-    for n in chef_nodes:
-        name = n['name']
-        node = Node(name)
-        if node.chef_environment == environment:
-            if "recipe[network-interfaces]" not in node.run_list:
-                erase_node(name)
-            else:
-                node.chef_environment = "_default"
-                node.save()
 
 def cleanup_environment(chef_environment):
     """

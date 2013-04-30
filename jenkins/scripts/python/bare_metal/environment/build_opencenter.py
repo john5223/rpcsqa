@@ -97,6 +97,14 @@ print razor
 # Remove broker fails for qa-%os-pool
 rpcsqa.remove_broker_fail("qa-%s-pool" % results.os)
 
+#Prepare environment
+nodes = Search('node').query("name:qa-%s-pool*" % results.os)
+
+#Make sure all networking interfacing is set
+    for node in nodes:
+        chef_node = Node(node['name'])
+        set_network_interface(chef_node)
+
 # If the environment doesnt exist in chef, make it.
 env = "%s-%s-opencenter" % (results.name, results.os)
 if not Search("environment").query("name:%s" % env):
@@ -106,46 +114,9 @@ if not Search("environment").query("name:%s" % env):
 # Set the cluster size
 cluster_size = int(results.cluster_size)
 
-#Prepare environment
-nodes = Search('node').query("name:qa-%s-pool*" % results.os)
-
-#Make sure all networking interfacing is set
-for n in nodes:
-    node = Node(n['name'])
-    if "role[qa-base]" in node.run_list:
-        node['in_use'] = 0
-        node.run_list = ["recipe[network-interfaces]"]
-        node.save()
-        print "Running network interfaces for %s" % node.name
-
-        #Run chef client thrice
-        run = run_chef_client(node.name, logfile="/dev/null")
-        run = run_chef_client(node.name, logfile="/dev/null")
-        run = run_chef_client(node.name, logfile="/dev/null")
-
-        if run['success']:
-            print "Done running chef-client"
-        else:
-            print "Error running chef client for network interfaces"
-            print run
-            sys.exit(1)
-
 # If we want to clear the pool
 if results.clear_pool:
-    for n in nodes:
-        name = n['name']
-        node = Node(name)
-        not_default = node.chef_environment != "_default"
-        in_use = 'in_use' in node.attributes and node['in_use'] != 0
-        if not_default and in_use:
-            if (results.action == "destroy" and results.name == "all"):
-                erase_node(name)
-            else:
-                if node.chef_environment == env:
-                    erase_node(name)
-        else:
-            node.chef_environment = "_default"
-            node.save()
+    clear_pool(nodes, env)
 
 # Collect environment and install opencenter.
 if results.action == "build":
