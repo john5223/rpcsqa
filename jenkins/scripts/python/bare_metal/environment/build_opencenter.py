@@ -108,32 +108,9 @@ if results.clear_pool:
 # Collect environment and install opencenter.
 if results.action == "build":
 
-    #Collect the amount of servers we need for the opencenter install
-    to_use_nodes = rpcsqa.gather_size_nodes(results.os, '_default', cluster_size)
-
-    print to_use_nodes
-    
-    if len(nodes) < cluster_size:
-        print "*****************************************************"
-        print "Not enough nodes for the cluster_size given: %s " % cluster_size
-        print "*****************************************************"
-        sys.exit(1)
-
     count = 0
-    opencenter_list = []
-    for n in nodes:
-        name = n['name']
-        node = Node(name)
-        is_default = node.chef_environment == "_default"
-        in_run_list = "recipe[network-interfaces]" in node.run_list
-        if is_default and in_run_list:
-            node.chef_environment = env
-            node.save()
-            opencenter_list.append(name)
-            print "Taking node: %s" % name
-            count += 1
-            if count >= cluster_size:
-                break
+    opencenter_list = rpcsqa.gather_size_nodes(results.os, '_default', cluster_size)
+    #Collect the amount of servers we need for the opencenter install
 
     if not opencenter_list:
         print "No nodes"
@@ -147,14 +124,14 @@ if results.action == "build":
 
         # Check to make sure the VMs ips dont ping
         # Ping the opencenter vm
-        oc_ping = ping_check_vm(oc_server_ip)
+        oc_ping = rpcsqa.ping_check_vm(oc_server_ip)
         if oc_ping['success']:
             print "OpenCenter VM pinged, tear down old vms before proceeding"
             sys.exit(1)
 
         # Ping the chef server vm
-        cf_ping = ping_check_vm(chef_server_ip)
-        if oc_ping['success']:
+        cf_ping = rpcsqa.ping_check_vm(chef_server_ip)
+        if cf_ping['success']:
             print "Chef Server VM pinged, tear down old vms before proceeding"
             sys.exit(1)
 
@@ -176,18 +153,15 @@ if results.action == "build":
             vminfo = "/var/lib/jenkins/source_files/vminfo.json"
             print "%s successfully open, read, and closed." % vminfo
 
-        # Edit the controller in our chef
-        controller_node = Node(controller)
-        controller_node['in_use'] = 'controller_with_vms'
-        controller_ip = controller_node['ipaddress']
-        controller_node.save()
+
+        controller_ip = rpscqa.set_node_in_use(controller, "controller")
 
         #Remove chef on controller
-        remove_chef(controller)
+        rpcsqa.remove_chef(controller)
 
         # Prepare the server by installing needed packages
         print "Preparing the VM host server"
-        prepare_vm_host(controller_node)
+        rpcsqa.prepare_vm_host(controller_node)
 
         # Get github user info
         github_user = vminfo['github_info']['user']
@@ -195,22 +169,22 @@ if results.action == "build":
 
         # Clone Repo onto controller
         print "Cloning setup script repo onto %s" % controller_node
-        clone_git_repo(controller_node, github_user, github_user_pass)
+        rpcsqa.clone_git_repo(controller_node, github_user, github_user_pass)
 
         # install the server vms and ping check them
         print "Setting up VMs on the host server"
-        install_server_vms(controller_node,
-                           oc_server_ip,
-                           chef_server_ip,
-                           vm_bridge,
-                           vm_bridge_device)
+        rpcsqa.install_server_vms(controller_node,
+                                  oc_server_ip,
+                                  chef_server_ip,
+                                  vm_bridge,
+                                  vm_bridge_device)
 
         # Need to sleep for 30 seconds to let virsh completely finish
         print "Sleeping for 30 seconds to let VM's complete..."
         time.sleep(30)
 
         # Ping the opencenter vm
-        oc_ping = ping_check_vm(oc_server_ip)
+        oc_ping = rpcsqa.ping_check_vm(oc_server_ip)
         if not oc_ping['success']:
             print "OpenCenter VM failed to ping..."
             print "Return Code: %s" % oc_ping['exception'].returncode
@@ -220,7 +194,7 @@ if results.action == "build":
             print "OpenCenter Server VM set up and pinging..."
 
         # Ping the chef server vm
-        cf_ping = ping_check_vm(chef_server_ip)
+        cf_ping = rpcsqa.ping_check_vm(chef_server_ip)
         if not cf_ping['success']:
             print "OpenCenter VM failed to ping..."
             print "Return Code: %s" % cf_ping['exception'].returncode
@@ -234,45 +208,26 @@ if results.action == "build":
         vm_user_pass = vminfo['user_info']['password']
 
         # Install OpenCenter Server / Dashboard on VM
-        install_opencenter_vm(oc_server_ip,
-                              oc_server_ip,
-                              results.repo,
-                              'server',
-                              vm_user,
-                              vm_user_pass)
-        install_opencenter_vm(oc_server_ip,
-                              oc_server_ip,
-                              results.repo,
-                              'dashboard',
-                              vm_user,
-                              vm_user_pass)
+        rpcsqa.install_opencenter_vm(oc_server_ip, oc_server_ip, results.repo, 'server', vm_user, vm_user_pass)
+        rpcsqa.install_opencenter_vm(oc_server_ip, oc_server_ip, results.repo, 'dashboard', vm_user, vm_user_pass)
 
         # Install OpenCenter Client on Chef VM
-        install_opencenter_vm(chef_server_ip,
-                              oc_server_ip,
-                              results.repo,
-                              'agent',
-                              vm_user,
-                              vm_user_pass)
+        rpcsqa.install_opencenter_vm(chef_server_ip, oc_server_ip, results.repo, 'agent', vm_user,vm_user_pass)
 
         # Install OpenCenter Client on Controller
-        install_opencenter(controller, results.repo, 'agent', oc_server_ip)
+        rpcsqa.install_opencenter(controller, results.repo, 'agent', oc_server_ip)
 
         # Install OpenCenter Client on Computes
-        for client in computes:
-            agent_node = Node(client)
-            agent_node['in_use'] = "agent"
-            agent_node.save()
-            remove_chef(client)
-            install_opencenter(client, results.repo, 'agent', oc_server_ip)
+        for compute in computes:
+            compute_ip = rpcsqa.set_node_in_use(compute, "agent")
+            rpcsqa.remove_chef(compute)
+            rpcsqa.install_opencenter(compute, results.repo, 'agent', oc_server_ip)
 
         # Print Cluster Info
         print "************************************************************"
         print "2 VMs, 1 controller ( VM Host ), %i Agents" % len(computes)
-        print "OpenCenter Server (VM) with IP: %s on Host: %s" % (oc_server_ip,
-                                                                  controller)
-        print "Chef Server (VM) with IP: %s on Host: %s" % (chef_server_ip,
-                                                            controller)
+        print "OpenCenter Server (VM) with IP: %s on Host: %s" % (oc_server_ip, controller)
+        print "Chef Server (VM) with IP: %s on Host: %s" % (chef_server_ip, controller)
         print "Controller Node: %s with IP: %s" % (controller, controller_ip)
         for agent in computes:
             node = Node(agent)
@@ -291,6 +246,7 @@ if results.action == "build":
 
         #Remove chef client...install opencenter server
         print "Making %s the server node" % server
+        self.set_node_in_use(server, "server")
         server_node = Node(server)
         server_ip = server_node['ipaddress']
         server_node['in_use'] = "server"
@@ -318,7 +274,7 @@ if results.action == "build":
         print ""
         print ""
 
-        dashboard_ip = Node(dashboard)['ipaddress']
+        dashboard_ip = rpscqa.chef.Node(dashboard)['ipaddress']
         dashboard_url = ""
         try:
             r = requests.get("https://%s" % dashboard_ip,

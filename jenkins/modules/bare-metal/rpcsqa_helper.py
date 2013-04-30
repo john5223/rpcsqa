@@ -99,7 +99,7 @@ class rpcsqa_helper:
 
         # Build directory service node
         ip = dir_node['ipaddress']
-        root_pass = razor_password(dir_node)
+        root_pass = self.razor_password(dir_node)
         dir_node['in_use'] = 'directory-server'
         dir_node.run_list = ["role[qa-%s-%s]" % (results.dir_version, results.os)]
         dir_node.save()
@@ -178,7 +178,7 @@ class rpcsqa_helper:
 
     def clone_git_repo(self, chef_node, github_user, github_pass):
         controller_ip = chef_node['ipaddress']
-        root_pass = razor_password(chef_node)
+        root_pass = self.razor_password(chef_node)
 
         # Download vm setup script on controller node.
         print "Cloning repo with setup script..."
@@ -199,7 +199,7 @@ class rpcsqa_helper:
 
     def disable_iptables(self, chef_node, logfile="STDOUT"):
         ip = chef_node['ipaddress']
-        root_pass = razor_password(chef_node)
+        root_pass = self.razor_password(chef_node)
         return run_remote_ssh_cmd(ip, 'root', root_pass, '/etc/init.d/iptables save; /etc/init.d/iptables stop; /etc/init.d/iptables save')
 
     def erase_node(self, chef_node):
@@ -211,7 +211,7 @@ class rpcsqa_helper:
             am_uuid = chef_node['razor_metadata'].to_dict()['razor_active_model_uuid']
             run = run_remote_ssh_cmd(chef_node['ipaddress'],
                                      'root',
-                                     razor_password(chef_node),
+                                     self.razor_password(chef_node),
                                      "reboot 0")
             if not run['success']:
                 print "Error rebooting server %s@%s " % (chef_node, chef_node['ipaddress'])
@@ -249,7 +249,7 @@ class rpcsqa_helper:
                     sys.exit(1)
 
     def install_opencenter(self, chef_node, install_script, role):
-        root_pass = razor_password(chef_node)
+        root_pass = self.razor_password(chef_node)
         print ""
         print ""
         print "*****************************************************"
@@ -295,7 +295,7 @@ class rpcsqa_helper:
 
     def install_server_vms(self, controller_node, opencenter_server_ip, chef_server_ip, vm_bridge, vm_bridge_device):
         controller_ip = controller_node['ipaddress']
-        root_pass = razor_password(controller_node)
+        root_pass = self.razor_password(controller_node)
 
         # Run vm setup script on controller node
         print "Running VM setup script..."
@@ -347,7 +347,7 @@ class rpcsqa_helper:
 
     def prepare_vm_host(self, controller_node):
         controller_ip = controller_node['ipaddress']
-        root_pass = razor_password(controller_node)
+        root_pass = self.razor_password(controller_node)
 
         if controller_node['platform_family'] == 'debian':
             commands = [("aptitude install -y curl dsh screen vim"
@@ -406,7 +406,7 @@ class rpcsqa_helper:
         """
         run = None
         try:
-            root_pass = razor_password(chef_node)
+            root_pass = self.razor_password(chef_node)
             print "removing chef on %s..." % chef_node
             command = ""
             if node['platform_family'] == "debian":
@@ -415,8 +415,7 @@ class rpcsqa_helper:
                 command = 'yum remove -y chef; rm -rf /etc/chef /var/chef'
             run = run_remote_ssh_cmd(node['ipaddress'], 'root', root_pass, command)
         except:
-            print "Error removing chef"
-            return run
+            raise Exception("Error removing chef")
 
     def set_network_interface(self, chef_node):
         if "role[qa-base]" in chef_node.run_list:
@@ -497,3 +496,12 @@ class rpcsqa_helper:
                 return True
             else:
                 return False
+
+    def set_node_in_use(self, node, role):
+        # Edit the controller in our chef
+        node = Node(controller)
+        node['in_use'] = '%s' % role
+        node_ip = node['ipaddress']
+        node.save()
+
+        return node_ip
