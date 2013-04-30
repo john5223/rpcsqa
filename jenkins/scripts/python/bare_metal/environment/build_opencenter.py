@@ -161,23 +161,19 @@ if results.action == "build":
 
         # Prepare the server by installing needed packages
         print "Preparing the VM host server"
-        rpcsqa.prepare_vm_host(controller_node)
+        rpcsqa.prepare_vm_host(controller)
 
         # Get github user info
         github_user = vminfo['github_info']['user']
         github_user_pass = vminfo['github_info']['password']
 
         # Clone Repo onto controller
-        print "Cloning setup script repo onto %s" % controller_node
-        rpcsqa.clone_git_repo(controller_node, github_user, github_user_pass)
+        print "Cloning setup script repo onto %s" % controller
+        rpcsqa.clone_git_repo(controller, github_user, github_user_pass)
 
         # install the server vms and ping check them
         print "Setting up VMs on the host server"
-        rpcsqa.install_server_vms(controller_node,
-                                  oc_server_ip,
-                                  chef_server_ip,
-                                  vm_bridge,
-                                  vm_bridge_device)
+        rpcsqa.install_server_vms(controller, oc_server_ip, chef_server_ip, vm_bridge, vm_bridge_device)
 
         # Need to sleep for 30 seconds to let virsh completely finish
         print "Sleeping for 30 seconds to let VM's complete..."

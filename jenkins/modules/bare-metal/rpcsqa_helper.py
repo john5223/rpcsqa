@@ -176,8 +176,9 @@ class rpcsqa_helper:
         for n in nodes:
             erase_node(n)
 
-    def clone_git_repo(self, chef_node, github_user, github_pass):
-        controller_ip = chef_node['ipaddress']
+    def clone_git_repo(self, server, github_user, github_pass):
+        chef_node = Node(server)
+        node_ip = chef_node['ipaddress']
         root_pass = self.razor_password(chef_node)
 
         # Download vm setup script on controller node.
@@ -185,12 +186,12 @@ class rpcsqa_helper:
         rcps_dir = "/opt/rpcs"
         repo = "https://%s:%s@github.com/rsoprivatecloud/scripts" % (github_user, github_pass)
         command = "mkdir -p /opt/rpcs; git clone %s %s" % (repo, rcps_dir)
-        download_run = run_remote_ssh_cmd(controller_ip,
+        download_run = run_remote_ssh_cmd(node_ip,
                                           'root',
                                           root_pass,
                                           command)
         if not download_run['success']:
-            print "Failed to clone script repo on server %s@%s" % (chef_node, controller_ip)
+            print "Failed to clone script repo on server %s@%s" % (chef_node, node_ip)
             print "Return Code: %s" % download_run['exception'].returncode
             print "Exception: %s" % download_run['exception']
             sys.exit(1)
@@ -282,12 +283,12 @@ class rpcsqa_helper:
             print "Exception: %s" % install_run['exception']
             sys.exit(1)
         else:
-            print "OpenCenter %s successfully installed on vm with ip %s" % (role,
-                                                                             vm_ip)
+            print "OpenCenter %s successfully installed on vm with ip %s" % (role, vm_ip)
 
-    def install_server_vms(self, controller_node, opencenter_server_ip, chef_server_ip, vm_bridge, vm_bridge_device):
-        controller_ip = controller_node['ipaddress']
-        root_pass = self.razor_password(controller_node)
+    def install_server_vms(self, server, opencenter_server_ip, chef_server_ip, vm_bridge, vm_bridge_device):
+        chef_node = Node(server)
+        node_ip = chef_node['ipaddress']
+        root_pass = self.razor_password(chef_node)
 
         # Run vm setup script on controller node
         print "Running VM setup script..."
@@ -298,16 +299,16 @@ class rpcsqa_helper:
                                            vm_bridge,
                                            vm_bridge_device)
         print "Prepare command to run: %s" % command
-        install_run = run_remote_ssh_cmd(controller_ip, 'root', root_pass, command)
+        install_run = run_remote_ssh_cmd(node_ip, 'root', root_pass, command)
         if not install_run['success']:
-            print "Failed VM setup script on server %s@%s" % (controller_node,
-                                                              controller_ip)
+            print "Failed VM setup script on server %s@%s" % (chef_node,
+                                                              node_ip)
             print "Command ran: %s" % install_run['command']
             print "Return Code: %s" % install_run['exception'].returncode
             print "Exception: %s" % install_run['exception']
             sys.exit(1)
         else:
-            print "VM's successfully setup on server %s..." % controller_node
+            print "VM's successfully setup on server %s..." % chef_node
 
     def ping_check_vm(self, ip_address):
         command = "ping -c 5 %s" % ip_address
@@ -337,11 +338,12 @@ class rpcsqa_helper:
 
         return env
 
-    def prepare_vm_host(self, controller_node):
-        controller_ip = controller_node['ipaddress']
-        root_pass = self.razor_password(controller_node)
+    def prepare_vm_host(self, server):
+        chef_node = Node(server)
+        controller_ip = chef_node['ipaddress']
+        root_pass = self.razor_password(chef_node)
 
-        if controller_node['platform_family'] == 'debian':
+        if chef_node['platform_family'] == 'debian':
             commands = [("aptitude install -y curl dsh screen vim"
                          "iptables-persistent libvirt-bin python-libvirt"
                          "qemu-kvm guestfish git"),
@@ -366,7 +368,7 @@ class rpcsqa_helper:
 
             if not prepare_run['success']:
                 print "Failed to run command %s" % command
-                print "check the server %s @ ip: %s" % (controller_node,
+                print "check the server %s @ ip: %s" % (chef_node,
                                                         controller_ip)
                 print "Return Code: %s" % prepare_run['exception'].returncode
                 print "Exception: %s" % prepare_run['exception']
