@@ -98,7 +98,6 @@ class rpcsqa_helper:
                 print run1
                 sys.exit(1)
 
-<<<<<<< HEAD
 def clone_git_repo(chef_node, github_user, github_pass):
     controller_ip = chef_node['ipaddress']
     root_pass = razor_password(chef_node)
