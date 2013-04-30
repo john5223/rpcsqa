@@ -20,6 +20,9 @@ class rpcsqa_helper:
         
         return outl
 
+    def __enter__(self):
+        return self
+
     def __exit__(self):
         pass
 
