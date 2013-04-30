@@ -248,13 +248,13 @@ if results.action == "build":
 
         if dashboard:
             dashboard_ip = rpcsqa.set_node_in_use(dashboard, "dashboard")
-            rpscqa.remove_chef(dashboard)
-            rpscqa.install_opencenter(dashboard, results.repo, 'dashboard', server_ip)
+            rpcsqa.remove_chef(dashboard)
+            rpcsqa.install_opencenter(dashboard, results.repo, 'dashboard', server_ip)
 
         for agent in agents:
             agent_ip = rpcsqa.set_node_in_use(agent, 'agent')
-            rpscqa.remove_chef(agent)
-            rpscqa.install_opencenter(agent, results.repo, 'agent', server_ip)
+            rpcsqa.remove_chef(agent)
+            rpcsqa.install_opencenter(agent, results.repo, 'agent', server_ip)
 
         print ""
         print ""
