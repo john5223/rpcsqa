@@ -338,7 +338,7 @@ class rpcsqa_helper:
             self.set_network_interface(chef_node)
 
         # If the environment doesnt exist in chef, make it.
-        env = "%s-%s" % (name, os)
+        env = "%s-%s" % (os, name)
         if not Search("environment").query("name:%s" % env):
             print "Making environment: %s " % env
             Environment.create(env)
@@ -473,7 +473,7 @@ class rpcsqa_helper:
             node = Node(name)
             if ((node.chef_environment == "_default" or node.chef_environment == environment) and "recipe[network-interfaces]" in node.run_list):
                 node['in_use'] = 1
-                set_nodes_environment(node, environment)
+                self.set_nodes_environment(node, environment)
                 ret_nodes.append(name)          
                 print "Taking node: %s" % name
                 count += 1
