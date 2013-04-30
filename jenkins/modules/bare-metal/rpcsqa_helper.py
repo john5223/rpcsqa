@@ -434,7 +434,7 @@ class rpcsqa_helper:
                 raise Exception("Failed to set network interface for %s" % chef_node)
 
     def set_nodes_environment(self, chef_node, environment):
-        print "Nodes environment is %s, trying to set to %s" % (chef_node.environment, environment)
+        print "Nodes environment is %s, trying to set to %s" % (chef_node.chef_environment, environment)
         if chef_node.chef_environment != environment:
             print "Environment mismatch, setting environment"
             chef_node.chef_environment = environment
@@ -452,7 +452,6 @@ class rpcsqa_helper:
             sys.exit(1)
 
     def gather_all_nodes(self, os):
-        
         # Gather the nodes for the requested OS
         nodes = Search('node').query("name:qa-%s-pool*" % os)
         return nodes
