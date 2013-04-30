@@ -26,7 +26,7 @@ class rpcsqa_helper:
 
     def erase_node(self, chef_node):
         """
-        @param name
+        @param chef_node
         """
         print "Deleting: %s" % chef_node['name']
         am_uuid = chef_node['razor_metadata'].to_dict()['razor_active_model_uuid']
@@ -99,6 +99,8 @@ class rpcsqa_helper:
 
     def clear_pool(self, chef_nodes, environment):
         for n in chef_nodes:
+            print n
+            print n.chef_environment
             name = n['name']
             node = self.chef.Node(name)
             if node.chef_environment == environment:
