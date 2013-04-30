@@ -108,7 +108,7 @@ rpcsqa.cleanup_environment(env)
 if results.action == "build":
 
     count = 0
-    opencenter_list = rpcsqa.gather_size_nodes(results.os, '_default', cluster_size)
+    opencenter_list = rpcsqa.gather_size_nodes(results.os, env, cluster_size)
     #Collect the amount of servers we need for the opencenter install
 
     if not opencenter_list:
