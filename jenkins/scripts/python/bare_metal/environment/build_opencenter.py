@@ -95,7 +95,7 @@ print chef
 print razor
 
 # Remove broker fails for qa-%os-pool
-remove_broker_fail("qa-%s-pool" % results.os)
+rpcsqa.remove_broker_fail("qa-%s-pool" % results.os)
 
 # If the environment doesnt exist in chef, make it.
 env = "%s-%s-opencenter" % (results.name, results.os)
