@@ -87,9 +87,7 @@ Steps
 5. Install opencenter-agent on the rest of the boxes.
 """
 
-rpcsqa = rpcsqa_helper(results.razor_ip)
-
-with rpcsqa:
+with rpcsqa_helper(results.razor_ip):
 
     # Remove broker fails for qa-%os-pool
     remove_broker_fail("qa-%s-pool" % results.os)
