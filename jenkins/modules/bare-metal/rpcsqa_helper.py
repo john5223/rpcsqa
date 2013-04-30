@@ -148,6 +148,13 @@ class rpcsqa_helper:
             print "Failed to set-up Directory Service: %s..." % results.dir_version
             sys.exit(1)
 
+    def check_cluster_size(self, chef_nodes, size):
+        if len(chef_nodes) < size:
+            print "*****************************************************"
+            print "Not enough nodes for the cluster_size given: %s " % cluster_size
+            print "*****************************************************"
+            sys.exit(1)
+
     def clear_pool(self, chef_nodes, environment):
         with self.chef:
             for n in chef_nodes:
@@ -159,6 +166,36 @@ class rpcsqa_helper:
                     else:
                         node.chef_environment = "_default"
                         node.save()
+
+    def cleanup_environment(self, chef_environment):
+        """
+        @param chef_environment
+        """
+        nodes = Search('node').query("chef_environment:%s AND NOT in_use:0") % \
+            chef_environment
+        for n in nodes:
+            erase_node(n)
+
+    def clone_git_repo(self, chef_node, github_user, github_pass):
+        controller_ip = chef_node['ipaddress']
+        root_pass = razor_password(chef_node)
+
+        # Download vm setup script on controller node.
+        print "Cloning repo with setup script..."
+        rcps_dir = "/opt/rpcs"
+        repo = "https://%s:%s@github.com/rsoprivatecloud/scripts" % (github_user, github_pass)
+        command = "mkdir -p /opt/rpcs; git clone %s %s" % (repo, rcps_dir)
+        download_run = run_remote_ssh_cmd(controller_ip,
+                                          'root',
+                                          root_pass,
+                                          command)
+        if not download_run['success']:
+            print "Failed to clone script repo on server %s@%s" % (chef_node, controller_ip)
+            print "Return Code: %s" % download_run['exception'].returncode
+            print "Exception: %s" % download_run['exception']
+            sys.exit(1)
+        else:
+            print "Successfully cloned repo with setup script..."
 
     def erase_node(self, chef_node):
         """
@@ -205,27 +242,6 @@ class rpcsqa_helper:
                     print "Trouble removing broker fail"
                     print run
                     sys.exit(1)
-
-    def clone_git_repo(self, chef_node, github_user, github_pass):
-        controller_ip = chef_node['ipaddress']
-        root_pass = razor_password(chef_node)
-
-        # Download vm setup script on controller node.
-        print "Cloning repo with setup script..."
-        rcps_dir = "/opt/rpcs"
-        repo = "https://%s:%s@github.com/rsoprivatecloud/scripts" % (github_user, github_pass)
-        command = "mkdir -p /opt/rpcs; git clone %s %s" % (repo, rcps_dir)
-        download_run = run_remote_ssh_cmd(controller_ip,
-                                          'root',
-                                          root_pass,
-                                          command)
-        if not download_run['success']:
-            print "Failed to clone script repo on server %s@%s" % (chef_node, controller_ip)
-            print "Return Code: %s" % download_run['exception'].returncode
-            print "Exception: %s" % download_run['exception']
-            sys.exit(1)
-        else:
-            print "Successfully cloned repo with setup script..."
 
     def disable_iptables(self, chef_node, logfile="STDOUT"):
         ip = chef_node['ipaddress']
@@ -461,22 +477,6 @@ class rpcsqa_helper:
             sys.exit(1)
 
         return ret_nodes
-
-    def cleanup_environment(self, chef_environment):
-        """
-        @param chef_environment
-        """
-        nodes = Search('node').query("chef_environment:%s AND NOT in_use:0") % \
-            chef_environment
-        for n in nodes:
-            erase_node(n)
-
-    def check_cluster_size(self, chef_nodes, size):
-        if len(chef_nodes) < size:
-            print "*****************************************************"
-            print "Not enough nodes for the cluster_size given: %s " % cluster_size
-            print "*****************************************************"
-            sys.exit(1)
 
     def environment_has_controller(self, environment):
         # Load Environment
