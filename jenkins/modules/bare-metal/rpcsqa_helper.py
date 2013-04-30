@@ -25,7 +25,7 @@ class rpcsqa_helper:
         # Run computes
         print "Making the compute nodes..."
         for compute in computes:
-            compute_node = self.chef.Node(compute)
+            compute_node = Node(compute)
             compute_node['in_use'] = "compute"
             compute_node.run_list = ["role[qa-single-compute]"]
             compute_node.save()
