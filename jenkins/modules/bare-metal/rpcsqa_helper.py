@@ -65,6 +65,39 @@ class rpcsqa_helper:
                     print run
                     sys.exit(1)
 
+    def build_computes(self, computes):
+        # Run computes
+        print "Making the compute nodes..."
+        for compute in computes:
+            compute_node = self.chef.Node(compute)
+            compute_node['in_use'] = "compute"
+            compute_node.run_list = ["role[qa-single-compute]"]
+            compute_node.save()
+
+            print "Updating server...this may take some time"
+            update_node(compute_node)
+
+            if compute_node['platform_family'] == 'rhel':
+                print "Platform is RHEL family, disabling iptables"
+                disable_iptables(compute_node)
+
+            # Run chef client twice
+            print "Running chef-client on compute node: %s, this may take some time..." % compute
+            run1 = run_chef_client(compute_node)
+            if run1['success']:
+                print "First chef-client run successful...starting second run..."
+                run2 = run_chef_client(compute_node)
+                if run2['success']:
+                    print "Second chef-client run successful..."
+                else:
+                    print "Error running chef-client for compute %s" % compute
+                    print run2
+                    sys.exit(1)
+            else:
+                print "Error running chef-client for compute %s" % compute
+                print run1
+                sys.exit(1)
+
     def clone_git_repo(chef_node, github_user, github_pass):
         controller_ip = chef_node['ipaddress']
         root_pass = razor_password(chef_node)
@@ -407,39 +440,6 @@ class rpcsqa_helper:
         else:
             print "Failed to set-up Directory Service: %s..." % results.dir_version
             sys.exit(1)
-
-    def build_computes(computes):
-        # Run computes
-        print "Making the compute nodes..."
-        for compute in computes:
-            compute_node = Node(compute)
-            compute_node['in_use'] = "compute"
-            compute_node.run_list = ["role[qa-single-compute]"]
-            compute_node.save()
-
-            print "Updating server...this may take some time"
-            update_node(compute_node)
-
-            if compute_node['platform_family'] == 'rhel':
-                print "Platform is RHEL family, disabling iptables"
-                disable_iptables(compute_node)
-
-            # Run chef client twice
-            print "Running chef-client on compute node: %s, this may take some time..." % compute
-            run1 = run_chef_client(compute_node)
-            if run1['success']:
-                print "First chef-client run successful...starting second run..."
-                run2 = run_chef_client(compute_node)
-                if run2['success']:
-                    print "Second chef-client run successful..."
-                else:
-                    print "Error running chef-client for compute %s" % compute
-                    print run2
-                    sys.exit(1)
-            else:
-                print "Error running chef-client for compute %s" % compute
-                print run1
-                sys.exit(1)
 
     def gather_nodes(chef_nodes, environment, cluster_size):
         ret_nodes = []
