@@ -4,7 +4,6 @@ from chef import *
 from server_helper import *
 from razor_api import razor_api
 
-
 class rpcsqa_helper:
 
     def __init__(self, razor_ip='198.101.133.3'):
@@ -22,40 +21,42 @@ class rpcsqa_helper:
         return outl
 
     def build_dir_server(self, dir_node):
+        chef_node = Node(dir_node)
+
         # We dont support 389 yet, so exit if it is not ldap
         if results.dir_version != 'openldap':
             print "%s as a directory service is not yet supported...exiting" % results.dir_version
             sys.exit(1)
 
         # Build directory service node
-        ip = dir_node['ipaddress']
-        root_pass = self.razor_password(dir_node)
-        dir_node['in_use'] = 'directory-server'
-        dir_node.run_list = ["role[qa-%s-%s]" % (results.dir_version, results.os)]
-        dir_node.save()
+        ip = chef_node['ipaddress']
+        root_pass = self.razor_password(chef_node)
+        chef_node['in_use'] = 'directory-server'
+        chef_node.run_list = ["role[qa-%s-%s]" % (results.dir_version, results.os)]
+        chef_node.save()
 
         print "Updating server...this may take some time"
-        update_node(dir_node)
+        self.update_node(chef_node)
 
         # if redhat platform, disable iptables
-        if dir_node['platform_family'] == 'rhel':
+        if chef_node['platform_family'] == 'rhel':
             print "Platform is RHEL family, disabling iptables"
-            disable_iptables(dir_node)
+            self.disable_iptables(chef_node)
 
         # Run chef-client twice
         print "Running chef-client for directory service node...this may take some time..."
-        run1 = run_chef_client(dir_node)
+        run1 = self.run_chef_client(chef_node)
         if run1['success']:
             print "First chef-client run successful...starting second run..."
-            run2 = run_chef_client(dir_node)
+            run2 = self.run_chef_client(chef_node)
             if run2['success']:
                 print "Second chef-client run successful..."
             else:
-                print "Error running chef-client for directory node %s" % dir_node
+                print "Error running chef-client for directory node %s" % chef_node
                 print run2
                 sys.exit(1)
         else:
-            print "Error running chef-client for directory node %s" % dir_node
+            print "Error running chef-client for directory node %s" % chef_node
             print run1
             sys.exit(1)
 
@@ -89,18 +90,18 @@ class rpcsqa_helper:
             compute_node.save()
 
             print "Updating server...this may take some time"
-            update_node(compute_node)
+            self.update_node(compute_node)
 
             if compute_node['platform_family'] == 'rhel':
                 print "Platform is RHEL family, disabling iptables"
-                disable_iptables(compute_node)
+                self.disable_iptables(compute_node)
 
             # Run chef client twice
             print "Running chef-client on compute node: %s, this may take some time..." % compute
-            run1 = run_chef_client(compute_node)
+            run1 = self.run_chef_client(compute_node)
             if run1['success']:
                 print "First chef-client run successful...starting second run..."
-                run2 = run_chef_client(compute_node)
+                run2 = self.run_chef_client(compute_node)
                 if run2['success']:
                     print "Second chef-client run successful..."
                 else:
@@ -127,18 +128,18 @@ class rpcsqa_helper:
         chef_node.save()
 
         print "Updating server...this may take some time"
-        update_node(chef_node)
+        self.update_node(chef_node)
 
         if chef_node['platform_family'] == 'rhel':
             print "Platform is RHEL family, disabling iptables"
-            disable_iptables(chef_node)
+            self.disable_iptables(chef_node)
 
         # Run chef-client twice
         print "Running chef-client for controller node...this may take some time..."
-        run1 = run_chef_client(chef_node)
+        run1 = self.run_chef_client(chef_node)
         if run1['success']:
             print "First chef-client run successful...starting second run..."
-            run2 = run_chef_client(chef_node)
+            run2 = self.run_chef_client(chef_node)
             if run2['success']:
                 print "Second chef-client run successful..."
             else:
@@ -497,7 +498,7 @@ class rpcsqa_helper:
 
     def update_node(self, chef_node):
         ip = chef_node['ipaddress']
-        root_pass = razor.get_active_model_pass(chef_node['razor_metadata'].to_dict()['razor_active_model_uuid'])['password']
+        root_pass = self.razor_password(chef_node)
         if chef_node['platform_family'] == "debian":
             run_remote_ssh_cmd(ip, 'root', root_pass, 'apt-get update -y -qq')
         elif chef_node['platform_family'] == "rhel":
