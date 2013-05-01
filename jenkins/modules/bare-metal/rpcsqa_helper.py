@@ -123,7 +123,7 @@ class rpcsqa_helper:
         else:
             print "Making %s the controller node" % controller_node
             chef_node['in_use'] = "controller"
-            chef_node.run_list = ["role[qa-single-controller]"]
+            chef_node.run_list = ["role[qa-ha-controller1]"]
         # save node
         chef_node.save()
 
