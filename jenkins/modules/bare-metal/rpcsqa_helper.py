@@ -500,7 +500,7 @@ class rpcsqa_helper:
         ip = chef_node['ipaddress']
         root_pass = self.razor_password(chef_node)
         if chef_node['platform_family'] == "debian":
-            run_remote_ssh_cmd(ip, 'root', root_pass, 'apt-get update -y')
+            run_remote_ssh_cmd(ip, 'root', root_pass, 'apt-get update -y; apt-get upgrade -y')
         elif chef_node['platform_family'] == "rhel":
             run_remote_ssh_cmd(ip, 'root', root_pass, 'yum update -y')
         else:
