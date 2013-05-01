@@ -112,9 +112,9 @@ if results.action == "build":
 
         # print all servers info
         print "********************************************************************"
-        print "Directory Service Server: %s" % print_server_info(dir_server)
-        print "HA-Controller 1: %s" % print_server_info(ha_controller_1)
-        print "HA-Controller 2: %s" % print_server_info(ha_controller_2)
+        print "Directory Service Server: %s" % rpcsqa.print_server_info(dir_server)
+        print "HA-Controller 1: %s" % rpcsqa.print_server_info(ha_controller_1)
+        print "HA-Controller 2: %s" % rpcsqa.print_server_info(ha_controller_2)
         rpcsqa.print_computes_info(computes)
         print "********************************************************************"
 
@@ -136,8 +136,8 @@ if results.action == "build":
 
         # print all servers info
         print "********************************************************************"
-        print "Directory Service Server: %s" % print_server_info(dir_server)
-        print "Controller: %s" % print_server_info(controller)
+        print "Directory Service Server: %s" % rpcsqa.print_server_info(dir_server)
+        print "Controller: %s" % rpcsqa.print_server_info(controller)
         rpcsqa.print_computes_info(computes)
         print "********************************************************************"
 
@@ -162,8 +162,8 @@ if results.action == "build":
 
         # print all servers info
         print "********************************************************************"
-        print "HA-Controller 1: %s" % print_server_info(ha_controller_1)
-        print "HA-Controller 2: %s" % print_server_info(ha_controller_2)
+        print "HA-Controller 1: %s" % rpcsqa.print_server_info(ha_controller_1)
+        print "HA-Controller 2: %s" % rpcsqa.print_server_info(ha_controller_2)
         rpcsqa.print_computes_info(computes)
         print "********************************************************************"
 
@@ -179,7 +179,7 @@ if results.action == "build":
 
         # print all servers info
         print "********************************************************************"
-        print "Controller: %s" % print_server_info(controller)
+        print "Controller: %s" % rpcsqa.print_server_info(controller)
         rpcsqa.print_computes_info(computes)
         print "********************************************************************"
 
