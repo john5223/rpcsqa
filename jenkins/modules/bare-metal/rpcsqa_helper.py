@@ -429,7 +429,7 @@ class rpcsqa_helper:
                     print run
                     sys.exit(1)
 
-    def run_chef_client(self, chef_node, logfile="STDOUT"):
+    def run_chef_client(self, chef_node):
         """
         @param chef_node
         @param  logfile
@@ -440,7 +440,7 @@ class rpcsqa_helper:
         return run_remote_ssh_cmd(ip,
                                   'root',
                                   root_pass,
-                                  'chef-client --logfile %s' % logfile)
+                                  'chef-client')
 
     def remove_chef(self, server):
         """
@@ -500,9 +500,9 @@ class rpcsqa_helper:
         ip = chef_node['ipaddress']
         root_pass = self.razor_password(chef_node)
         if chef_node['platform_family'] == "debian":
-            run_remote_ssh_cmd(ip, 'root', root_pass, 'apt-get update -y -qq')
+            run_remote_ssh_cmd(ip, 'root', root_pass, 'apt-get update -y')
         elif chef_node['platform_family'] == "rhel":
-            run_remote_ssh_cmd(ip, 'root', root_pass, 'yum update -y -q')
+            run_remote_ssh_cmd(ip, 'root', root_pass, 'yum update -y')
         else:
             print "Platform Family %s is not supported." % chef_node['platform_family']
             sys.exit(1)
