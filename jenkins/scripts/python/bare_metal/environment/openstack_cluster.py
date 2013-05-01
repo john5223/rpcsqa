@@ -35,7 +35,6 @@ parser.add_argument('--razor_ip', action="store", dest="razor_ip", default="198.
 
 # Save the parsed arguments
 results = parser.parse_args()
-results.chef_client_pem = results.chef_client_pem.replace('~',os.getenv("HOME"))
 
 """
 Steps
