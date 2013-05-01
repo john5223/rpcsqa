@@ -5,7 +5,6 @@ import time
 import requests
 import argparse
 from rpcsqa_helper import *
-from chef import Search, Environment, Node
 
 # Parse arguments from the cmd line
 parser = argparse.ArgumentParser()
