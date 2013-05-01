@@ -32,14 +32,6 @@ parser.add_argument('--action', action="store", dest="action", required=False, d
 #Defaulted arguments
 parser.add_argument('--razor_ip', action="store", dest="razor_ip", default="198.101.133.3",
                     help="IP for the Razor server")
-parser.add_argument('--chef_url', action="store", dest="chef_url", default="https://198.101.133.3:443", required=False,
-                    help="URL of the chef server")
-parser.add_argument('--chef_client', action="store", dest="chef_client", default="jenkins", required=False,
-                    help="client for chef")
-parser.add_argument('--chef_client_pem', action="store", dest="chef_client_pem", default="~/.chef/jenkins.pem", required=False,
-                    help="client pem for chef")
-
-parser.add_argument('--clear_pool', action="store_true", dest="clear_pool", default=True, required=False)
 
 # Save the parsed arguments
 results = parser.parse_args()
@@ -68,10 +60,6 @@ cluster_size = int(results.cluster_size)
 
 # Gather all the nodes for the os
 all_nodes = rpcsqa.gather_all_nodes(results.os)
-
-# If we want to clear the pool
-if results.clear_pool:
-    rpcsqa.clear_pool(all_nodes, env)# Collect environment and install Open Stack.
 
 if results.action == "build":
 
