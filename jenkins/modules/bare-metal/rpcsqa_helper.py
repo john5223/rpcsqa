@@ -467,9 +467,9 @@ class rpcsqa_helper:
             print "Running network interfaces for %s" % chef_node
           
             #Run chef client thrice
-            run1 = self.run_chef_client(chef_node, logfile="/dev/null")
-            run2 = self.run_chef_client(chef_node, logfile="/dev/null")
-            run3 = self.run_chef_client(chef_node, logfile="/dev/null")
+            run1 = self.run_chef_client(chef_node)
+            run2 = self.run_chef_client(chef_node)
+            run3 = self.run_chef_client(chef_node)
 
             if run1['success'] and run2['success'] and run3['success']:
                 print "Done running chef-client"
