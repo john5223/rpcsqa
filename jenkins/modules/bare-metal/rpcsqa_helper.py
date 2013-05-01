@@ -401,10 +401,10 @@ class rpcsqa_helper:
 
     def print_computes_info(self, computes):
         for compute in computes:
-            c = Node(compute)
-            print "Compute: %s" % self.print_server_info(c)
+            print "Compute: %s" % self.print_server_info(compute)
 
-    def print_server_info(self, chef_node):
+    def print_server_info(self, server):
+        chef_node = Node(server)
         return "%s - %s" % (chef_node, chef_node['ipaddress'])
 
     def razor_password(self, chef_node):
