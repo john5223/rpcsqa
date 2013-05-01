@@ -61,6 +61,9 @@ rpcsqa.remove_broker_fail("qa-%s-pool" % results.os)
 #Prepare environment
 env = rpcsqa.prepare_environment(results.os, results.name)
 
+# Clean up the current running environment
+rpcsqa.cleanup_environment(env)
+
 # Set the cluster size
 cluster_size = int(results.cluster_size)
 
