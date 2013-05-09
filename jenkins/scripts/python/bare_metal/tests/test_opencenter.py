@@ -40,7 +40,7 @@ parser.add_argument('--chef_client_pem', action="store",
 
 # Save the parsed arguments
 results = parser.parse_args()
-autoconfigure()
+chef = autoconfigure()
 razor = razor_api(results.razor_ip)
 
 server = []
