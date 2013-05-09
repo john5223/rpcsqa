@@ -52,7 +52,7 @@ with ChefAPI(results.chef_url, results.chef_client_pem, results.chef_client):
     agents = []
     
     # Make sure environment exists, if not create one
-    env = "%s-%s-opencenter" % (results.name, results.os)
+    env = "%s-%s-opencenter" % (results.os, results.name)
     if not Search("environment").query("name:%s" % env):
         print "Making environment: %s " % env
         Environment.create(env)
