@@ -52,3 +52,11 @@ def opencenter_chef(opencenter_endpoint):
     url = chef_node['facts']['chef_server_uri']
     name = chef_node['facts']['chef_server_client_name']
     return ChefAPI(url, key, name)
+
+def opencenter_dashboard(chef, name='test', os='ubuntu'):
+    validate_environment(chef, name=name, os=os)
+    env = env_format % (name, os)
+    query = "in_use:\"dashboard\" AND chef_environment:%s" % env
+    dashboard = next(Node(node['name']) for node in
+                  Search('node').query(query))
+    return dashboard
