@@ -24,7 +24,7 @@ parser.add_argument('--tests', action="store", dest="opencenter_tests",
                     required=False, default="test_happy_path.py",
                     help="Tests to run")
 parser.add_argument('-HA', action="store_true", dest="HA", required=False,
-                    default=True, help="Do HA for openstack controller")
+                    default=False, help="Do HA for openstack controller")
 
 #Defaulted arguments
 parser.add_argument('--razor_ip', action="store", dest="razor_ip",
