@@ -81,7 +81,7 @@ if results.server_vms:
 Steps
 1. Make an environment for {{name}}-{{os}}-opencenter
 2. Grab (cluster_size) amount of active models and change their env to
-   {{name}}-{{os}}-opencenter
+   {{name}}-{{os}}
 3. Remove chef from all boxes
 4. Pick one for server and install opencenter-server
 5. Install opencenter-agent on the rest of the boxes.
@@ -96,7 +96,8 @@ cluster_size = int(results.cluster_size)
 rpcsqa.remove_broker_fail("qa-%s-pool" % results.os)
 
 # Prepare environment
-env = rpcsqa.prepare_environment(results.os, results.name)
+name = '%s-opencenter' % results.name
+env = rpcsqa.prepare_environment(results.os, name)
 
 # Gather all the nodes for the os
 all_nodes = rpcsqa.gather_all_nodes(results.os)
